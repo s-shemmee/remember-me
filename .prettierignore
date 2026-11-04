@@ -1,0 +1,9 @@
+pnpm-lock.yaml
+.next/
+coverage/
+docs/design/screens/
+next-env.d.ts
+# Hand-written docs and agent/CI config: not reformatted automatically.
+*.md
+.github/
+pnpm-workspace.yaml
