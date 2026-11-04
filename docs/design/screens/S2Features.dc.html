@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Remember Me · Section 2 · What's inside</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&amp;family=Instrument+Serif:ital@1&amp;family=Caveat:wght@500;600&amp;family=Kalam:wght@400;700&amp;family=Gochi+Hand&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{opacity:.88}
+.rm{--bg:#F4F5F9;--card:#FFFFFF;--card2:#E9EBF1;--text:#1C1B1F;--sub:#5F5C66;--line:#E2E4EB;--accent:#D93F4C;--accentText:#C2333F;--onAccent:#FFFFFF;--shadow:0 1px 2px rgba(28,27,31,.04),0 10px 28px rgba(28,27,31,.07);--glass:rgba(255,255,255,.8);--bubble:#E9E9EB;--peach:#FFE5D6;--peach2:#FFCDB8;--peachInk:#8A3B12;--lilac:#EAE3FF;--lilac2:#D6CAFF;--lilacInk:#5B3FB5;--mint:#D7F5E6;--mint2:#BDEDD5;--mintInk:#1E6B49;--sky:#DCEBFF;--skyInk:#1F4F8F;--rose:#FFE0EA;--rose2:#FFC7D8;--roseInk:#9A2E55;--butter:#FFF1C2;--butterInk:#5E4500;--select:#3D6BE0}
+.rm{--fUi:'Plus Jakarta Sans',system-ui,sans-serif;--fHand:Kalam,cursive;--hs:.8}
+.rm.ui-inter{--fUi:Inter,system-ui,sans-serif}.rm.ui-dm{--fUi:'DM Sans',system-ui,sans-serif}.rm.ui-brico{--fUi:'Bricolage Grotesque',system-ui,sans-serif}.rm.ui-system{--fUi:-apple-system,'SF Pro Text',Inter,system-ui,sans-serif}
+.rm.h-caveat{--fHand:Caveat,cursive;--hs:1}.rm.h-gochi{--fHand:'Gochi Hand',cursive;--hs:.86}
+.rm.cream{--bg:#FAF8F5;--card2:#F2F0EC;--line:#ECEAE7}
+.rm.dark{--bg:#0E0E10;--card:#1A1A1D;--card2:#232327;--text:#F5F4F2;--sub:#A9A6AE;--line:#2C2C31;--accent:#FF8A8E;--accentText:#FF9EA1;--onAccent:#1A0B0C;--shadow:0 0 0 1px #26262B;--glass:rgba(26,26,29,.8);--bubble:#2C2C2E;--peach:#3A2418;--peach2:#4E2C19;--peachInk:#FFC6A8;--lilac:#2A2140;--lilac2:#382A5C;--lilacInk:#CDBDFF;--mint:#12302A;--mint2:#16423A;--mintInk:#9FE5C4;--sky:#142640;--skyInk:#A9CBFF;--rose:#3A1C28;--rose2:#4C2134;--roseInk:#FFB3CB;--butter:#352C10;--butterInk:#FFE08A;--select:#8AA8FF}
+.rm button{font-family:inherit;color:inherit}
+.rm-ios{font-family:-apple-system,'SF Pro Text',Inter,system-ui,sans-serif}
+.rm-pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:0;border-radius:999px;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer;transition:transform .2s cubic-bezier(.2,.8,.2,1),background .2s,box-shadow .2s}
+.rm-pill:hover{transform:translateY(-1px)}
+.rm-pill:active{transform:scale(.97)}
+@keyframes rmDraw{to{stroke-dashoffset:0}}
+@keyframes rmFloat{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-8px) rotate(var(--r,0deg))}}
+@keyframes rmSlide{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+@keyframes rmPop{0%{opacity:0;transform:scale(.85)}100%{opacity:1;transform:scale(1)}}
+@keyframes rmWords{0%,18%{transform:translateY(0)}25%,43%{transform:translateY(-1.1em)}50%,68%{transform:translateY(-2.2em)}75%,93%{transform:translateY(-3.3em)}100%{transform:translateY(-4.4em)}}
+@keyframes rmFlicker{0%,100%{transform:scale(1,1) rotate(-3deg)}50%{transform:scale(.9,1.1) rotate(3deg)}}
+@keyframes rmPeek{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:none}}
+@keyframes rmBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.rm-draw{stroke-dasharray:600;stroke-dashoffset:600;animation:rmDraw 1.3s ease-out .8s forwards}
+.rm-draw2{stroke-dasharray:600;stroke-dashoffset:600;animation:rmDraw 1.1s ease-out 1.8s forwards}
+.rm-draw3{stroke-dasharray:600;stroke-dashoffset:600;animation:rmDraw 1s ease-out 2.6s forwards}
+.rm-float{animation:rmFloat 5s ease-in-out infinite}
+.rm-slide{animation:rmSlide .7s cubic-bezier(.2,.8,.2,1) .3s both}
+.rm-pop1{animation:rmPop .5s ease-out 1.2s both}
+.rm-pop2{animation:rmPop .5s ease-out 1.7s both}
+.rm-words{animation:rmWords 10s cubic-bezier(.7,0,.2,1) infinite}
+.rm-flame{animation:rmFlicker 1.3s ease-in-out infinite;transform-origin:50% 90%;transform-box:fill-box}
+.rm-peek{animation:rmPeek .7s cubic-bezier(.2,.9,.3,1.3) 3s both}
+.rm-bob{animation:rmBob 2.6s ease-in-out infinite}
+.rm-gift{transition:transform .45s cubic-bezier(.2,.9,.3,1.3),box-shadow .3s;cursor:default}
+.rm-gifts:hover .rm-gift.l{transform:rotate(-8deg) translate(-10px,-6px) !important}
+.rm-gifts:hover .rm-gift.r{transform:rotate(8deg) translate(10px,-10px) !important}
+.rm-gift:hover{z-index:2}
+.rm-gifts .rm-gift:hover{box-shadow:0 18px 36px rgba(0,0,0,.14)}
+details summary{cursor:pointer;list-style:none}details summary::-webkit-details-marker{display:none}
+@media (prefers-reduced-motion: reduce){.rm-float,.rm-slide,.rm-pop1,.rm-pop2,.rm-words,.rm-flame,.rm-peek,.rm-bob{animation:none}.rm-gift{transition:none !important}.rm-draw,.rm-draw2,.rm-draw3{animation:none;stroke-dashoffset:0}.rm-pill,.rm-card{transition:none !important}}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+</style>
+</helmet>
+<div class="rm {{mode}}" style="background: var(--bg); color: var(--text); font-family: var(--fUi)">
+
+    <section id="features" style="max-width: 1200px; margin: 0 auto; padding: 72px 32px; display: flex; flex-direction: column; gap: 64px">
+    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 640px">
+      <span style="font-family: var(--fHand); font-size: calc(26px * var(--hs)); color: var(--accentText); transform: rotate(-2deg); align-self: flex-start">what's inside</span>
+      <h2 style="margin: 0; font-size: 44px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1">Everything you need to <span style="font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--accentText)">show up</span> for them</h2>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 48px; align-items: center">
+      <div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: var(--fHand); font-size: calc(24px * var(--hs)); color: var(--sub)">01</span>
+        <h3 style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.15">Reminders that feel like a <span style="font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--peachInk)">friend's nudge</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.6; color: var(--sub)">A week before, the day before, the morning of. Noor tells you what's coming, and what they'd love, before it's too late.</p>
+      </div>
+      <div class="rm-panel" style="height: 300px; box-sizing: border-box; justify-content: center; flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 14px; padding: 32px; border-radius: 32px; background: linear-gradient(160deg, var(--peach), var(--peach2))">
+        <div role="region" aria-label="Example reminders, tap to see the next one" onMouseEnter="{{pause}}" onMouseLeave="{{resume}}" style="position: relative; height: 140px">
+          <sc-for list="{{stack}}" as="c" hint-placeholder-count="5">
+            <button onClick="{{nextCard}}" aria-hidden="{{c.hidden}}" tabindex="{{c.tab}}" class="rm-ios rm-card" style="position: absolute; left: 0; right: 0; top: 0; display: flex; gap: 12px; padding: 14px 16px; border: 0; border-radius: 22px; background: var(--glass); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 10px 28px rgba(0,0,0,.10); text-align: left; cursor: pointer; transform-origin: 50% 0; transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .5s ease; transform: {{c.tf}}; opacity: {{c.op}}; z-index: {{c.z}}">
+              <span style="flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; background: {{c.icon}}; display: flex; align-items: center; justify-content: center; font-size: 20px">{{c.e}}</span>
+              <span style="display: flex; flex-direction: column; flex-grow: 1; gap: 1px"><span style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--sub)"><span>REMEMBER ME</span><span>{{c.when}}</span></span><span style="font-size: 15px; font-weight: 700">{{c.t}}</span><span style="font-size: 14px; color: var(--sub)">{{c.s}}</span></span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; color: var(--peachInk)">
+          <div aria-hidden="true" style="display: flex; gap: 6px"><sc-for list="{{dots}}" as="d" hint-placeholder-count="5"><span style="width: {{d.w}}; height: 7px; border-radius: 999px; background: currentColor; opacity: {{d.op}}; transition: width .3s, opacity .3s"></span></sc-for></div>
+          <button onClick="{{nextCard}}" class="rm-pill" style="min-height: 36px; padding: 0 14px; font-size: 13px; background: var(--glass)">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap-reverse; gap: 48px; align-items: center">
+      <div class="rm-panel" style="height: 300px; box-sizing: border-box; justify-content: center; flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 32px; border-radius: 32px; background: linear-gradient(160deg, var(--lilac), var(--lilac2)); color: var(--lilacInk)">
+        <div style="display: flex; align-items: center; gap: 12px"><span style="width: 44px; height: 44px; border-radius: 50%; background: var(--card); color: var(--text); display: flex; align-items: center; justify-content: center; font-weight: 800">SA</span><div style="display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 700">Sara's birthday plan</span><span style="font-size: 14px">Tue, Mar 3 · {{planDone}} of 4 done</span></div></div>
+        <div role="list" aria-label="Plan steps" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+          <sc-for list="{{plan}}" as="p" hint-placeholder-count="4">
+            <div role="listitem" style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+              <button onClick="{{p.act}}" aria-pressed="{{p.on}}" aria-label="{{p.t}}" class="rm-pill" style="width: 60px; height: 60px; padding: 0; font-size: 26px; background: {{p.bg}}; box-shadow: {{p.sh}}">{{p.e}}</button>
+              <span style="font-size: 13px; font-weight: 700; text-align: center">{{p.t}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; align-items: flex-end; gap: 8px">
+          <svg class="rm-bob" width="36" height="48" viewBox="0 0 60 80" aria-hidden="true"><path class="rm-flame" d="M30 3 C37 12 39 18 35 24 C33 27 27 27 25 24 C21 18 23 12 30 3Z" fill="#FFB547" stroke="#E08A1E" stroke-width="1.2"></path><rect x="13" y="30" width="34" height="46" rx="13" fill="#FFB8CC" stroke="#C94F76" stroke-width="2"></rect><circle cx="24" cy="47" r="2.8" fill="#2B2024"></circle><circle cx="36" cy="47" r="2.8" fill="#2B2024"></circle><path d="M26 54 Q30 58 34 54" fill="none" stroke="#2B2024" stroke-width="2" stroke-linecap="round"></path></svg>
+          <span class="rm-ios" style="padding: 9px 13px; border-radius: 18px 18px 18px 5px; background: var(--card); color: var(--text); font-size: 15px">{{planSays}}</span>
+        </div>
+      </div>
+      <div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: var(--fHand); font-size: calc(24px * var(--hs)); color: var(--sub)">02</span>
+        <h3 style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.15">Plan each birthday, <span style="font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--lilacInk)">step by step</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.6; color: var(--sub)">Pick a gift, reserve it, write a few sweet words, celebrate. Tap the steps: each one lights up as you go, and Noor cheers you on.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 48px; align-items: center">
+      <div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: var(--fHand); font-size: calc(24px * var(--hs)); color: var(--sub)">03</span>
+        <h3 style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.15">Wishlists with <span style="font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--mintInk)">secret</span> reservations</h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.6; color: var(--sub)">Share what you'd love with the people you choose. Friends quietly reserve a gift, and you never find out who. Surprises stay surprises.</p>
+      </div>
+      <div class="rm-panel rm-gifts" style="height: 300px; box-sizing: border-box; justify-content: center; flex: 1 1 400px; min-width: 0; display: flex; gap: 20px; justify-content: center; padding: 40px; align-items: center; border-radius: 32px; background: linear-gradient(160deg, var(--mint), var(--mint2))">
+        <div class="rm-gift l" style="position: relative; flex: 0 1 190px; transform: rotate(-3deg)">
+          <div style="display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 22px; background: var(--card); box-shadow: var(--shadow)"><span style="font-size: 42px">📸</span><span style="font-size: 16px; font-weight: 700">Instax mini 12</span><span style="font-size: 13px; color: var(--sub)">790 MAD</span></div>
+          <div style="position: absolute; inset: -7px; border: 1.5px solid var(--select); border-radius: 28px"></div>
+          <span style="position: absolute; left: 50%; bottom: -34px; transform: translateX(-50%); white-space: nowrap; padding: 3px 8px; border-radius: 6px; background: #3D6BE0; color: #FFFFFF; font-size: 12px; font-weight: 600">reserved by Omar 🤫</span>
+        </div>
+        <div class="rm-gift r" style="flex: 0 1 190px; display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 22px; background: var(--card); box-shadow: var(--shadow); transform: rotate(3deg)"><span style="font-size: 42px">🌻</span><span style="font-size: 16px; font-weight: 700">Sunflower tote</span><span style="font-size: 13px; color: var(--sub)">180 MAD · available</span></div>
+      </div>
+    </div>
+
+    <div id="me" style="display: flex; flex-wrap: wrap-reverse; gap: 48px; align-items: center">
+      <div class="rm-panel" style="height: 300px; box-sizing: border-box; position: relative; flex: 1 1 400px; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 24px; padding: 32px; border-radius: 32px; background: linear-gradient(160deg, var(--rose), var(--rose2)); color: var(--roseInk)">
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 20px 22px; border-radius: 26px; background: var(--card); color: var(--text); box-shadow: var(--shadow)"><span style="font-size: 12px; font-weight: 700; letter-spacing: .05em; color: var(--roseInk)">CELEBRATE ME</span><span style="font-size: 52px; font-weight: 800; letter-spacing: -0.04em; line-height: 1">12 days</span><span style="font-size: 14px; color: var(--sub)">brunch ✓ · hammam ✓ · call grandma</span></div>
+        <span style="position: absolute; right: 26px; bottom: 20px; padding: 10px 14px; border-radius: 6px; background: var(--butter); color: var(--butterInk); font-family: var(--fHand); font-size: calc(22px * var(--hs)); transform: rotate(4deg)">you made it another year 🤍</span>
+      </div>
+      <div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: var(--fHand); font-size: calc(24px * var(--hs)); color: var(--sub)">04</span>
+        <h3 style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.15">Your day matters <span style="font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--roseInk)">too.</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.6; color: var(--sub)">Remember Me started with a forgotten birthday. Plan yours, keep a treat-yourself list, and save the memories, so you never wait on anyone to feel celebrated.</p>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+componentDidMount() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  this.iv = setInterval(() => { const s = this.state || {}; if (!s.paused) this.setState({ idx: (s.idx || 0) + 1 }); }, 2800);
+}
+componentWillUnmount() { clearInterval(this.iv); }
+renderVals() {
+const s = this.state || {};
+const dark = s.dark !== undefined ? s.dark : !!this.props.dark;
+const idx = s.idx || 0;
+const cards = [
+  { e: '🎂', t: 'Khalid turns 30 tomorrow!', s: 'He mentioned a new football ⚽', when: 'now', icon: 'linear-gradient(150deg, #FFF1C2, #FFE597)' },
+  { e: '💍', t: "Mom & Dad's anniversary in 7 days", s: 'No gift idea yet. Want help?', when: '9:00', icon: 'linear-gradient(150deg, #DCEBFF, #C4DCFF)' },
+  { e: '🎓', t: "Today: Yasmine's graduation", s: 'Send her something sweet 💌', when: 'yesterday', icon: 'linear-gradient(150deg, #FFE0EA, #FFC7D8)' },
+  { e: '🎁', t: "Sara's Instax is still free", s: 'Reserve it before someone else does', when: '2h ago', icon: 'linear-gradient(150deg, #D7F5E6, #BDEDD5)' },
+  { e: '✨', t: 'Your day is in 12 days', s: 'Your plan is 2 of 4 ready', when: 'Mon', icon: 'linear-gradient(150deg, #EAE3FF, #D6CAFF)' }
+];
+const n = cards.length;
+const front = idx % n;
+const stack = cards.map((c, i) => {
+  const rel = (i - front + n) % n;
+  let tf = 'translateY(44px) scale(.86)', op = 0, z = 1;
+  if (rel === 0) { tf = 'translateY(0) scale(1)'; op = 1; z = 5; }
+  else if (rel === 1) { tf = 'translateY(16px) scale(.95)'; op = .85; z = 4; }
+  else if (rel === 2) { tf = 'translateY(32px) scale(.9)'; op = .55; z = 3; }
+  else if (rel === n - 1) { tf = 'translateY(-34px) scale(1.02) rotate(-3deg)'; op = 0; z = 6; }
+  return Object.assign({}, c, { tf: tf, op: op, z: z, hidden: rel === 0 ? 'false' : 'true', tab: rel === 0 ? '0' : '-1' });
+});
+const dots = cards.map((c, i) => ({ w: i === front ? '22px' : '7px', op: i === front ? 1 : .35 }));
+const done = s.done || { 0: true, 1: true };
+const planDef = [['🎁', 'Pick gift'], ['🤫', 'Reserve'], ['💌', 'Write wish'], ['🎉', 'Celebrate']];
+const plan = planDef.map((p, i) => { const on = !!done[i]; return { e: on ? p[0] : '○', t: p[1], on: on ? 'true' : 'false', bg: on ? 'var(--card)' : 'rgba(255,255,255,.35)', sh: on ? '0 8px 18px rgba(91,63,181,.22)' : 'inset 0 0 0 2px rgba(91,63,181,.25)', act: () => { const nd = Object.assign({}, done); nd[i] = !nd[i]; this.setState({ done: nd }); } }; });
+const planDone = Object.keys(done).filter((k) => done[k]).length;
+const says = ['Let\'s start with a gift idea 🎁', 'Good start! Now reserve it 🤫', 'Halfway there! A sweet message next 💌', 'Almost! Get ready to celebrate 🎉', 'All done. Sara is lucky to have you 🥹'];
+return {
+  mode: dark ? 'dark' : '',
+  stack: stack, dots: dots, nextCard: () => this.setState({ idx: idx + 1 }), pause: () => this.setState({ paused: true }), resume: () => this.setState({ paused: false }),
+  plan: plan, planDone: planDone, planSays: says[planDone]
+};
+}
+}
+</script>
+</body>
+</html>
