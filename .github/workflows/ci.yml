@@ -20,7 +20,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test -- --coverage
+      - run: pnpm test --coverage
       - run: pnpm build
 
   database-and-e2e:
@@ -28,17 +28,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Supabase and Playwright arrive later in M0. Until both are set up, this job skips its steps.
+      - name: Check Supabase and Playwright are set up
+        id: setup
+        run: |
+          if [ -f supabase/config.toml ] && ls playwright.config.* >/dev/null 2>&1; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Skipping database and e2e: supabase/config.toml or playwright.config.* not found yet."
+          fi
       - uses: pnpm/action-setup@v4
+        if: steps.setup.outputs.ready == 'true'
       - uses: actions/setup-node@v4
+        if: steps.setup.outputs.ready == 'true'
         with: { node-version: 22, cache: pnpm }
       - uses: supabase/setup-cli@v1
-      - run: pnpm install --frozen-lockfile
-      - run: supabase start
-      - run: supabase test db
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm e2e
+        if: steps.setup.outputs.ready == 'true'
+      - if: steps.setup.outputs.ready == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.setup.outputs.ready == 'true'
+        run: supabase start
+      - if: steps.setup.outputs.ready == 'true'
+        run: supabase test db
+      - if: steps.setup.outputs.ready == 'true'
+        run: pnpm exec playwright install --with-deps chromium
+      - if: steps.setup.outputs.ready == 'true'
+        run: pnpm e2e
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() && steps.setup.outputs.ready == 'true'
         with: { name: playwright-report, path: playwright-report }
 
   evals:
