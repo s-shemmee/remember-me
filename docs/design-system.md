@@ -17,7 +17,7 @@ Define as CSS variables on `:root` (light) and `.dark` (dark). Tailwind reads th
 | `--text` | `#1C1B1F` | `#F5F4F2` | body text |
 | `--sub` | `#5F5C66` | `#A9A6AE` | secondary text |
 | `--line` | `#E2E4EB` | `#2C2C31` | borders, dividers |
-| `--accent` | `#D93F4C` | `#FF8A8E` | primary buttons, focus ring, today |
+| `--accent` | `#D63B48` | `#FF8A8E` | primary buttons, focus ring, today |
 | `--accentText` | `#C2333F` | `#FF9EA1` | accent text on light surfaces (4.5:1) |
 | `--onAccent` | `#FFFFFF` | `#1A0B0C` | text on accent |
 | `--glass` | `rgba(255,255,255,.8)` | `rgba(26,26,29,.8)` | frosted header, iOS-style cards |
