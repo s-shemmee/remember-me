@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Africa/Casablanca",
+  "schedule": ["before 6am on monday"],
+  "minimumReleaseAge": "3 days",
+  "internalChecksFilter": "strict",
+  "platformAutomerge": false,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Minor updates: one weekly PR, merged by a person.",
+      "matchUpdateTypes": ["minor"],
+      "groupName": "minor updates",
+      "automerge": false
+    },
+    {
+      "description": "Patch updates: one weekly PR, merged by Renovate only after CI passes.",
+      "matchUpdateTypes": ["patch"],
+      "groupName": "patch updates",
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Major updates: their own PRs, never automerged.",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ]
+}

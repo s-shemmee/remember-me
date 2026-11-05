@@ -26,9 +26,19 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Set on Vercel (Production + Preview). Absent in CI and most local builds:
+// then the build skips the source map upload instead of failing.
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
+
 export default withSentryConfig(nextConfig, {
   org: "shemmee",
   project: "remember-me-os",
+
+  authToken: sentryAuthToken,
+  sourcemaps: {
+    // "disable-upload" still injects debug IDs, so maps can be uploaded later.
+    disable: sentryAuthToken ? false : "disable-upload",
+  },
 
   // Quiet locally, verbose in CI
   silent: !process.env.CI,
