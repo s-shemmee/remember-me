@@ -31,3 +31,7 @@ Open [http://localhost:3000](http://localhost:3000). For now `/` is a temporary 
 ## Stack
 
 Next.js (App Router), TypeScript, Tailwind CSS v4 with our design tokens, Vitest + Testing Library. Supabase, Playwright, CI and Vercel are added next as part of milestone M0 (see [`docs/roadmap.md`](docs/roadmap.md)).
+
+```
+[Repository structure omitted from this historical README.]
+```
