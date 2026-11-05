@@ -27,13 +27,28 @@ jobs:
       - run: pnpm test --coverage
       # No SENTRY_AUTH_TOKEN here on purpose: next.config.ts skips the
       # source map upload without it, so the build still passes.
+      # No Supabase env either: env validation runs at server start, not here.
       - run: pnpm build
+        env:
+          SKIP_ENV_VALIDATION: "1"
 
-  database-and-e2e:
-    # Off until M2: the first tables, RLS tests and Playwright specs arrive then.
-    # To turn it back on, delete the `if: false` line below.
+  database:
+    # Local Postgres (Docker on the runner) with every migration applied,
+    # then the pgTAP tests in supabase/tests. This is the only place they run:
+    # development uses the cloud project and has no Docker (docs/decisions.md).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: { version: 3.0.0 }
+      - run: supabase db start
+      - run: supabase test db
+
+  e2e:
+    # Off until M2: the first Playwright specs arrive then.
+    # To turn it on, delete the `if: false` line below.
     if: false
-    needs: quality
+    needs: [quality, database]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,9 +56,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
       - uses: supabase/setup-cli@v1
+        with: { version: 3.0.0 }
       - run: pnpm install --frozen-lockfile
       - run: supabase start
-      - run: supabase test db
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
       - uses: actions/upload-artifact@v4

@@ -41,6 +41,9 @@ All tables live in `public`, have RLS **enabled**, and use `uuid` keys (`gen_ran
 - `future_notes`: owner only, and `select` only when `current_date >= opens_on`.
 - `ai_usage`, `notification_log`, `push_subscriptions`: owner read; writes only from Edge Functions (service role, server side).
 
+## Functions
+- `health_check()`: `returns boolean`, `security invoker`, reads no data. Executable by `anon` and `authenticated` only. Used by `GET /api/health`.
+
 ## Storage buckets (private, signed URLs)
 `avatars` (2 MB, images only), `wish-images` (2 MB), `memories` (5 MB). Path prefix = `auth.uid()`; policies check the prefix.
 

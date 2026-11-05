@@ -1,0 +1,8 @@
+# Same line endings on every OS (Prettier expects LF; Windows checkouts used CRLF).
+* text=auto eol=lf
+
+# Binary files: never touch.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
