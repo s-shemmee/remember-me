@@ -1,9 +1,12 @@
 export type TokenMap = Record<string, string>;
 
-/** Reads the custom properties declared directly in one top-level CSS block (e.g. ":root"). */
+/**
+ * Reads the custom properties declared directly in one top-level CSS block
+ * whose selector list starts with `selector` (":root" matches ":root, .light").
+ */
 export function parseBlock(css: string, selector: string): TokenMap {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = new RegExp(`(?:^|\\n)${escaped}\\s*\\{([^}]*)\\}`).exec(css);
+  const match = new RegExp(`(?:^|\\n)${escaped}(?:\\s*,[^{]*)?\\s*\\{([^}]*)\\}`).exec(css);
   if (!match?.[1]) throw new Error(`No "${selector}" block found`);
 
   const body = match[1].replace(/\/\*[\s\S]*?\*\//g, "");

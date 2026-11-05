@@ -4,6 +4,8 @@ import path from "node:path";
 import { parseThemes, type TokenMap } from "@/styles/parse-tokens";
 import { coreTokens, pastels, typeScale, type Pastel } from "@/styles/tokens";
 
+import { ComponentsDemo } from "./components-demo";
+
 // Temporary token and font check page for M0. The (marketing) landing replaces it in M6.
 
 const pastelClasses: Record<Pastel, string> = {
@@ -58,6 +60,8 @@ export default function TokensPage() {
         <ThemePanel title="Light" tokens={themes.light} />
         <ThemePanel title="Dark" tokens={themes.dark} dark />
       </div>
+
+      <ComponentsDemo />
     </main>
   );
 }
@@ -68,7 +72,7 @@ function ThemePanel({ title, tokens, dark }: { title: string; tokens: TokenMap; 
       aria-labelledby={`${title}-heading`}
       // min-w-0: grid items won't shrink below their content otherwise (390px overflow).
       className={[
-        dark && "dark",
+        dark ? "dark" : "light",
         "min-w-0 rounded-panel bg-bg p-5 text-text ring-1 ring-line sm:p-8",
       ]
         .filter(Boolean)

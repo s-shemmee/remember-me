@@ -6,6 +6,25 @@ import prettier from "eslint-config-prettier/flat";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    // shadcn's generated files import `cn` from the package; ours must use the
+    // configured one, which knows our theme (text-15, rounded-pill…).
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/lib/utils.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "cn",
+              message: 'Import { cn } from "@/lib/utils" (configured for our tokens).',
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Last: turns off style rules that Prettier owns.
   prettier,
   globalIgnores([".next/**", "out/**", "build/**", "coverage/**", "next-env.d.ts"]),

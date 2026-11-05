@@ -51,11 +51,13 @@ Second tones for gradients: `peach2 #FFCDB8`, `lilac2 #D6CAFF`, `mint2 #BDEDD5`,
 - Feature visuals on the landing page are all the same size (300px tall) so the zigzag has rhythm.
 
 ## Components
-- **Pill button:** min-height 44px (52–54px for main CTAs), radius 999, weight 600. Variants: accent, card2, transparent. Hover lifts 1px; active scales .97.
+All live in `src/components/ui/`. Button, Switch, Dialog, Dropdown Menu, Tabs and Sonner are shadcn/ui (Radix) restyled to these tokens; Card, Chip, Avatar, Field, Noor and NoorBubble are our own.
+
+- **Button (pill):** pill-shaped by design; there is no separate Pill component. Min-height 44px (54px for main CTAs, `size="lg"`), radius 999, weight 600. Variants: accent, card2, transparent. Hover lifts 1px; active scales .97.
 - **Social button:** full width, card background, 1.5px line border, Google/Apple mark + "Continue with…".
 - **Field:** visible label above, 52px input, 1.5px line border, focus = accent border + 4px soft ring. Helper text under in `--sub`.
 - **Chip / filter:** 36–44px, selected = `--text` fill with `--bg` text.
-- **Switch:** `role="switch"`, 48×28, accent when on.
+- **Switch:** `role="switch"`, 48×28, 22px knob, accent when on. Off: `line` track with a 1.5px `sub` outline so it meets 3:1. Touch area 44px tall.
 - **Card:** card bg, radius 24, shadow; hoverable cards lift 2px.
 - **Person avatar:** circle in the person's pastel, initials in its ink, 800 weight.
 - **Countdown pill:** person's pastel fill + ink text ("in 2 days").

@@ -3,12 +3,21 @@
 /* Dark mode follows the `.dark` class (set on <html> or any wrapper), not the OS. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Radix state variants used by src/components/ui (copied from shadcn's tailwind.css). */
+@custom-variant data-open (&:where([data-state="open"]));
+@custom-variant data-closed (&:where([data-state="closed"]));
+@custom-variant data-checked (&:where([data-state="checked"]));
+@custom-variant data-unchecked (&:where([data-state="unchecked"]));
+@custom-variant data-active (&:where([data-state="active"]));
+@custom-variant data-disabled (&:where([data-disabled]:not([data-disabled="false"])));
+
 /*
  * Design tokens: source of truth is docs/design-system.md.
  * Every token defined on :root must also be defined on .dark
  * (src/styles/tokens.test.ts checks this).
  */
-:root {
+:root,
+.light {
   --bg: #f4f5f9;
   --card: #ffffff;
   --card2: #e9ebf1;
@@ -43,6 +52,20 @@
   --rose2: #ffc7d8;
 
   --card-shadow: 0 1px 2px rgba(28, 27, 31, 0.04), 0 10px 28px rgba(28, 27, 31, 0.07);
+  /* Menus and popovers (account menu in the approved screens) */
+  --popover-shadow: 0 18px 40px rgba(28, 27, 31, 0.18), 0 0 0 1px var(--line);
+  /* Dialog backdrop */
+  --overlay: rgba(28, 27, 31, 0.4);
+
+  /* Noor, the candle (illustration colours, same in both themes; outlined so she stands out) */
+  --noor-body: #ffb8cc;
+  --noor-stripe: #ff97b4;
+  --noor-outline: #c94f76;
+  --noor-face: #2b2024;
+  --noor-blush: #f0607e;
+  --noor-flame: #ffb547;
+  --noor-flame-edge: #e08a1e;
+  --noor-wick: #5e4500;
 
   color-scheme: light;
 }
@@ -82,6 +105,17 @@
 
   /* Dark mode uses a 1px ring instead of a shadow. */
   --card-shadow: 0 0 0 1px #26262b;
+  --popover-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--line);
+  --overlay: rgba(0, 0, 0, 0.6);
+
+  --noor-body: #ffb8cc;
+  --noor-stripe: #ff97b4;
+  --noor-outline: #c94f76;
+  --noor-face: #2b2024;
+  --noor-blush: #f0607e;
+  --noor-flame: #ffb547;
+  --noor-flame-edge: #e08a1e;
+  --noor-wick: #5e4500;
 
   color-scheme: dark;
 }
@@ -121,6 +155,38 @@
   --color-butter: var(--butter);
   --color-butter-ink: var(--butter-ink);
 
+  --color-overlay: var(--overlay);
+  --color-noor-body: var(--noor-body);
+  --color-noor-stripe: var(--noor-stripe);
+  --color-noor-outline: var(--noor-outline);
+  --color-noor-face: var(--noor-face);
+  --color-noor-blush: var(--noor-blush);
+  --color-noor-flame: var(--noor-flame);
+  --color-noor-flame-edge: var(--noor-flame-edge);
+  --color-noor-wick: var(--noor-wick);
+
+  /*
+   * shadcn/ui names, mapped to our tokens so components added later with
+   * `pnpm dlx shadcn add` start out on-brand. There is no default theme.
+   * Name clash: shadcn uses `accent` for grey hover backgrounds, but our
+   * `accent` is the brand red. Restyle hovers in new components to `card2`.
+   * No `destructive`: it isn't in our design system.
+   */
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--onAccent);
+  --color-secondary: var(--card2);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--card2);
+  --color-muted-foreground: var(--sub);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--accent);
+
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
   --font-hand: var(--font-kalam), cursive;
@@ -149,11 +215,60 @@
   --radius-input: 16px;
   --radius-chip: 10px;
   --radius-bubble: 22px;
+  --radius-item: 14px;
+  --radius-popover: 20px;
 
   --shadow-card: var(--card-shadow);
+  --shadow-popover: var(--popover-shadow);
 
   --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-pop: cubic-bezier(0.2, 0.9, 0.3, 1.3);
+
+  /* Motion from the approved screens. All of it stops under reduced motion (base layer). */
+  --animate-up: rm-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade-in: rm-fade-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade-out: rm-fade-out 0.15s ease-in both;
+  --animate-bob: rm-bob 2.6s ease-in-out infinite;
+  --animate-flicker: rm-flicker 1.3s ease-in-out infinite;
+
+  @keyframes rm-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes rm-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes rm-fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes rm-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+  @keyframes rm-flicker {
+    0%,
+    100% {
+      transform: scale(1, 1) rotate(-3deg);
+    }
+    50% {
+      transform: scale(0.9, 1.1) rotate(3deg);
+    }
+  }
 }
 
 @layer base {

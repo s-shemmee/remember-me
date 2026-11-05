@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Kalam, Plus_Jakarta_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { themeScript } from "@/lib/theme";
+
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -28,11 +31,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
+    // The head script adds `.dark` and color-scheme before React hydrates.
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${jakarta.variable} ${instrument.variable} ${kalam.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <head>
+        {/* Sets the theme before first paint: no flash of the wrong theme. */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }
