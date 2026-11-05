@@ -1,0 +1,17 @@
+# Gitleaks: the full default rule set, plus an allowlist of known fake test
+# values. No paths or folders are allowed: a real-looking key anywhere,
+# including tests, still fails the scan.
+# Fake values live in src/test/fake-values.ts; add new ones to both places.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known fake test values from src/test/fake-values.ts (exact strings only)"
+regexTarget = "secret"
+regexes = [
+  '''^sb_publishable_test_0{8}$''',
+  '''^sb_secret_test_0{8}$''',
+  '''^eyJ_test_0{8}$''',
+  '''^test_password_0{8}$''',
+]

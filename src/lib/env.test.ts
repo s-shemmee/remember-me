@@ -1,15 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { EnvError, parseEnv } from "./env";
+import { FAKE_LEGACY_JWT, FAKE_SECRET_KEY, fakeEnv } from "@/test/fake-values";
 
-const valid = {
-  NEXT_PUBLIC_SUPABASE_URL: "https://abcdefgh.supabase.co",
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_abc123",
-};
+import { EnvError, parseEnv } from "./env";
 
 describe("parseEnv", () => {
   it("accepts a valid env", () => {
-    expect(parseEnv(valid)).toEqual(valid);
+    expect(parseEnv(fakeEnv)).toEqual(fakeEnv);
   });
 
   it("names every missing variable", () => {
@@ -19,30 +16,29 @@ describe("parseEnv", () => {
   });
 
   it("rejects a URL that isn't one", () => {
-    expect(() => parseEnv({ ...valid, NEXT_PUBLIC_SUPABASE_URL: "abcdefgh.supabase" })).toThrow(
+    expect(() => parseEnv({ ...fakeEnv, NEXT_PUBLIC_SUPABASE_URL: "test.supabase" })).toThrow(
       /NEXT_PUBLIC_SUPABASE_URL: must be an http\(s\) URL/,
     );
   });
 
   it("rejects old anon keys and secret keys in the publishable slot", () => {
-    for (const key of ["eyJhbGciOiJIUzI1NiJ9.legacy-anon", "sb_secret_do-not-ship"]) {
-      expect(() => parseEnv({ ...valid, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: key })).toThrow(
-        /must be a publishable key/,
-      );
+    for (const wrongKey of [FAKE_LEGACY_JWT, FAKE_SECRET_KEY]) {
+      expect(() =>
+        parseEnv({ ...fakeEnv, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: wrongKey }),
+      ).toThrow(/must be a publishable key/);
     }
   });
 
   it("never puts a value in the error message", () => {
-    const secretish = "sb_secret_do-not-print-me";
     try {
       parseEnv({
         NEXT_PUBLIC_SUPABASE_URL: "nope",
-        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: secretish,
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: FAKE_SECRET_KEY,
       });
       expect.unreachable();
     } catch (error) {
       const message = (error as Error).message;
-      expect(message).not.toContain(secretish);
+      expect(message).not.toContain(FAKE_SECRET_KEY);
       expect(message).not.toContain("nope");
     }
   });

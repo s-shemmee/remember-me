@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { FAKE_DB_PASSWORD, FAKE_SUPABASE_URL } from "@/test/fake-values";
+
 const rpcResult = vi.fn();
 const captureException = vi.fn();
 
@@ -15,7 +17,14 @@ vi.mock("@/lib/supabase/server", () => ({
 
 const { GET } = await import("./route");
 
-const SECRETS = ["https://abcdefgh.supabase.co", "sb_publishable_", "sb_secret_", "password"];
+// Anything that must never appear in the response body.
+const MUST_NOT_LEAK = [
+  FAKE_SUPABASE_URL,
+  FAKE_DB_PASSWORD,
+  "sb_publishable_",
+  "sb_secret_",
+  "password",
+];
 
 async function call() {
   const response = await GET();
@@ -42,13 +51,13 @@ describe("GET /api/health", () => {
   it("returns 503 without details when the database errors", async () => {
     rpcResult.mockResolvedValue({
       data: null,
-      error: { message: "connect ECONNREFUSED https://abcdefgh.supabase.co password=hunter2" },
+      error: { message: `connect ECONNREFUSED ${FAKE_SUPABASE_URL} password ${FAKE_DB_PASSWORD}` },
     });
     const { response, text, body } = await call();
 
     expect(response.status).toBe(503);
     expect(body).toEqual({ status: "error", db: "unreachable" });
-    for (const secret of SECRETS) expect(text).not.toContain(secret);
+    for (const value of MUST_NOT_LEAK) expect(text).not.toContain(value);
     expect(captureException).toHaveBeenCalledOnce();
   });
 

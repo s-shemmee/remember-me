@@ -9,6 +9,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Least privilege: every job gets read-only repo contents unless it asks for more.
+permissions:
+  contents: read
+
 env:
   # One place for the Node version. package.json "engines" allows >=22.
   NODE_VERSION: 24
@@ -89,6 +93,11 @@ jobs:
 
   secrets-scan:
     runs-on: ubuntu-latest
+    # On PRs, gitleaks-action lists the PR's commits through the API
+    # (GET /pulls/{n}/commits), which needs pull-requests: read.
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }

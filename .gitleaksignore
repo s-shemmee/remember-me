@@ -1,0 +1,11 @@
+# Single findings acknowledged as fake, by fingerprint (commit:file:rule:line).
+# Each line ignores one finding in one past commit, nothing else.
+
+# feat/supabase-setup, first commit: made-up test keys, since replaced by
+# low-entropy fakes in src/test/fake-values.ts. Never real credentials.
+a6b58d947b783e9c05d9608e298f579b6e22aad1:src/lib/env.test.ts:generic-api-key:7
+a6b58d947b783e9c05d9608e298f579b6e22aad1:src/lib/env.test.ts:generic-api-key:36
+
+# The same file as squash-merged to main in upstream change (f1a99e5).
+f1a99e596ef8cb3288bfa353c3b4532986d4347b:src/lib/env.test.ts:generic-api-key:7
+f1a99e596ef8cb3288bfa353c3b4532986d4347b:src/lib/env.test.ts:generic-api-key:36
