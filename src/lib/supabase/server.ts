@@ -14,8 +14,10 @@ import type { Database } from "./types";
  * publishable key only. Create one per request; never share it globally.
  */
 export async function createSupabaseServerClient() {
-  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getEnv();
+  // cookies() first: during the build it marks the caller as per-request and
+  // stops prerendering here, so nothing below runs without the real env.
   const cookieStore = await cookies();
+  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getEnv();
 
   return createServerClient<Database>(
     NEXT_PUBLIC_SUPABASE_URL,

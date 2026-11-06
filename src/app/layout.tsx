@@ -42,6 +42,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-full flex-col">
+        {/* Every page has a <main id="main">. */}
+        <a
+          href="#main"
+          className="sr-only z-50 rounded-pill bg-card px-5 font-semibold shadow-card focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:inline-flex focus:min-h-11 focus:items-center"
+        >
+          Skip to content
+        </a>
         {children}
         <Toaster />
       </body>

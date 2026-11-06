@@ -48,7 +48,7 @@ export default function TokensPage() {
   const themes = readTokens();
 
   return (
-    <main className="mx-auto w-full max-w-[1440px] px-4 py-10 sm:px-8">
+    <main id="main" className="mx-auto w-full max-w-[1440px] px-4 py-10 sm:px-8">
       <h1 className="text-34 font-extrabold tracking-heading">
         Design <em className="font-serif font-normal text-accent-text">tokens</em>
       </h1>

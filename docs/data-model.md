@@ -6,6 +6,7 @@ All tables live in `public`, have RLS **enabled**, and use `uuid` keys (`gen_ran
 
 **profiles**: one per user, created by a trigger on `auth.users` insert.
 `id uuid pk → auth.users`, `first_name`, `last_name`, `handle citext unique`, `birthday_day smallint`, `birthday_month smallint`, `birth_year smallint null` (private, never exposed to others), `city`, `bio`, `avatar_kind enum('initials','photo','character')`, `avatar_color text` (pastel name), `avatar_character text`, `avatar_path text`, `timezone text default 'Africa/Casablanca'`.
+Built (M1, `…_profiles.sql`): trigger `on_auth_user_created` → `handle_new_user()` (security definer, `search_path = ''`, not callable through the API) sets `first_name` from the sign-up form, else Google's `given_name`, else the first word of `full_name`; it may be null and onboarding asks again. `handle` is null until onboarding (`^[A-Za-z0-9_]{3,30}$`, unique ignoring case). Birthday checks: day and month together, a real date (29 Feb allowed), `birth_year` only with a birthday. RLS: read and update own row only; no insert (trigger only) and no delete (M5). Column grants: `anon` nothing; `authenticated` can't change `id` or `created_at`.
 
 **people**: someone you remember (they may or may not use the app).
 `id`, `owner_id`, `name`, `relation text`, `group enum('family','friends','work','other')`, `color text`, `linked_profile_id uuid null → profiles` (set when connected), `little_things text[] default '{}'`, `archived_at null`.

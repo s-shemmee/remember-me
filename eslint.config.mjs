@@ -7,6 +7,15 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    // `_name` marks an unused parameter required by a signature (e.g. useActionState's prevState).
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
+    },
+  },
+  {
     // shadcn's generated files import `cn` from the package; ours must use the
     // configured one, which knows our theme (text-15, rounded-pill…).
     files: ["src/**/*.{ts,tsx}"],
