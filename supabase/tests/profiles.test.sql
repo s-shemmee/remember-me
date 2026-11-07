@@ -30,7 +30,13 @@ select is(
 );
 
 -- Trigger -------------------------------------------------------------------
-select is((select count(*)::int from public.profiles), 4, 'every new user gets exactly one profile');
+select is(
+  (select count(*)::int from public.profiles where id in (
+    '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-00000000000b',
+    '00000000-0000-0000-0000-00000000000c', '00000000-0000-0000-0000-00000000000d')),
+  4,
+  'every new user gets exactly one profile'
+);
 select is((select first_name from public.profiles where id = '00000000-0000-0000-0000-00000000000a'),
   'Sara', 'first name from the sign-up form, trimmed');
 select is((select first_name from public.profiles where id = '00000000-0000-0000-0000-00000000000b'),
