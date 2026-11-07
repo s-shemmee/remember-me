@@ -10,9 +10,11 @@ Built (M1, `…_profiles.sql`): trigger `on_auth_user_created` → `handle_new_u
 
 **people**: someone you remember (they may or may not use the app).
 `id`, `owner_id`, `name`, `relation text`, `group enum('family','friends','work','other')`, `color text`, `linked_profile_id uuid null → profiles` (set when connected), `little_things text[] default '{}'`, `archived_at null`.
+Built (M1 part 2, `…_onboarding.sql`, pulled forward from M2): `name` 1–80, `relation` ≤ 40, `group` enum `person_group`, `color` one of the six pastels (default `lilac`), `little_things` ≤ 20, `owner_id` defaults to `auth.uid()`. RLS: owner only for select/insert/update/delete. Column grants: users can't write `owner_id` or `linked_profile_id` (server only, M3).
 
 **occasions**: a day to remember. Belongs to a person, or to the owner themselves (`person_id null`).
 `id`, `owner_id`, `person_id null`, `kind enum('birthday','anniversary','graduation','other')`, `title`, `day smallint check 1–31`, `month smallint check 1–12`, `year smallint null`, `recurring bool default true`.
+Built (M1 part 2): enum `occasion_kind`; `day`/`month` must be a real day of the year (29 Feb allowed), and with a `year` 29 Feb must be a leap year; one `birthday` per person (partial unique index); index on `(month, day)` for reminders. Your own birthday stays on `profiles` (not duplicated as an occasion). RLS: owner only, and inserts/updates may only reference your own people.
 
 **connections**: two users who agreed to see each other's shared things.
 `id`, `requester_id`, `addressee_id`, `status enum('pending','accepted','declined')`, unique on the unordered pair.
@@ -25,6 +27,7 @@ Built (M1, `…_profiles.sql`): trigger `on_auth_user_created` → `handle_new_u
 **plans** + **plan_steps**: per occasion per year. Steps: `gift`, `reserve`, `wish`, `celebrate`, or custom (Celebrate Me checklist). `done bool`.
 
 **reminder_settings**: `profile_id pk`, `offsets_days int[] default '{7,1,0}'`, `send_time time default '09:00'`, `email bool default true`, `push bool default false`, `remind_my_people bool default true`.
+Built (M1 part 2): `offsets_days` limited to 7/3/1/0 (default `{7,1,0}`), `send_time` 09:00, `email` on, `push` off, `remind_my_people` on. RLS: owner select/insert/update; no delete (goes with the profile). `profiles.onboarded_at` is null until `complete_onboarding()` finishes.
 **push_subscriptions**: `id`, `profile_id`, `endpoint unique`, `p256dh`, `auth`, `user_agent`.
 **notification_log**: `id`, `profile_id`, `occasion_id`, `offset_days`, `occurs_on date`, `channel`, `sent_at`. Unique on `(occasion_id, offset_days, occurs_on, channel)` so a reminder is never sent twice.
 
@@ -44,6 +47,7 @@ Built (M1, `…_profiles.sql`): trigger `on_auth_user_created` → `handle_new_u
 
 ## Functions
 - `health_check()`: `returns boolean`, `security invoker`, reads no data. Executable by `anon` and `authenticated` only. Used by `GET /api/health`.
+- `complete_onboarding(p_first_name, p_birthday_day, p_birthday_month, p_birth_year?, p_avatar_kind?, p_avatar_color?, p_avatar_character?, p_avatar_path?, p_person_name?, p_person_relation?, p_person_color?, p_person_birthday_day?, p_person_birthday_month?, p_person_birthday_year?, p_person_little_thing?, p_reminder_offsets? = {7,1,0}, p_reminder_email? = true, p_timezone?) returns uuid`: `security invoker` (RLS applies), one transaction. Saves your name, birthday and look, the first person and their birthday (no name = skipped, returns null), reminder settings, then `onboarded_at`. Refuses a second call (`already_onboarded`). Relation → group: Family → family, Colleague → work, Best friend / Friend → friends, else other. Errors: errcode `22023` with a code as the message (`invalid_first_name`, `invalid_birthday`, `invalid_birth_year`, `invalid_timezone`, `invalid_avatar`, `person_name_required`, `invalid_person`, `invalid_person_birthday`, `invalid_reminders`, `already_onboarded`); `42501` `not_authenticated`. Executable by `authenticated` only.
 
 ## Storage buckets (private, signed URLs)
 `avatars` (2 MB, images only), `wish-images` (2 MB), `memories` (5 MB). Path prefix = `auth.uid()`; policies check the prefix.

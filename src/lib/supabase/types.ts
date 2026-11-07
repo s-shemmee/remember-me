@@ -3,6 +3,116 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      occasions: {
+        Row: {
+          created_at: string;
+          day: number;
+          id: string;
+          kind: Database["public"]["Enums"]["occasion_kind"];
+          month: number;
+          owner_id: string;
+          person_id: string | null;
+          recurring: boolean;
+          title: string | null;
+          year: number | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          day: number;
+          id?: string;
+          kind?: Database["public"]["Enums"]["occasion_kind"];
+          month: number;
+          owner_id?: string;
+          person_id?: string | null;
+          recurring?: boolean;
+          title?: string | null;
+          year?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          day?: number;
+          id?: string;
+          kind?: Database["public"]["Enums"]["occasion_kind"];
+          month?: number;
+          owner_id?: string;
+          person_id?: string | null;
+          recurring?: boolean;
+          title?: string | null;
+          year?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "occasions_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "occasions_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people: {
+        Row: {
+          archived_at: string | null;
+          color: string;
+          created_at: string;
+          group: Database["public"]["Enums"]["person_group"];
+          id: string;
+          linked_profile_id: string | null;
+          little_things: string[];
+          name: string;
+          owner_id: string;
+          relation: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          color?: string;
+          created_at?: string;
+          group?: Database["public"]["Enums"]["person_group"];
+          id?: string;
+          linked_profile_id?: string | null;
+          little_things?: string[];
+          name: string;
+          owner_id?: string;
+          relation?: string | null;
+        };
+        Update: {
+          archived_at?: string | null;
+          color?: string;
+          created_at?: string;
+          group?: Database["public"]["Enums"]["person_group"];
+          id?: string;
+          linked_profile_id?: string | null;
+          little_things?: string[];
+          name?: string;
+          owner_id?: string;
+          relation?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_linked_profile_id_fkey";
+            columns: ["linked_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "people_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_character: string | null;
@@ -19,6 +129,7 @@ export type Database = {
           handle: string | null;
           id: string;
           last_name: string | null;
+          onboarded_at: string | null;
           timezone: string;
         };
         ComputedFields: never;
@@ -37,6 +148,7 @@ export type Database = {
           handle?: string | null;
           id: string;
           last_name?: string | null;
+          onboarded_at?: string | null;
           timezone?: string;
         };
         Update: {
@@ -54,19 +166,84 @@ export type Database = {
           handle?: string | null;
           id?: string;
           last_name?: string | null;
+          onboarded_at?: string | null;
           timezone?: string;
         };
         Relationships: [];
+      };
+      reminder_settings: {
+        Row: {
+          email: boolean;
+          offsets_days: number[];
+          profile_id: string;
+          push: boolean;
+          remind_my_people: boolean;
+          send_time: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          email?: boolean;
+          offsets_days?: number[];
+          profile_id?: string;
+          push?: boolean;
+          remind_my_people?: boolean;
+          send_time?: string;
+          updated_at?: string;
+        };
+        Update: {
+          email?: boolean;
+          offsets_days?: number[];
+          profile_id?: string;
+          push?: boolean;
+          remind_my_people?: boolean;
+          send_time?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reminder_settings_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      complete_onboarding: {
+        Args: {
+          p_avatar_character?: string;
+          p_avatar_color?: string;
+          p_avatar_kind?: Database["public"]["Enums"]["avatar_kind"];
+          p_avatar_path?: string;
+          p_birth_year?: number;
+          p_birthday_day: number;
+          p_birthday_month: number;
+          p_first_name: string;
+          p_person_birthday_day?: number;
+          p_person_birthday_month?: number;
+          p_person_birthday_year?: number;
+          p_person_color?: string;
+          p_person_little_thing?: string;
+          p_person_name?: string;
+          p_person_relation?: string;
+          p_reminder_email?: boolean;
+          p_reminder_offsets?: number[];
+          p_timezone?: string;
+        };
+        Returns: string;
+      };
       health_check: { Args: Record<PropertyKey, never>; Returns: boolean };
     };
     Enums: {
       avatar_kind: "initials" | "photo" | "character";
+      occasion_kind: "birthday" | "anniversary" | "graduation" | "other";
+      person_group: "family" | "friends" | "work" | "other";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -179,6 +356,8 @@ export const Constants = {
   public: {
     Enums: {
       avatar_kind: ["initials", "photo", "character"],
+      occasion_kind: ["birthday", "anniversary", "graduation", "other"],
+      person_group: ["family", "friends", "work", "other"],
     },
   },
 } as const;
