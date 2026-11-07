@@ -66,6 +66,7 @@
   --noor-flame: #ffb547;
   --noor-flame-edge: #e08a1e;
   --noor-wick: #5e4500;
+  --noor-flame-inner: #ffe08a;
 
   color-scheme: light;
 }
@@ -116,6 +117,7 @@
   --noor-flame: #ffb547;
   --noor-flame-edge: #e08a1e;
   --noor-wick: #5e4500;
+  --noor-flame-inner: #ffe08a;
 
   color-scheme: dark;
 }
@@ -164,6 +166,7 @@
   --color-noor-flame: var(--noor-flame);
   --color-noor-flame-edge: var(--noor-flame-edge);
   --color-noor-wick: var(--noor-wick);
+  --color-noor-flame-inner: var(--noor-flame-inner);
 
   /*
    * shadcn/ui names, mapped to our tokens so components added later with
@@ -201,7 +204,9 @@
   --text-22: 1.375rem;
   --text-19: 1.1875rem;
   --text-17: 1.0625rem;
+  --text-16: 1rem;
   --text-15: 0.9375rem;
+  --text-14: 0.875rem;
   --text-13: 0.8125rem;
   --text-12: 0.75rem;
 
@@ -289,8 +294,47 @@
     *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
+      animation-delay: 0s !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
   }
+}
+
+/*
+ * Auth panel motion (docs/decisions.md: exception for the auth panels only).
+ * Items fade up once with a stagger (set --in-delay per item); two cards then
+ * float gently 3 times (about 15s) and rest. Keyframes animate `translate`,
+ * not `transform`, so Tailwind's rotate-* tilt is kept. All of it stops under
+ * reduced motion (base layer: durations, iterations and delays reset).
+ */
+@keyframes rm-panel-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes rm-panel-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+@utility animate-panel-in {
+  animation: rm-panel-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) var(--in-delay, 0s) both;
+}
+
+@utility animate-panel-in-float {
+  animation:
+    rm-panel-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) var(--in-delay, 0s) both,
+    rm-panel-float 5s ease-in-out calc(var(--in-delay, 0s) + 0.6s) 3;
 }

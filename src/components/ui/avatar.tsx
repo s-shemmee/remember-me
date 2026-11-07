@@ -6,13 +6,21 @@ import { cn } from "@/lib/utils";
 import { pastelClasses } from "./chip";
 
 /** Up to two initials from a name: "Grandma Fatima" → "GF", "Omar" → "O". */
+/**
+ * Two letters, as in the approved screens: first and last word's initials
+ * ("Grandma Fatima" → "GF", "Mom & Dad" → "MD"), or the first two letters of
+ * a single name ("Khalid" → "KH", "Sara" → "SA"). Symbols like "&" are skipped.
+ */
 export function initialsOf(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  const letters = words.length > 1 ? [words[0], words.at(-1)] : words;
-  return letters
-    .map((w) => Array.from(w ?? "")[0] ?? "")
-    .join("")
-    .toUpperCase();
+  const words = name
+    .trim()
+    .split(/\s+/)
+    .filter((w) => /\p{L}/u.test(w));
+  const first = words[0];
+  if (!first) return "";
+  if (words.length === 1) return Array.from(first).slice(0, 2).join("").toUpperCase();
+  const last = words.at(-1) ?? "";
+  return `${Array.from(first)[0] ?? ""}${Array.from(last)[0] ?? ""}`.toUpperCase();
 }
 
 const sizes = {

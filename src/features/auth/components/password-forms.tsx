@@ -18,7 +18,7 @@ export function ForgotPasswordForm() {
   );
 
   return (
-    <form action={action} noValidate className="grid gap-5">
+    <form action={action} noValidate className="flex flex-col gap-4">
       <Field
         label="Email"
         name="email"
@@ -45,7 +45,7 @@ export function ResetPasswordForm() {
   );
 
   return (
-    <form action={action} noValidate className="grid gap-5">
+    <form action={action} noValidate className="flex flex-col gap-4">
       <PasswordField
         label="New password"
         name="password"

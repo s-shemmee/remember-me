@@ -9,15 +9,13 @@ export const metadata: Metadata = { title: "Create your account · Remember Me" 
 export default function SignUpPage() {
   return (
     <AuthShell panel={<SignUpPanel />} panelClassName={signUpPanelClass}>
-      <div className="grid gap-8">
-        <AuthHeading
-          accent="someone"
-          lead="Create your free account. Your first person is one minute away."
-        >
-          Let&apos;s remember
-        </AuthHeading>
-        <SignUpForm />
-      </div>
+      <AuthHeading
+        accent="someone"
+        lead="Create your free account. Your first person is one minute away."
+      >
+        Let&apos;s remember
+      </AuthHeading>
+      <SignUpForm />
     </AuthShell>
   );
 }

@@ -6,13 +6,22 @@ import { cn } from "@/lib/utils";
  * "Remember me" wordmark: a heart in a rounded accent square, "Remember"
  * in Plus Jakarta 800 and "me" in Instrument Serif italic.
  */
-function Logo({ href = "/", className }: { href?: string; className?: string }) {
+function Logo({
+  href = "/",
+  label = "Remember me, home",
+  className,
+}: {
+  href?: string;
+  /** Accessible name of the link, e.g. "Remember me, back to home". */
+  label?: string;
+  className?: string;
+}) {
   return (
     <Link
       href={href}
-      aria-label="Remember me, home"
+      aria-label={label}
       className={cn(
-        "inline-flex min-h-11 items-center gap-2 rounded-chip text-19 font-extrabold tracking-heading",
+        "inline-flex min-h-11 shrink-0 items-center gap-2.5 rounded-chip text-19 font-extrabold tracking-[-0.02em] whitespace-nowrap",
         className,
       )}
     >
@@ -22,7 +31,7 @@ function Logo({ href = "/", className }: { href?: string; className?: string }) 
         </svg>
       </span>
       <span aria-hidden>
-        Remember <em className="font-serif text-22 font-normal text-accent-text">me</em>
+        Remember <em className="-ml-0.5 font-serif text-[23px] font-normal text-accent-text">me</em>
       </span>
     </Link>
   );

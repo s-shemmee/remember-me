@@ -20,7 +20,7 @@ export function LiveDate() {
     <>
       <span className="text-13 font-bold tracking-[.06em] text-accent-text">{weekday}</span>
       <span className="text-[80px] leading-none font-light tracking-[-0.04em]">{day}</span>
-      <span className="text-15 font-medium text-sub">{month}</span>
+      <span className="text-14 font-medium text-sub">{month}</span>
     </>
   );
 }

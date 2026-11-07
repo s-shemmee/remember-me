@@ -11,12 +11,10 @@ export const metadata: Metadata = { title: "Choose a new password · Remember Me
 export default function ResetPasswordPage() {
   return (
     <AuthShell panel={<LogInPanel />} panelClassName={logInPanelClass}>
-      <div className="grid gap-8">
-        <AuthHeading accent="password" lead="Choose a new one and you're back in.">
-          A fresh
-        </AuthHeading>
-        <ResetPasswordForm />
-      </div>
+      <AuthHeading accent="password" lead="Choose a new one and you're back in.">
+        A fresh
+      </AuthHeading>
+      <ResetPasswordForm />
     </AuthShell>
   );
 }

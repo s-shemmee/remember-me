@@ -11,7 +11,7 @@ import { createCn } from "cn/config";
 export const cn = createCn({
   extend: {
     theme: {
-      text: ["64", "48", "44", "34", "24", "22", "19", "17", "15", "13", "12"],
+      text: ["64", "48", "44", "34", "24", "22", "19", "17", "16", "15", "14", "13", "12"],
       radius: [
         "pill",
         "card",

@@ -22,4 +22,4 @@ export const coreTokens = [
 export const pastels = ["peach", "lilac", "mint", "sky", "rose", "butter"] as const;
 export type Pastel = (typeof pastels)[number];
 
-export const typeScale = [64, 48, 44, 34, 24, 22, 19, 17, 15, 13, 12] as const;
+export const typeScale = [64, 48, 44, 34, 24, 22, 19, 17, 16, 15, 14, 13, 12] as const;

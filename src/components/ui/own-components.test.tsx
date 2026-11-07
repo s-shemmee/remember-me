@@ -63,11 +63,14 @@ describe("Avatar", () => {
   });
 
   it.each([
-    ["Omar", "O"],
+    ["Omar", "OM"],
+    ["Khalid", "KH"],
+    ["Yasmine", "YA"],
     ["Grandma Fatima", "GF"],
     ["  Mom & Dad  ", "MD"],
     ["Yasmine El Idrissi", "YI"],
-    ["élodie", "É"],
+    ["élodie", "ÉL"],
+    ["", ""],
   ])("initials of %j are %s", (name, expected) => {
     expect(initialsOf(name)).toBe(expected);
   });
@@ -117,6 +120,28 @@ describe("Noor", () => {
     expect(noor).toHaveAttribute("width", "96");
     expect(noor).toHaveAttribute("height", "128");
     expect(noor).toHaveClass("animate-bob");
+  });
+
+  it("story: calm by default, smiling for welcoming moments", () => {
+    const { container } = render(
+      <div>
+        <Noor />
+        <Noor mood="smiling" animated />
+      </div>,
+    );
+    const [calm, smiling] = container.querySelectorAll("[data-slot='noor']");
+
+    expect(calm).toHaveAttribute("data-mood", "calm");
+    expect(calm?.querySelectorAll("circle")).toHaveLength(2); // dot eyes
+    expect(calm?.querySelector("[data-part='inner-flame']")).toBeNull();
+
+    expect(smiling).toHaveAttribute("data-mood", "smiling");
+    expect(smiling?.querySelector("[data-part='eyes']")).toBeInTheDocument(); // arched
+    expect(smiling?.querySelector("[data-part='mouth']")).toBeInTheDocument(); // open smile
+    expect(smiling?.querySelector("[data-part='inner-flame']")).toHaveClass(
+      "fill-noor-flame-inner",
+      "animate-flicker",
+    );
   });
 });
 

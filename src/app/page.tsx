@@ -26,7 +26,9 @@ const sizeClasses: Record<(typeof typeScale)[number], string> = {
   22: "text-22",
   19: "text-19",
   17: "text-17",
+  16: "text-16",
   15: "text-15",
+  14: "text-14",
   13: "text-13",
   12: "text-12",
 };

@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 
 /** The 52px input look shared by Field and PasswordField. */
 export const fieldInputClass = cn(
-  "h-[52px] w-full rounded-input border-[1.5px] border-line bg-card px-4 text-17 text-text",
+  "h-[52px] w-full rounded-input border-[1.5px] border-line bg-card px-4 text-16 text-text",
   "transition-[border-color,box-shadow] duration-200 ease-soft placeholder:text-sub",
-  "focus:border-accent focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_20%,transparent)] focus:outline-none",
+  "focus:border-accent focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_18%,transparent)] focus:outline-none",
   "aria-invalid:border-accent-text",
   "disabled:cursor-not-allowed disabled:opacity-50",
 );
@@ -23,7 +23,7 @@ export function FieldLabel({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <label htmlFor={htmlFor} className="text-15 font-semibold text-text">
+      <label htmlFor={htmlFor} className="text-14 font-semibold text-text">
         {children}
       </label>
       {aside}
@@ -76,7 +76,7 @@ function Field({
   const note = error ?? helper;
 
   return (
-    <div data-slot="field" className={cn("grid gap-2", className)}>
+    <div data-slot="field" className={cn("grid gap-1.5", className)}>
       <FieldLabel htmlFor={inputId} aside={labelAside}>
         {label}
       </FieldLabel>

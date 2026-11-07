@@ -20,15 +20,13 @@ async function LogInFormWithParams({ searchParams }: { searchParams: SearchParam
 export default function LogInPage({ searchParams }: { searchParams: SearchParams }) {
   return (
     <AuthShell panel={<LogInPanel />} panelClassName={logInPanelClass}>
-      <div className="grid gap-8">
-        <AuthHeading accent="back" lead="Your people missed you. Well, Noor did.">
-          Welcome
-        </AuthHeading>
-        {/* searchParams are request data: stream them in, same form meanwhile. */}
-        <Suspense fallback={<LogInForm />}>
-          <LogInFormWithParams searchParams={searchParams} />
-        </Suspense>
-      </div>
+      <AuthHeading accent="back" after="🤍" lead="Your people missed you. Well, Noor did.">
+        Welcome
+      </AuthHeading>
+      {/* searchParams are request data: stream them in, same form meanwhile. */}
+      <Suspense fallback={<LogInForm />}>
+        <LogInFormWithParams searchParams={searchParams} />
+      </Suspense>
     </AuthShell>
   );
 }

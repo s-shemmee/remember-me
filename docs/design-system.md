@@ -4,7 +4,7 @@ Source of truth: the design canvas, "Final · Playful" page (landing sections 1�
 
 ## Brand
 - **Logo:** a plain white heart in a rounded square (`--accent`, 32px, radius 10) + "Remember" (Plus Jakarta Sans 800) + "*me*" (Instrument Serif italic, `--accentText`). No candle in the logo.
-- **Noor:** a pink birthday candle with a flickering flame, dot eyes, blush. She is the assistant, not the logo. Sizes: 40–58px in UI, 86–120px in hero moments. Gentle bob animation (off under reduced motion).
+- **Noor:** a pink birthday candle with a flickering flame, dot eyes, blush. Two moods on the `Noor` component: `calm` (dot eyes, small smile; everyday UI) and `smiling` (arched happy eyes, open smile, a glowing inner flame; welcoming moments such as the auth panels, onboarding and celebrations). She is the assistant, not the logo. Sizes: 40–58px in UI, 86–120px in hero moments. Gentle bob animation (off under reduced motion).
 
 ## Colour tokens
 Define as CSS variables on `:root` (light) and `.dark` (dark). Tailwind reads them.
@@ -42,7 +42,7 @@ Second tones for gradients: `peach2 #FFCDB8`, `lilac2 #D6CAFF`, `mint2 #BDEDD5`,
 - **Elegant accent:** Instrument Serif italic, for one or two words in a heading ("one gentle *place*", "Welcome *back*").
 - **Handwritten:** Kalam, for small notes, eyebrows ("what's inside"), sticky notes. Scale it to ~0.8 of the size you'd use for Caveat.
 - iMessage-style bubbles and iOS notification mock-ups use the system font (`-apple-system`).
-- Scale: 64 / 48 / 44 / 34 / 24 / 22 / 19 / 17 / 15 / 13 / 12 px.
+- Scale: 64 / 48 / 44 / 34 / 24 / 22 / 19 / 17 / 16 / 15 / 14 / 13 / 12 px (`text-16`, `text-14`, …). 16 is for input text, social buttons and main CTAs; 14 for field labels, the "or with email" divider and small links (as in the approved SignUp / LogIn screens).
 
 ## Shape, depth, spacing
 - Radius: pills `999px`; cards 24–28px; hero panels 32–36px; inputs 16px; small chips 8–12px.
@@ -69,6 +69,7 @@ All live in `src/components/ui/`. Button, Switch, Dialog, Dropdown Menu, Tabs an
 ## Motion
 - Durations 200–600ms, ease `cubic-bezier(.2,.8,.2,1)`; springy pop `cubic-bezier(.2,.9,.3,1.3)`.
 - Allowed: rotating hero words, pen-draw underline, cards fading in once, the reminders card shuffle, wishlist cards tilting on hover, Noor's bob, numbers rolling up once.
+- Exception, auth panels only (sign-up, log-in and their sibling pages): items fade up once with a stagger (0.2s / 0.7s / 1.2s / 1.7s, 0.6s each), one card per panel floats 8px three times (about 15s) and rests, and Noor bobs. See docs/decisions.md.
 - One moving thing per section. Everything off under `prefers-reduced-motion` (and the in-app "Reduce motion" switch).
 
 ## Voice

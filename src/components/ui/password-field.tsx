@@ -42,7 +42,7 @@ function PasswordField({
     .join(" ");
 
   return (
-    <div data-slot="password-field" className={cn("grid gap-2", className)}>
+    <div data-slot="password-field" className={cn("grid gap-1.5", className)}>
       <FieldLabel htmlFor={inputId} aside={labelAside}>
         {label}
       </FieldLabel>
@@ -79,18 +79,21 @@ function PasswordField({
           id={checkId}
           aria-live="polite"
           className={cn(
-            "flex items-center gap-1.5 text-13 transition-colors duration-200 ease-soft",
-            longEnough ? "font-semibold text-mint-ink" : "text-sub",
+            "mt-1 flex items-center gap-2 text-14 transition-colors duration-200 ease-soft",
+            longEnough ? "text-mint-ink" : "text-sub",
           )}
         >
+          {/* Design: solid dot, line when unmet; met = green with a ✓. The
+              design's green isn't a token, so it's mint-ink with a card-colour
+              tick (6.5:1 in light, also passes in dark). */}
           <span
             aria-hidden
             className={cn(
-              "grid size-4 place-items-center rounded-pill transition-colors duration-200 ease-soft",
-              longEnough ? "bg-mint" : "border-[1.5px] border-line",
+              "grid size-[18px] shrink-0 place-items-center rounded-pill transition-colors duration-200 ease-soft",
+              longEnough ? "bg-mint-ink text-card" : "bg-line",
             )}
           >
-            {longEnough && <CheckIcon className="size-3" strokeWidth={3} />}
+            {longEnough && <CheckIcon className="size-3" strokeWidth={3.5} />}
           </span>
           <span className="sr-only">{longEnough ? "Done:" : "Needs:"}</span> {minLength} characters
           or more

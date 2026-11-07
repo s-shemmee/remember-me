@@ -10,7 +10,7 @@ import { SocialButton } from "@/components/ui/social-button";
 
 import { logIn, logInWithGoogle } from "../actions";
 import type { AuthFormState } from "../state";
-import { FormMessage, OrDivider } from "./auth-shell";
+import { AuthSwitch, FormMessage, OrDivider } from "./auth-shell";
 
 type Fields = "email" | "password";
 
@@ -24,8 +24,9 @@ export function LogInForm({ next, error }: { next?: string; error?: string }) {
   const [state, action, pending] = useActionState<AuthFormState<Fields>, FormData>(logIn, {});
   const linkError = error ? LINK_ERRORS[error] : undefined;
 
+  // Blocks are direct children of AuthShell's 22px column, as in the screens.
   return (
-    <div className="grid gap-6">
+    <>
       <form action={logInWithGoogle}>
         {next && <input type="hidden" name="next" value={next} />}
         <SocialButton provider="google" />
@@ -33,7 +34,7 @@ export function LogInForm({ next, error }: { next?: string; error?: string }) {
 
       <OrDivider />
 
-      <form action={action} noValidate className="grid gap-5">
+      <form action={action} noValidate className="flex flex-col gap-4">
         {next && <input type="hidden" name="next" value={next} />}
         <Field
           label="Email"
@@ -55,7 +56,7 @@ export function LogInForm({ next, error }: { next?: string; error?: string }) {
           labelAside={
             <Link
               href="/forgot-password"
-              className="inline-flex min-h-11 items-center text-13 font-semibold text-accent-text underline-offset-2 hover:underline"
+              className="inline-flex min-h-11 items-center text-14 font-semibold text-accent-text underline-offset-2 hover:underline"
             >
               Forgot password?
             </Link>
@@ -69,15 +70,9 @@ export function LogInForm({ next, error }: { next?: string; error?: string }) {
         </Button>
       </form>
 
-      <p className="text-15 text-sub">
-        New here?{" "}
-        <Link
-          href="/sign-up"
-          className="inline-flex min-h-11 items-center font-semibold text-accent-text underline-offset-2 hover:underline"
-        >
-          Create a free account
-        </Link>
-      </p>
-    </div>
+      <AuthSwitch question="New here?" href="/sign-up">
+        Create a free account
+      </AuthSwitch>
+    </>
   );
 }

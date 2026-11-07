@@ -11,22 +11,23 @@ import { SocialButton } from "@/components/ui/social-button";
 import { logInWithGoogle, signUp } from "../actions";
 import { PASSWORD_MIN } from "../schemas";
 import type { AuthFormState } from "../state";
-import { FormMessage, OrDivider } from "./auth-shell";
+import { AuthSwitch, FormMessage, OrDivider } from "./auth-shell";
 
 type Fields = "firstName" | "email" | "password";
 
 export function SignUpForm() {
   const [state, action, pending] = useActionState<AuthFormState<Fields>, FormData>(signUp, {});
 
+  // Blocks are direct children of AuthShell's 22px column, as in the screens.
   return (
-    <div className="grid gap-6">
+    <>
       <form action={logInWithGoogle}>
         <SocialButton provider="google" />
       </form>
 
       <OrDivider />
 
-      <form action={action} noValidate className="grid gap-5">
+      <form action={action} noValidate className="flex flex-col gap-4">
         <Field
           label="What should we call you?"
           name="firstName"
@@ -62,29 +63,23 @@ export function SignUpForm() {
         <Button type="submit" size="lg" className="w-full" aria-disabled={pending || undefined}>
           {pending ? "Creating your account…" : "Create my account"}
         </Button>
-
-        <p className="text-13 text-sub">
-          By continuing you agree to our{" "}
-          <Link href="/terms" className="font-semibold text-text underline underline-offset-2">
-            Terms
-          </Link>{" "}
-          and{" "}
-          <Link href="/privacy" className="font-semibold text-text underline underline-offset-2">
-            Privacy Policy
-          </Link>
-          .
-        </p>
       </form>
 
-      <p className="text-15 text-sub">
-        Already have an account?{" "}
-        <Link
-          href="/log-in"
-          className="inline-flex min-h-11 items-center font-semibold text-accent-text underline-offset-2 hover:underline"
-        >
-          Log in
+      <p className="text-center text-13 leading-normal text-balance text-sub">
+        By continuing you agree to our{" "}
+        <Link href="/terms" className="text-text underline">
+          Terms
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="text-text underline">
+          Privacy Policy
         </Link>
+        . No ads, ever.
       </p>
-    </div>
+
+      <AuthSwitch question="Already have an account?" href="/log-in">
+        Log in
+      </AuthSwitch>
+    </>
   );
 }
