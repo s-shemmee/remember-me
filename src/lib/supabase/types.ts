@@ -70,6 +70,7 @@ export type Database = {
           name: string;
           owner_id: string;
           relation: string | null;
+          relation_kind: string | null;
         };
         ComputedFields: never;
         Insert: {
@@ -83,6 +84,7 @@ export type Database = {
           name: string;
           owner_id?: string;
           relation?: string | null;
+          relation_kind?: string | null;
         };
         Update: {
           archived_at?: string | null;
@@ -95,6 +97,7 @@ export type Database = {
           name?: string;
           owner_id?: string;
           relation?: string | null;
+          relation_kind?: string | null;
         };
         Relationships: [
           {
@@ -229,6 +232,7 @@ export type Database = {
           p_person_birthday_month?: number;
           p_person_birthday_year?: number;
           p_person_color?: string;
+          p_person_description?: string;
           p_person_little_thing?: string;
           p_person_name?: string;
           p_person_relation?: string;
@@ -240,6 +244,21 @@ export type Database = {
         Returns: string;
       };
       health_check: { Args: Record<PropertyKey, never>; Returns: boolean };
+      save_person: {
+        Args: {
+          p_birthday_day?: number;
+          p_birthday_month?: number;
+          p_birthday_year?: number;
+          p_color?: string;
+          p_days?: Json;
+          p_id?: string;
+          p_little_things?: string[];
+          p_name?: string;
+          p_relation?: string;
+          p_relation_kind?: string;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       avatar_kind: "initials" | "photo" | "character";

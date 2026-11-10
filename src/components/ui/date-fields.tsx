@@ -6,16 +6,16 @@ import { FieldNote, fieldInputClass } from "@/components/ui/field";
 import { SelectField } from "@/components/ui/select-field";
 import { cn } from "@/lib/utils";
 
-import { MONTHS } from "../constants";
+import { MONTHS } from "@/lib/dates";
 
 type Value = { day: number | null; month: number | null; year: number | null };
 
 /**
- * Birthday as day + month (required) and an optional, private year.
+ * A date as day + month (required) and an optional year (private for birthdays).
  * A fieldset with a visible legend labels the group; each select has its
  * own accessible name. Errors are text linked to the field they're about.
  */
-export function BirthdayFields({
+export function DateFields({
   legend,
   hint,
   value,

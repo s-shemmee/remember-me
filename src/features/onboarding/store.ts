@@ -30,6 +30,8 @@ export type OnboardingDraft = {
     skipped: boolean;
     name: string;
     relation: Relation;
+    /** "How you'd describe them" (optional), e.g. "Little sister". */
+    description: string;
     day: number | null;
     month: number | null;
     year: number | null;
@@ -58,6 +60,7 @@ export const emptyDraft = (): OnboardingDraft => ({
     skipped: false,
     name: "",
     relation: "Best friend",
+    description: "",
     day: null,
     month: null,
     year: null,

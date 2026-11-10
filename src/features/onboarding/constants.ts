@@ -1,5 +1,14 @@
 import { type Pastel, pastels } from "@/styles/tokens";
 
+export { MONTHS } from "@/lib/dates";
+export {
+  DESCRIPTION_MAX,
+  NAME_MAX,
+  type Relation,
+  RELATION_COLORS,
+  RELATIONS,
+} from "@/features/people/constants";
+
 /** The 8 characters from the approved screen (AppOnboard), stored by key. */
 export const CHARACTERS = [
   { key: "fox", emoji: "🦊", label: "Fox" },
@@ -16,26 +25,6 @@ export const CHARACTER_KEYS = CHARACTERS.map((c) => c.key) as [CharacterKey, ...
 export const characterEmoji = (key: string | null | undefined) =>
   CHARACTERS.find((c) => c.key === key)?.emoji;
 
-/** Relation chips; the chip text is saved as people.relation. */
-export const RELATIONS = ["Best friend", "Family", "Partner", "Friend", "Colleague"] as const;
-export type Relation = (typeof RELATIONS)[number];
-
-/**
- * Each relation's colour (docs/design-system.md). A new person gets their
- * relation's colour, saved on people.color; it can be changed later in
- * their profile. complete_onboarding() applies the same default.
- */
-export const RELATION_COLORS: Record<Relation, Pastel> = {
-  "Best friend": "rose",
-  Family: "sky",
-  Partner: "peach",
-  Friend: "lilac",
-  Colleague: "mint",
-};
-
-/** Names (yours and your people's) are at most 40 characters everywhere. */
-export const NAME_MAX = 40;
-
 /** Reminder chips: days before the day. 7, 1 and 0 are pre-picked. */
 export const REMINDER_OPTIONS = [
   { days: 14, label: "2 weeks before" },
@@ -46,21 +35,6 @@ export const REMINDER_OPTIONS = [
 ] as const;
 export const REMINDER_DAYS = REMINDER_OPTIONS.map((o) => o.days);
 export const DEFAULT_REMINDER_OFFSETS = [7, 1, 0];
-
-export const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-] as const;
 
 export const PASTELS = pastels;
 export const DEFAULT_AVATAR_COLOR: Pastel = "lilac";

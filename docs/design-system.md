@@ -79,6 +79,9 @@ All live in `src/components/ui/`. Button, Switch, Dialog, Dropdown Menu, Tabs an
 - **Noor bubble:** card bg, radius `22 22 22 6`, sits next to Noor, `aria-live="polite"` when it changes.
 - **iOS notification card:** glass bg, app icon tile, "REMEMBER ME · now", title + one line.
 - **Sidebar (desktop app):** 248px, logo, 5 nav items, "Your day" lilac card, Settings, account chip that opens the account menu (profile, settings, help, log out).
+- **Mobile app shell (below 1024px):** a top bar with the logo and your avatar (opens the same account menu, where Settings lives), and a bottom tab bar with the five sections: glass background, 24px icon over a 12px label, at least 60px tall, the current one in `accentText`, room for the home indicator (`safe-area-inset-bottom`).
+- **Person card (People grid):** card with the avatar in their pastel, name, relation (their description when set, else the chip) and a countdown pill for their next day ("Birthday · in 2 days"). Three columns when there's room; in a narrow list (phones) it becomes a compact row with the avatar on the left. The open person gets a 2.5px accent ring.
+- **Profile panel (People):** next to the grid from 1280px; below that it replaces the grid with "← All people". Sections: Days to remember (emoji, title, date, countdown in their ink), Little things (pills in their pastel), Their wishlist.
 
 ## Motion
 - Durations 200–600ms, ease `cubic-bezier(.2,.8,.2,1)`; springy pop `cubic-bezier(.2,.9,.3,1.3)`.

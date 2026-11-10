@@ -1,8 +1,11 @@
 import { z } from "zod";
 
+import { isLeapYear, isRealDayMonth } from "@/lib/dates";
 import { pastels } from "@/styles/tokens";
 
-import { CHARACTER_KEYS, NAME_MAX, RELATIONS, REMINDER_DAYS } from "./constants";
+import { LITTLE_THING_MAX } from "@/features/people/constants";
+
+import { CHARACTER_KEYS, DESCRIPTION_MAX, NAME_MAX, RELATIONS, REMINDER_DAYS } from "./constants";
 
 /**
  * Onboarding validation, mirroring complete_onboarding() in the database
@@ -11,18 +14,11 @@ import { CHARACTER_KEYS, NAME_MAX, RELATIONS, REMINDER_DAYS } from "./constants"
  * again on the server before the database call.
  */
 
-export const isLeapYear = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-
-/** A real day of the year; 29 February is allowed (it falls on the 28th otherwise). */
-export function isRealDayMonth(day: number, month: number): boolean {
-  if (month < 1 || month > 12 || day < 1) return false;
-  const max = month === 2 ? 29 : [4, 6, 9, 11].includes(month) ? 30 : 31;
-  return day <= max;
-}
+export { isLeapYear, isRealDayMonth };
 
 const thisYear = () => new Date().getFullYear();
 
-const optionalYear = z
+export const optionalYear = z
   .number({ error: "Use a year like 1995." })
   .int({ error: "Use a year like 1995." })
   .min(1900, { error: "Use a year like 1995." })
@@ -30,7 +26,7 @@ const optionalYear = z
   .nullable();
 
 /** Shared birthday rules: day + month required together, real date, leap years. */
-function birthdayRules(
+export function birthdayRules(
   value: { day: number | null; month: number | null; year: number | null },
   ctx: z.RefinementCtx,
   messages: { missing: string },
@@ -57,8 +53,8 @@ function birthdayRules(
   }
 }
 
-const dayField = z.number().int().min(1).max(31).nullable();
-const monthField = z.number().int().min(1).max(12).nullable();
+export const dayField = z.number().int().min(1).max(31).nullable();
+export const monthField = z.number().int().min(1).max(12).nullable();
 
 export const youSchema = z
   .object({
@@ -97,10 +93,18 @@ export const personSchema = z.discriminatedUnion("skipped", [
         .min(1, { error: "What's their name?" })
         .max(NAME_MAX, { error: `Keep it to ${NAME_MAX} characters.` }),
       relation: z.enum(RELATIONS),
+      description: z
+        .string()
+        .trim()
+        .max(DESCRIPTION_MAX, { error: `Keep it to ${DESCRIPTION_MAX} characters.` })
+        .default(""),
       day: dayField,
       month: monthField,
       year: optionalYear,
-      littleThing: z.string().trim().max(80, { error: "Keep it under 80 characters." }),
+      littleThing: z
+        .string()
+        .trim()
+        .max(LITTLE_THING_MAX, { error: `Keep it to ${LITTLE_THING_MAX} characters.` }),
     })
     .superRefine((v, ctx) =>
       birthdayRules(v, ctx, { missing: "When is their birthday? Day and month." }),

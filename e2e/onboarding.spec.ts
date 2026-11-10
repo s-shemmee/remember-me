@@ -1,46 +1,12 @@
-import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+
+import { confirmationLink, expectAccessible, PASSWORD } from "./helpers";
 
 /**
  * Sign up → confirm via Mailpit → onboarding (all four steps) → Home shows
  * the first person. Runs against local Supabase; emails never leave the box.
  * Every step is checked with axe (no serious or critical violations).
  */
-
-const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
-const PASSWORD = "test_password_00000000";
-
-async function expectAccessible(page: Page, label: string) {
-  const { violations } = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-    .analyze();
-  const serious = violations.filter((v) => v.impact === "serious" || v.impact === "critical");
-  expect(
-    serious.map((v) => `${v.id}: ${v.nodes[0]?.target.join(" ")}`),
-    label,
-  ).toEqual([]);
-}
-
-async function confirmationLink(email: string): Promise<string> {
-  for (let i = 0; i < 30; i++) {
-    const search = await fetch(
-      `${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`,
-    );
-    const { messages = [] } = (await search.json()) as {
-      messages?: { ID: string; Subject: string }[];
-    };
-    const message = messages.find((m) => m.Subject.includes("Confirm"));
-    if (message) {
-      const full = (await (await fetch(`${MAILPIT}/api/v1/message/${message.ID}`)).json()) as {
-        HTML: string;
-      };
-      const href = full.HTML.match(/href="([^"]*token_hash[^"]*)"/)?.[1];
-      if (href) return href.replaceAll("&amp;", "&");
-    }
-    await new Promise((r) => setTimeout(r, 1000));
-  }
-  throw new Error(`No confirmation email for ${email} in Mailpit`);
-}
 
 test("sign up, confirm, onboard, and see your first person at home", async ({ page }) => {
   const email = `e2e.${Date.now()}@test.local`;

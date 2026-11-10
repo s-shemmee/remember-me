@@ -2,7 +2,7 @@
 -- Users: A (Sara) onboards fully, B (Khalid) is the denied side, C (Omar)
 -- skips the first person, D (Nadia) hits every validation path.
 begin;
-select plan(49);
+select plan(52);
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-0000000000a1', 'sara@test.local',   '{"first_name": "Sara"}'),
@@ -34,7 +34,7 @@ select is(
   false, 'complete_onboarding runs as the caller (security invoker)'
 );
 select is(
-  has_function_privilege('anon', 'public.complete_onboarding(text, integer, integer, integer, public.avatar_kind, text, text, text, text, text, text, integer, integer, integer, text, integer[], boolean, boolean, text)', 'execute'),
+  has_function_privilege('anon', 'public.complete_onboarding(text, integer, integer, integer, public.avatar_kind, text, text, text, text, text, text, integer, integer, integer, text, integer[], boolean, boolean, text, text)', 'execute'),
   false, 'anonymous visitors cannot call complete_onboarding'
 );
 
@@ -46,7 +46,8 @@ select lives_ok($$
     p_avatar_kind => 'character', p_avatar_color => 'lilac', p_avatar_character => 'cat',
     p_person_name => 'Khalid', p_person_relation => 'Best friend', p_person_color => 'butter',
     p_person_birthday_day => 14, p_person_birthday_month => 3,
-    p_person_little_thing => 'black coffee', p_timezone => 'Africa/Casablanca')
+    p_person_little_thing => 'black coffee', p_timezone => 'Africa/Casablanca',
+    p_person_description => ' Brother from uni ')
 $$, 'A completes onboarding (own birthday 29 Feb, with a first person)');
 
 select is((select onboarded_at is not null from public.profiles), true, 'A is marked onboarded');
@@ -55,9 +56,10 @@ select is((select first_name || ' ' || birthday_day || '/' || birthday_month fro
 select is((select avatar_kind || ':' || avatar_character || ':' || avatar_color from public.profiles),
   'character:cat:lilac', 'A: avatar saved');
 select is(
-  (select name || '|' || relation || '|' || "group" || '|' || color || '|' || array_to_string(little_things, ',')
+  (select name || '|' || relation_kind || '|' || relation || '|' || "group" || '|' || color || '|' || array_to_string(little_things, ',')
    from public.people),
-  'Khalid|Best friend|friends|butter|black coffee', 'A: first person saved, "Best friend" grouped as friends');
+  'Khalid|Best friend|Brother from uni|friends|butter|black coffee',
+  'A: first person saved: chip in relation_kind, trimmed description in relation, "Best friend" grouped as friends');
 select is(
   (select o.kind || ' ' || o.day || '/' || o.month from public.occasions o join public.people p on p.id = o.person_id),
   'birthday 14/3', 'A: first person''s birthday saved as an occasion');
@@ -120,8 +122,8 @@ select lives_ok($$
     p_person_name => 'Lina', p_person_relation => 'Partner', p_person_birthday_day => 8,
     p_person_birthday_month => 8)
 $$, 'B completes onboarding with a partner');
-select is((select relation || ' ' || "group" || ' ' || color from public.people where name = 'Lina'),
-  'Partner family peach', 'relation chip text is saved; Partner is grouped as family and gets peach');
+select is((select relation_kind || ' ' || coalesce(relation, '-') || ' ' || "group" || ' ' || color from public.people where name = 'Lina'),
+  'Partner - family peach', 'the chip is saved in relation_kind, no description; Partner is grouped as family and gets peach');
 
 -- C: skips the first person, picks other reminders ---------------------------
 select pg_temp.act_as('00000000-0000-0000-0000-0000000000c1');
@@ -173,6 +175,20 @@ select throws_ok(
   $$ select public.complete_onboarding(p_first_name => 'Nadia', p_birthday_day => 1, p_birthday_month => 1,
        p_timezone => 'Mars/Olympus') $$,
   '22023', 'invalid_timezone', 'an unknown timezone is refused');
+select throws_ok(
+  $$ select public.complete_onboarding(p_first_name => 'Nadia', p_birthday_day => 1, p_birthday_month => 1,
+       p_person_name => 'Yasmine', p_person_relation => 'Family', p_person_birthday_day => 1,
+       p_person_birthday_month => 1, p_person_description => repeat('x', 31)) $$,
+  '22023', 'invalid_person', 'a description over 30 characters is refused');
+select throws_ok(
+  $$ select public.complete_onboarding(p_first_name => 'Nadia', p_birthday_day => 1, p_birthday_month => 1,
+       p_person_name => 'Yasmine', p_person_relation => 'Cousin', p_person_birthday_day => 1,
+       p_person_birthday_month => 1) $$,
+  '22023', 'invalid_person', 'a relation that is not one of the five chips is refused');
+select throws_ok(
+  $$ select public.complete_onboarding(p_first_name => 'Nadia', p_birthday_day => 1, p_birthday_month => 1,
+       p_person_description => 'Little sister') $$,
+  '22023', 'person_name_required', 'a description without a name is refused');
 select is(
   (select coalesce(birthday_day::text, 'none') || ' ' || (onboarded_at is null) from public.profiles),
   'none true', 'after every refused call nothing was saved (all or nothing)');

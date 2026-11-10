@@ -57,6 +57,7 @@ export async function completeOnboarding(input: unknown): Promise<CompleteOnboar
     p_reminder_email: reminders.email,
     p_reminder_push: reminders.push,
     p_timezone: timezone ?? undefined,
+    p_person_description: withPerson && person.description ? person.description : undefined,
   });
 
   if (error) {

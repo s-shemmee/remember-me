@@ -82,6 +82,15 @@ describe("completeOnboarding", () => {
     });
   });
 
+  it("sends how you'd describe them, trimmed, when given", async () => {
+    rpc.mockResolvedValue({ data: "person-1", error: null });
+    await run({ ...draft, person: { ...draft.person, description: " Little sister " } });
+    expect(rpc.mock.calls[0]![1]).toMatchObject({
+      p_person_relation: "Best friend",
+      p_person_description: "Little sister",
+    });
+  });
+
   it("sends no person fields when the first person was skipped", async () => {
     rpc.mockResolvedValue({ data: null, error: null });
     const { result } = await run({ ...draft, person: { skipped: true } });

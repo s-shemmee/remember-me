@@ -203,6 +203,17 @@ describe("Onboarding · step 4, Reminders, and Done", () => {
     );
   });
 
+  it("asks how you'd describe them (optional, 30 characters) and shows it in the preview", async () => {
+    act(() => useOnboardingDraft.setState({ ownerId: USER, step: 2 }));
+    renderFlow();
+    const description = screen.getByLabelText("How you'd describe them (optional)");
+    expect(description).toHaveAttribute("maxlength", "30");
+    expect(screen.getAllByText("Best friend").length).toBeGreaterThan(1); // chip + preview
+    await userEvent.type(description, "Little sister");
+    expect(useOnboardingDraft.getState().person.description).toBe("Little sister");
+    expect(screen.getAllByText("Little sister")).not.toHaveLength(0);
+  });
+
   it("previews a reminder with the first person's name", () => {
     act(() =>
       useOnboardingDraft.setState({

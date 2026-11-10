@@ -3,21 +3,17 @@ import { Suspense } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Logo } from "@/components/ui/logo";
 import { NoorBubble } from "@/components/ui/noor-bubble";
 import { TruncatedName } from "@/components/ui/truncated-name";
-import { LogOutButton } from "@/features/auth/components/log-out-button";
-import { MONTHS } from "@/features/onboarding/constants";
+import { asPastel } from "@/features/people/view";
+import { AppMain } from "@/features/shell/app-shell";
+import { formatDayMonth } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { type Pastel, pastels } from "@/styles/tokens";
 
 export const metadata: Metadata = { title: "Home · Remember Me" };
 
 // Placeholder until the real Home (M2). The (app) layout guarantees a
 // finished onboarding; RLS means the queries only ever return your own rows.
-
-const asPastel = (c: string | null | undefined): Pastel =>
-  pastels.includes(c as Pastel) ? (c as Pastel) : "lilac";
 
 async function Greeting() {
   const supabase = await createSupabaseServerClient();
@@ -39,7 +35,7 @@ async function YourPeople() {
   const supabase = await createSupabaseServerClient();
   const { data: people } = await supabase
     .from("people")
-    .select("id, name, relation, color, occasions(kind, day, month)")
+    .select("id, name, relation, relation_kind, color, occasions(kind, day, month)")
     .is("archived_at", null)
     .order("created_at");
 
@@ -63,8 +59,8 @@ async function YourPeople() {
               <span className="flex min-w-0 flex-col">
                 <span className="truncate text-17 font-bold">{p.name}</span>
                 <span className="truncate text-14 text-sub">
-                  {p.relation}
-                  {birthday ? ` · ${birthday.day} ${MONTHS[birthday.month - 1]}` : ""}
+                  {p.relation || p.relation_kind}
+                  {birthday ? ` · ${formatDayMonth(birthday)}` : ""}
                 </span>
               </span>
             </li>
@@ -77,25 +73,19 @@ async function YourPeople() {
 
 export default function HomePage() {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[720px] flex-col gap-10 px-4 py-6 sm:px-10">
-      <header className="flex items-center justify-between gap-3">
-        <Logo href="/home" />
-        <LogOutButton />
-      </header>
-      <main id="main" className="grid grid-cols-[minmax(0,1fr)] gap-6">
-        <Suspense
-          fallback={
-            <h1 className="text-34 leading-tight font-extrabold tracking-heading sm:text-44">
-              You&apos;re <em className="font-serif font-normal text-accent-text">in</em>
-            </h1>
-          }
-        >
-          <Greeting />
-        </Suspense>
-        <Suspense fallback={<Card aria-busy="true" className="h-28" />}>
-          <YourPeople />
-        </Suspense>
-      </main>
-    </div>
+    <AppMain className="grid max-w-[720px] grid-cols-[minmax(0,1fr)] content-start">
+      <Suspense
+        fallback={
+          <h1 className="text-34 leading-tight font-extrabold tracking-heading sm:text-44">
+            You&apos;re <em className="font-serif font-normal text-accent-text">in</em>
+          </h1>
+        }
+      >
+        <Greeting />
+      </Suspense>
+      <Suspense fallback={<Card aria-busy="true" className="h-28" />}>
+        <YourPeople />
+      </Suspense>
+    </AppMain>
   );
 }

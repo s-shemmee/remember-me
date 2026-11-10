@@ -10,8 +10,10 @@ import { pastelClasses } from "@/components/ui/chip";
 import { Field } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import { TruncatedName } from "@/components/ui/truncated-name";
+import { ColorSwatches } from "@/features/people/components/color-swatches";
+import { heartInk, RelationChips } from "@/features/people/components/relation-chips";
+import { DESCRIPTION_MAX, LITTLE_THING_MAX } from "@/features/people/constants";
 import { cn } from "@/lib/utils";
-import type { Pastel } from "@/styles/tokens";
 
 import {
   CHARACTERS,
@@ -20,17 +22,13 @@ import {
   NAME_MAX,
   PASTELS,
   RELATION_COLORS,
-  RELATIONS,
   REMINDER_OPTIONS,
-  type Relation,
 } from "../constants";
 import { sampleNudge } from "../noor-lines";
 import type { OnboardingDraft } from "../store";
-import { BirthdayFields } from "./birthday-fields";
+import { DateFields } from "@/components/ui/date-fields";
 
 type Errors = Record<string, string>;
-
-const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** "First, *you*": the step heading with one serif accent word. */
 export function StepHeading({
@@ -84,7 +82,7 @@ export function StepYou({
         onChange={(e) => onChange({ firstName: e.currentTarget.value })}
         error={errors.firstName}
       />
-      <BirthdayFields
+      <DateFields
         idPrefix="you-bday"
         legend="Your birthday"
         hint="Just the day and month. Your year stays private."
@@ -97,9 +95,6 @@ export function StepYou({
 }
 
 // 2 · Your look ---------------------------------------------------------------
-
-const swatchRing =
-  "data-[state=checked]:ring-3 data-[state=checked]:ring-accent data-[state=checked]:ring-offset-2 data-[state=checked]:ring-offset-bg";
 
 /** Desktop preview in Noor's column: "How your people see you". */
 export function YouPreview({
@@ -227,25 +222,11 @@ export function StepLook({
         <span id="look-colour-label" className="text-14 font-semibold">
           Colour
         </span>
-        <ChoiceGroup
-          aria-labelledby="look-colour-label"
+        <ColorSwatches
+          labelId="look-colour-label"
           value={value.color}
-          onValueChange={(color) => onChange({ color: color as Pastel })}
-          className="gap-3"
-        >
-          {PASTELS.map((p) => (
-            <ChoiceItem
-              key={p}
-              value={p}
-              aria-label={capitalise(p)}
-              className={cn(
-                "size-11 rounded-pill ring-1 ring-line ring-inset",
-                pastelClasses[p],
-                swatchRing,
-              )}
-            />
-          ))}
-        </ChoiceGroup>
+          onChange={(color) => onChange({ color })}
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-3.5">
@@ -261,43 +242,6 @@ export function StepLook({
 }
 
 // 3 · First person --------------------------------------------------------------
-
-/** Relation chip look per colour: a dot in the ink; checked fills with the pastel. */
-const relationChip: Record<Pastel, { chip: string; dot: string }> = {
-  peach: {
-    chip: "data-[state=checked]:bg-peach data-[state=checked]:text-peach-ink data-[state=checked]:ring-peach-ink",
-    dot: "bg-peach-ink",
-  },
-  lilac: {
-    chip: "data-[state=checked]:bg-lilac data-[state=checked]:text-lilac-ink data-[state=checked]:ring-lilac-ink",
-    dot: "bg-lilac-ink",
-  },
-  mint: {
-    chip: "data-[state=checked]:bg-mint data-[state=checked]:text-mint-ink data-[state=checked]:ring-mint-ink",
-    dot: "bg-mint-ink",
-  },
-  sky: {
-    chip: "data-[state=checked]:bg-sky data-[state=checked]:text-sky-ink data-[state=checked]:ring-sky-ink",
-    dot: "bg-sky-ink",
-  },
-  rose: {
-    chip: "data-[state=checked]:bg-rose data-[state=checked]:text-rose-ink data-[state=checked]:ring-rose-ink",
-    dot: "bg-rose-ink",
-  },
-  butter: {
-    chip: "data-[state=checked]:bg-butter data-[state=checked]:text-butter-ink data-[state=checked]:ring-butter-ink",
-    dot: "bg-butter-ink",
-  },
-};
-
-const heartInk: Record<Pastel, string> = {
-  peach: "fill-peach-ink",
-  lilac: "fill-lilac-ink",
-  mint: "fill-mint-ink",
-  sky: "fill-sky-ink",
-  rose: "fill-rose-ink",
-  butter: "fill-butter-ink",
-};
 
 /** The person card, in their relation's colour. Decorative: it repeats the form. */
 export function PersonPreview({
@@ -329,7 +273,9 @@ export function PersonPreview({
         />
         <span className="flex min-w-0 flex-col">
           <span className="truncate text-[18px] font-bold">{name || "Their name"}</span>
-          <span className="truncate text-14 text-sub">{person.relation}</span>
+          <span className="truncate text-14 text-sub">
+            {person.description.trim() || person.relation}
+          </span>
         </span>
       </div>
       <span
@@ -386,30 +332,23 @@ export function StepPerson({
             <span id="person-relation-label" className="text-14 font-semibold">
               Who are they to you?
             </span>
-            <ChoiceGroup
-              aria-labelledby="person-relation-label"
+            <RelationChips
+              labelId="person-relation-label"
               value={value.relation}
-              onValueChange={(relation) => onChange({ relation: relation as Relation })}
-            >
-              {RELATIONS.map((r) => {
-                const look = relationChip[RELATION_COLORS[r]];
-                return (
-                  <ChoiceItem
-                    key={r}
-                    value={r}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-2 rounded-pill bg-card2 px-4 text-15 font-semibold text-text data-[state=checked]:ring-2",
-                      look.chip,
-                    )}
-                  >
-                    <span aria-hidden className={cn("size-2.5 rounded-full", look.dot)} />
-                    {r}
-                  </ChoiceItem>
-                );
-              })}
-            </ChoiceGroup>
+              onChange={(relation) => onChange({ relation })}
+            />
           </div>
-          <BirthdayFields
+          <Field
+            id="person-description"
+            label="How you'd describe them (optional)"
+            placeholder="e.g. Little sister"
+            autoComplete="off"
+            maxLength={DESCRIPTION_MAX}
+            value={value.description}
+            onChange={(e) => onChange({ description: e.currentTarget.value })}
+            error={errors.description}
+          />
+          <DateFields
             idPrefix="person-bday"
             legend="Their birthday"
             value={value}
@@ -421,7 +360,7 @@ export function StepPerson({
             label="A little thing they love (optional)"
             placeholder="e.g. sunflowers, black coffee"
             autoComplete="off"
-            maxLength={80}
+            maxLength={LITTLE_THING_MAX}
             value={value.littleThing}
             onChange={(e) => onChange({ littleThing: e.currentTarget.value })}
             error={errors.littleThing}
