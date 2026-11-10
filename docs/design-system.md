@@ -37,6 +37,18 @@ Define as CSS variables on `:root` (light) and `.dark` (dark). Tailwind reads th
 
 Second tones for gradients: `peach2 #FFCDB8`, `lilac2 #D6CAFF`, `mint2 #BDEDD5`, `rose2 #FFC7D8`.
 
+**Relation colours** (decided Nov 2026): a new person gets their relation's pastel, saved on `people.color` and changeable later in their profile. Anything else (or no relation) is lilac.
+
+| Relation | Pastel |
+|---|---|
+| Best friend | rose |
+| Family | sky |
+| Partner | peach |
+| Friend | lilac |
+| Colleague | mint |
+
+In code: `RELATION_COLORS` in `src/features/onboarding/constants.ts`; the database applies the same default in `complete_onboarding()`.
+
 ## Type
 - **UI:** Plus Jakarta Sans (400–800). Headings 800, tight tracking (-0.03em).
 - **Elegant accent:** Instrument Serif italic, for one or two words in a heading ("one gentle *place*", "Welcome *back*").
@@ -57,9 +69,11 @@ All live in `src/components/ui/`. Button, Switch, Dialog, Dropdown Menu, Tabs an
 - **Social button:** full width, card background, 1.5px line border, Google/Apple mark + "Continue with…".
 - **Field:** visible label above, 52px input, 1.5px line border, focus = accent border + 4px soft ring. Helper text under in `--sub`.
 - **Chip / filter:** 36–44px, selected = `--text` fill with `--bg` text.
+- **Relation chip:** 44px pill on `card2` with a 10px dot in the relation's ink; selected fills with the relation's pastel, ink text and a 2px ink ring (a radio group: arrows move and select).
 - **Switch:** `role="switch"`, 48×28, 22px knob, accent when on. Off: `line` track with a 1.5px `sub` outline so it meets 3:1. Touch area 44px tall.
 - **Card:** card bg, radius 24, shadow; hoverable cards lift 2px.
 - **Person avatar:** circle in the person's pastel, initials in its ink, 800 weight.
+- **Names:** at most 40 characters. A name on its own line gets `truncate`; a name inside a heading uses `TruncatedName` (one line, ellipsis); a name inside a sentence (Noor, body copy) wraps with `overflow-wrap: anywhere`. A name never makes the page scroll sideways.
 - **Countdown pill:** person's pastel fill + ink text ("in 2 days").
 - **Plan steps:** 4 round buttons (🎁 Pick gift, 🤫 Reserve, 💌 Write wish, 🎉 Celebrate), filled when done.
 - **Noor bubble:** card bg, radius `22 22 22 6`, sits next to Noor, `aria-live="polite"` when it changes.

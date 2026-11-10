@@ -32,13 +32,14 @@ const sizes = {
 
 /**
  * Person avatar: a circle in the person's pastel, initials in its ink at 800.
- * With `src`, shows the photo instead. The name is the accessible label;
+ * With `src`, shows the photo instead; with `character` (an emoji), shows that. The name is the accessible label;
  * pass `decorative` when the name is already shown next to it.
  */
 function Avatar({
   name,
   pastel,
   src,
+  character,
   size = "md",
   decorative = false,
   className,
@@ -46,6 +47,8 @@ function Avatar({
   name: string;
   pastel: Pastel;
   src?: string | null;
+  /** A character avatar's emoji (e.g. 🦊). */
+  character?: string | null;
   size?: keyof typeof sizes;
   decorative?: boolean;
   className?: string;
@@ -67,6 +70,10 @@ function Avatar({
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element -- avatars come from signed Storage URLs; sized by the circle
         <img src={src} alt="" className="size-full object-cover" />
+      ) : character ? (
+        <span aria-hidden className="text-[1.15em] leading-none">
+          {character}
+        </span>
       ) : (
         <span aria-hidden>{initialsOf(name)}</span>
       )}

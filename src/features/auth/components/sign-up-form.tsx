@@ -34,7 +34,7 @@ export function SignUpForm() {
           autoComplete="given-name"
           placeholder="Your first name"
           required
-          maxLength={50}
+          maxLength={40}
           defaultValue={state.values?.firstName}
           error={state.fieldErrors?.firstName}
         />

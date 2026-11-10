@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+import { onboardingRedirect } from "@/features/onboarding/redirect";
+
 import { HOME_PATH, safeNextPath } from "./redirects";
 import { forgotPasswordSchema, logInSchema, resetPasswordSchema, signUpSchema } from "./schemas";
 import { type AuthFormState, fieldErrorsFrom } from "./state";
@@ -108,7 +110,7 @@ export async function logIn(
   if (!parsed.success) return { fieldErrors: fieldErrorsFrom(parsed.error.issues), values };
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     if (isRateLimit(error.code, error.status)) return { formError: MESSAGES.tooMany, values };
@@ -119,7 +121,14 @@ export async function logIn(
     return { formError: MESSAGES.generic, values };
   }
 
-  redirect(safeNextPath(str(formData, "next")));
+  // Straight to onboarding if it isn't finished (no stop at /home first).
+  const next = safeNextPath(str(formData, "next"));
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarded_at")
+    .eq("id", data.user.id)
+    .maybeSingle();
+  redirect(onboardingRedirect(next, Boolean(profile?.onboarded_at)) ?? next);
 }
 
 export async function logInWithGoogle(formData: FormData): Promise<void> {

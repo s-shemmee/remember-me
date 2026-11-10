@@ -49,11 +49,10 @@ jobs:
       - run: supabase test db
 
   e2e:
-    # Off until M2: the first Playwright specs arrive then.
-    # To turn it on, delete the `if: false` line below.
-    if: false
+    # Playwright end to end (e2e/), against local Supabase with Mailpit.
     needs: [quality, database]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -62,8 +61,21 @@ jobs:
       - uses: supabase/setup-cli@v1
         with: { version: 3.0.0 }
       - run: pnpm install --frozen-lockfile
-      - run: supabase start
+      # Only what the tests use: Postgres, Auth (gotrue), the API (kong +
+      # postgrest) and Mailpit for the confirmation email.
+      - run: supabase start -x realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Point the app at local Supabase
+        run: |
+          supabase status -o env > /tmp/supabase.env
+          set -a; . /tmp/supabase.env; set +a
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY"
+            echo "MAILPIT_URL=$MAILPIT_URL"
+          } >> "$GITHUB_ENV"
+          rm /tmp/supabase.env
       - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
       - run: pnpm e2e
       - uses: actions/upload-artifact@v4
         if: failure()

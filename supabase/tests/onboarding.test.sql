@@ -2,13 +2,15 @@
 -- Users: A (Sara) onboards fully, B (Khalid) is the denied side, C (Omar)
 -- skips the first person, D (Nadia) hits every validation path.
 begin;
-select plan(43);
+select plan(49);
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-0000000000a1', 'sara@test.local',   '{"first_name": "Sara"}'),
   ('00000000-0000-0000-0000-0000000000b1', 'khalid@test.local', '{"first_name": "Khalid"}'),
   ('00000000-0000-0000-0000-0000000000c1', 'omar@test.local',   '{"first_name": "Omar"}'),
-  ('00000000-0000-0000-0000-0000000000d1', 'nadia@test.local',  '{"first_name": "Nadia"}');
+  ('00000000-0000-0000-0000-0000000000d1', 'nadia@test.local',  '{"first_name": "Nadia"}'),
+  ('00000000-0000-0000-0000-0000000000e1', 'long@test.local',
+   '{"given_name": "Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}');
 
 create function pg_temp.act_as(user_id uuid) returns void language sql as $$
   select set_config('role', 'authenticated', true),
@@ -16,6 +18,8 @@ create function pg_temp.act_as(user_id uuid) returns void language sql as $$
 $$;
 
 -- Structure -----------------------------------------------------------------
+select is((select char_length(first_name) from public.profiles where id = '00000000-0000-0000-0000-0000000000e1'),
+  40, 'sign-up cuts a 60-character Google name to 40 instead of failing');
 select has_table('public', 'people', 'people table exists');
 select has_table('public', 'occasions', 'occasions table exists');
 select has_table('public', 'reminder_settings', 'reminder_settings table exists');
@@ -30,7 +34,7 @@ select is(
   false, 'complete_onboarding runs as the caller (security invoker)'
 );
 select is(
-  has_function_privilege('anon', 'public.complete_onboarding(text, integer, integer, integer, public.avatar_kind, text, text, text, text, text, text, integer, integer, integer, text, integer[], boolean, text)', 'execute'),
+  has_function_privilege('anon', 'public.complete_onboarding(text, integer, integer, integer, public.avatar_kind, text, text, text, text, text, text, integer, integer, integer, text, integer[], boolean, boolean, text)', 'execute'),
   false, 'anonymous visitors cannot call complete_onboarding'
 );
 
@@ -58,8 +62,8 @@ select is(
   (select o.kind || ' ' || o.day || '/' || o.month from public.occasions o join public.people p on p.id = o.person_id),
   'birthday 14/3', 'A: first person''s birthday saved as an occasion');
 select is(
-  (select offsets_days::text || ' ' || email || ' ' || send_time::text from public.reminder_settings),
-  '{7,1,0} true 09:00:00', 'A: reminder defaults (7 days, 1 day, morning of, email on)');
+  (select offsets_days::text || ' ' || email || ' ' || push || ' ' || send_time::text from public.reminder_settings),
+  '{7,1,0} true false 09:00:00', 'A: reminder defaults (7 days, 1 day, morning of, email on, push off)');
 select throws_ok(
   $$ select public.complete_onboarding(p_first_name => 'Sara', p_birthday_day => 1, p_birthday_month => 1,
        p_person_name => 'Someone') $$,
@@ -68,7 +72,8 @@ select is((select count(*)::int from public.people), 1, 'A still has exactly one
 
 -- Remember A's person id for the B tests (B cannot read it under RLS).
 reset role;
-select set_config('test.khalid_id', (select id::text from public.people where name = 'Khalid'), true);
+select set_config('test.khalid_id', (select id::text from public.people
+  where owner_id = '00000000-0000-0000-0000-0000000000a1'), true);
 
 -- B: the denied side --------------------------------------------------------
 select pg_temp.act_as('00000000-0000-0000-0000-0000000000b1');
@@ -108,20 +113,38 @@ select throws_ok(
   $$ insert into public.occasions (day, month) values (30, 2) $$,
   '23514', null, 'the table itself refuses 30 February');
 
+-- B: Partner maps to the family group -----------------------------------------
+select pg_temp.act_as('00000000-0000-0000-0000-0000000000b1');
+select lives_ok($$
+  select public.complete_onboarding(p_first_name => 'Khalid', p_birthday_day => 5, p_birthday_month => 6,
+    p_person_name => 'Lina', p_person_relation => 'Partner', p_person_birthday_day => 8,
+    p_person_birthday_month => 8)
+$$, 'B completes onboarding with a partner');
+select is((select relation || ' ' || "group" || ' ' || color from public.people where name = 'Lina'),
+  'Partner family peach', 'relation chip text is saved; Partner is grouped as family and gets peach');
+
 -- C: skips the first person, picks other reminders ---------------------------
 select pg_temp.act_as('00000000-0000-0000-0000-0000000000c1');
 select is(
   (select public.complete_onboarding(p_first_name => 'Omar', p_birthday_day => 2, p_birthday_month => 9,
-     p_person_name => '  ', p_reminder_offsets => '{0,3,3}', p_reminder_email => false)),
+     p_person_name => '  ', p_reminder_offsets => '{0,14,3,3}', p_reminder_email => false,
+     p_reminder_push => true)),
   null::uuid, 'C completes onboarding without a first person (returns no person id)');
 select is((select count(*)::int from public.people), 0, 'skipped: no person was created');
 select is((select count(*)::int from public.occasions), 0, 'skipped: no occasion was created');
 select is((select onboarded_at is not null from public.profiles), true, 'skipped: C is still onboarded');
-select is((select offsets_days::text || ' ' || email from public.reminder_settings),
-  '{3,0} false', 'C: reminders saved largest first without repeats, email off');
+select is((select offsets_days::text || ' ' || email || ' ' || push from public.reminder_settings),
+  '{14,3,0} false true', 'C: 2 weeks before allowed, saved largest first without repeats; email off, push choice stored');
 
 -- D: validation, then success with a person born on 29 February --------------
 select pg_temp.act_as('00000000-0000-0000-0000-0000000000d1');
+select throws_ok(
+  $$ select public.complete_onboarding(p_first_name => repeat('n', 41), p_birthday_day => 1, p_birthday_month => 1) $$,
+  '22023', 'invalid_first_name', 'a 41-character first name is refused');
+select throws_ok(
+  $$ select public.complete_onboarding(p_first_name => 'Nadia', p_birthday_day => 1, p_birthday_month => 1,
+       p_person_name => repeat('y', 41), p_person_birthday_day => 5, p_person_birthday_month => 5) $$,
+  '22023', 'invalid_person', 'a 41-character person name is refused');
 select throws_ok(
   $$ select public.complete_onboarding(p_first_name => 'Nadia', p_birthday_day => 30, p_birthday_month => 2) $$,
   '22023', 'invalid_birthday', '30 February is refused for your own birthday');
@@ -141,7 +164,7 @@ select throws_ok(
 select throws_ok(
   $$ select public.complete_onboarding(p_first_name => 'Nadia', p_birthday_day => 1, p_birthday_month => 1,
        p_reminder_offsets => '{5}') $$,
-  '22023', 'invalid_reminders', 'reminder offsets outside 7/3/1/0 are refused');
+  '22023', 'invalid_reminders', 'reminder offsets outside 14/7/3/1/0 are refused');
 select throws_ok(
   $$ select public.complete_onboarding(p_first_name => 'Nadia', p_birthday_day => 1, p_birthday_month => 1,
        p_avatar_kind => 'photo', p_avatar_path => '00000000-0000-0000-0000-0000000000a1/me.jpg') $$,
@@ -159,9 +182,12 @@ select lives_ok(
        p_person_birthday_month => 2, p_person_birthday_year => 2004) $$,
   'a first person born on 29 February 2004 (a leap year) is accepted');
 select is(
-  (select p."group" || ' ' || o.day || '/' || o.month || '/' || o.year
+  (select p."group" || ' ' || p.color || ' ' || o.day || '/' || o.month || '/' || o.year
    from public.occasions o join public.people p on p.id = o.person_id),
-  'family 29/2/2004', 'D: person grouped as family, 29 February birthday saved');
+  'family sky 29/2/2004', 'D: Family gets sky by default, 29 February birthday saved');
+select throws_ok(
+  $$ insert into public.people (name) values (repeat('x', 41)) $$,
+  '23514', null, 'the table itself refuses a name over 40 characters');
 
 -- Anonymous ------------------------------------------------------------------
 reset role;

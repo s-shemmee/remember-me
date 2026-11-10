@@ -19,7 +19,7 @@ export const signUpSchema = z.object({
     .string()
     .trim()
     .min(1, { error: "What should we call you?" })
-    .max(50, { error: "Keep it under 50 characters." }),
+    .max(40, { error: "Keep it to 40 characters." }),
   email,
   password: newPassword,
 });

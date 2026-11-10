@@ -234,6 +234,7 @@ export type Database = {
           p_person_relation?: string;
           p_reminder_email?: boolean;
           p_reminder_offsets?: number[];
+          p_reminder_push?: boolean;
           p_timezone?: string;
         };
         Returns: string;

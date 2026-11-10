@@ -23,6 +23,7 @@ const cookieJar = new Map<string, string>();
 const cookieSet = vi.fn((name: string, value: string, _options?: Record<string, unknown>) =>
   cookieJar.set(name, value),
 );
+let profileOnboardedAt: string | null = "2026-11-07T10:00:00Z";
 let requestHeaders = new Headers({ origin: "http://localhost:3000" });
 
 vi.mock("next/navigation", () => ({
@@ -38,7 +39,17 @@ vi.mock("next/headers", () => ({
   }),
 }));
 vi.mock("@/lib/supabase/server", () => ({
-  createSupabaseServerClient: async () => ({ auth }),
+  createSupabaseServerClient: async () => ({
+    auth,
+    // profiles.onboarded_at lookup after log in
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({ data: { onboarded_at: profileOnboardedAt }, error: null }),
+        }),
+      }),
+    }),
+  }),
 }));
 
 const actions = await import("./actions");
@@ -141,10 +152,20 @@ describe("signUp", () => {
 
 // --- log in -------------------------------------------------------------------
 describe("logIn", () => {
+  it("sends people who haven't finished onboarding straight to /onboarding", async () => {
+    auth.signInWithPassword.mockResolvedValue({ data: { user: { id: "user-a" } }, error: null });
+    profileOnboardedAt = null;
+    const { redirect } = await run(
+      actions.logIn({}, form({ email: "sara@test.local", password: PASSWORD, next: "/people" })),
+    );
+    expect(redirect).toBe("/onboarding");
+    profileOnboardedAt = "2026-11-07T10:00:00Z";
+  });
+
   const valid = { email: "sara@test.local", password: PASSWORD };
 
   it("goes home, or to a same-site next page, after logging in", async () => {
-    auth.signInWithPassword.mockResolvedValue({ data: {}, error: null });
+    auth.signInWithPassword.mockResolvedValue({ data: { user: { id: "user-a" } }, error: null });
     expect((await run(actions.logIn({}, form(valid)))).redirect).toBe("/home");
     expect(
       (await run(actions.logIn({}, form({ ...valid, next: "/people/khalid" })))).redirect,
