@@ -103,7 +103,9 @@ export function PersonPanel({
                 <span className="text-15 font-bold [overflow-wrap:anywhere]">{d.title}</span>
                 <span className="text-13 text-sub">{d.date}</span>
               </span>
-              <span className={cn("shrink-0 text-13 font-bold", ink)}>{d.when}</span>
+              <span className={cn("shrink-0 text-13 font-bold", d.gentle ? "text-sub" : ink)}>
+                {d.when}
+              </span>
             </li>
           ))}
         </ul>

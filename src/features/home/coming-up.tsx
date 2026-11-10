@@ -8,6 +8,7 @@ import { FilterChip, pastelClasses } from "@/components/ui/chip";
 import { cn } from "@/lib/utils";
 
 import type { DayEvent } from "../days/days";
+import { occasionType } from "../occasions/types";
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -27,14 +28,7 @@ const EMPTY: Record<Filter, string> = {
 /** "Birthday, turns 30", "Anniversary, 32 years", "Graduation", or the day's title. */
 function what(e: DayEvent) {
   const s = e.source;
-  const kind =
-    s.kind === "birthday"
-      ? "Birthday"
-      : s.kind === "anniversary"
-        ? "Anniversary"
-        : s.kind === "graduation"
-          ? "Graduation"
-          : s.title?.trim() || "A special day";
+  const kind = s.title?.trim() || occasionType(s.kind).label;
   if (!e.detail) return kind;
   return s.kind === "birthday" ? `${kind}, ${e.detail.toLowerCase()}` : `${kind}, ${e.detail}`;
 }
@@ -84,7 +78,8 @@ export function ComingUp({ events }: { events: DayEvent[] }) {
                 <span
                   className={cn(
                     "shrink-0 rounded-pill px-3 py-1.5 text-center text-13 font-bold whitespace-nowrap sm:min-w-[86px]",
-                    pastelClasses[e.source.color],
+                    // Remembrance: a quiet pill, not the bright pastel.
+                    e.gentle ? "bg-card2 text-text" : pastelClasses[e.source.color],
                   )}
                 >
                   {e.when}

@@ -8,7 +8,9 @@ import {
 } from "@/lib/dates";
 import { type Pastel, pastels } from "@/styles/tokens";
 
-import { DAY_KINDS, isRelation, type Relation, RELATION_COLORS } from "./constants";
+import { type OccasionKind, occasionType, type OtherDayKind } from "@/features/occasions/types";
+
+import { isRelation, type Relation, RELATION_COLORS } from "./constants";
 import type { PersonFormValues } from "./schema";
 
 /**
@@ -19,11 +21,13 @@ import type { PersonFormValues } from "./schema";
 
 export type OccasionRow = {
   id: string;
-  kind: "birthday" | "anniversary" | "graduation" | "other";
+  kind: OccasionKind;
   title: string | null;
   day: number;
   month: number;
   year: number | null;
+  /** Every year, or once on day/month/year. */
+  recurring: boolean;
 };
 
 export type PersonRow = {
@@ -45,6 +49,8 @@ export type DayView = {
   label: string;
   /** Full title for the profile: "Birthday, turns 30", "Anniversary, 32 years". */
   title: string;
+  /** Remembrance: shown quietly (no confetti, excitement or gift actions). */
+  gentle: boolean;
   /** "Fri, 6 November". */
   date: string;
   /** "in 2 days", "today", "in 4 months". */
@@ -69,40 +75,29 @@ export type PersonView = {
 export const asPastel = (c: string | null | undefined): Pastel =>
   pastels.includes(c as Pastel) ? (c as Pastel) : "lilac";
 
-const EMOJI: Record<OccasionRow["kind"], string> = {
-  birthday: "🎂",
-  anniversary: DAY_KINDS[0].emoji,
-  graduation: DAY_KINDS[1].emoji,
-  other: DAY_KINDS[2].emoji,
-};
-
 export function dayView(o: OccasionRow, today: CalendarDate): DayView {
-  // A graduation with a year happens once; the rest repeat every year.
-  const oneOff = o.kind === "graduation" && o.year !== null;
+  const type = occasionType(o.kind);
+  // Once: on its date in its year. Yearly: the next time it comes round.
+  const oneOff = !o.recurring && o.year !== null;
   const on = oneOff ? { year: o.year!, month: o.month, day: o.day } : nextOccurrence(o, today);
   const years = oneOff ? null : yearsOn(o.year, on);
   const daysUntil = daysBetween(today, on);
   const passed = daysUntil < 0;
-  const label =
-    o.kind === "birthday"
-      ? "Birthday"
-      : o.kind === "anniversary"
-        ? "Anniversary"
-        : o.kind === "graduation"
-          ? "Graduation"
-          : o.title?.trim() || "A special day";
+  // On their own profile the name is implied: "Wedding", "Anniversary".
+  const label = o.title?.trim() || type.label;
   const title =
     o.kind === "birthday" && years
       ? `Birthday, turns ${years}`
-      : o.kind === "anniversary" && years
-        ? `Anniversary, ${years} ${years === 1 ? "year" : "years"}`
+      : type.countsYears && years
+        ? `${label}, ${years} ${years === 1 ? "year" : "years"}`
         : label;
   return {
     id: o.id,
     kind: o.kind,
-    emoji: EMOJI[o.kind],
+    emoji: type.emoji,
     label,
     title,
+    gentle: type.gentle,
     date: passed ? `${formatLongDate(on)} ${on.year}` : formatLongDate(on),
     when: passed ? "passed" : countdownLabel(daysUntil),
     // Passed one-off days sort last and are never "next".
@@ -143,7 +138,8 @@ export function personView(row: PersonRow, today: CalendarDate): PersonView {
         .filter((o) => o.kind !== "birthday")
         .map((o) => ({
           id: o.id,
-          kind: o.kind as "anniversary" | "graduation" | "other",
+          kind: o.kind as OtherDayKind,
+          recurring: o.recurring,
           title: o.title ?? "",
           day: o.day,
           month: o.month,

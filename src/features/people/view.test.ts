@@ -12,14 +12,19 @@ const row = (over: Partial<PersonRow> = {}): PersonRow => ({
   color: "butter",
   group: "friends",
   little_things: ["black coffee"],
-  occasions: [{ id: "o1", kind: "birthday", title: null, day: 6, month: 11, year: 1996 }],
+  occasions: [
+    { id: "o1", kind: "birthday", title: null, day: 6, month: 11, year: 1996, recurring: true },
+  ],
   ...over,
 });
 
 describe("dayView", () => {
   it("writes a birthday with the age they turn, as in the screens", () => {
     expect(
-      dayView({ id: "o", kind: "birthday", title: null, day: 6, month: 11, year: 1996 }, today),
+      dayView(
+        { id: "o", kind: "birthday", title: null, day: 6, month: 11, year: 1996, recurring: true },
+        today,
+      ),
     ).toMatchObject({
       emoji: "🎂",
       label: "Birthday",
@@ -32,43 +37,111 @@ describe("dayView", () => {
 
   it("counts anniversary years; without a year it's just the kind", () => {
     expect(
-      dayView({ id: "o", kind: "anniversary", title: null, day: 16, month: 11, year: 1994 }, today)
-        .title,
+      dayView(
+        {
+          id: "o",
+          kind: "anniversary",
+          title: null,
+          day: 16,
+          month: 11,
+          year: 1994,
+          recurring: true,
+        },
+        today,
+      ).title,
     ).toBe("Anniversary, 32 years");
     expect(
-      dayView({ id: "o", kind: "anniversary", title: null, day: 16, month: 11, year: 2025 }, today)
-        .title,
+      dayView(
+        {
+          id: "o",
+          kind: "anniversary",
+          title: null,
+          day: 16,
+          month: 11,
+          year: 2025,
+          recurring: true,
+        },
+        today,
+      ).title,
     ).toBe("Anniversary, 1 year");
     expect(
-      dayView({ id: "o", kind: "birthday", title: null, day: 6, month: 11, year: null }, today)
-        .title,
+      dayView(
+        { id: "o", kind: "birthday", title: null, day: 6, month: 11, year: null, recurring: true },
+        today,
+      ).title,
     ).toBe("Birthday");
   });
 
   it("uses the title for 'something else' and never counts a graduation", () => {
     const other = dayView(
-      { id: "o", kind: "other", title: " Name day ", day: 3, month: 5, year: 2000 },
+      {
+        id: "o",
+        kind: "other",
+        title: " Name day ",
+        day: 3,
+        month: 5,
+        year: 2000,
+        recurring: true,
+      },
       today,
     );
     expect(other).toMatchObject({ label: "Name day", title: "Name day", emoji: "✨" });
     expect(
-      dayView({ id: "o", kind: "graduation", title: null, day: 24, month: 11, year: 2027 }, today),
+      dayView(
+        {
+          id: "o",
+          kind: "graduation",
+          title: null,
+          day: 24,
+          month: 11,
+          year: 2027,
+          recurring: false,
+        },
+        today,
+      ),
     ).toMatchObject({ title: "Graduation", when: "in 13 months" }); // once, in 2027
     expect(
-      dayView({ id: "o", kind: "graduation", title: null, day: 24, month: 6, year: 2025 }, today),
+      dayView(
+        {
+          id: "o",
+          kind: "graduation",
+          title: null,
+          day: 24,
+          month: 6,
+          year: 2025,
+          recurring: false,
+        },
+        today,
+      ),
     ).toMatchObject({ when: "passed", date: "Tue, 24 June 2025" });
     expect(
-      dayView({ id: "o", kind: "graduation", title: null, day: 24, month: 11, year: null }, today),
+      dayView(
+        {
+          id: "o",
+          kind: "graduation",
+          title: null,
+          day: 24,
+          month: 11,
+          year: null,
+          recurring: true,
+        },
+        today,
+      ),
     ).toMatchObject({ when: "in 20 days" });
   });
 
   it("is 'today' on the day, and a 29 February birthday falls on the 28th", () => {
     expect(
-      dayView({ id: "o", kind: "birthday", title: null, day: 4, month: 11, year: null }, today)
-        .when,
+      dayView(
+        { id: "o", kind: "birthday", title: null, day: 4, month: 11, year: null, recurring: true },
+        today,
+      ).when,
     ).toBe("today");
     expect(
-      dayView({ id: "o", kind: "birthday", title: null, day: 29, month: 2, year: 2004 }, today),
+      dayView(
+        { id: "o", kind: "birthday", title: null, day: 29, month: 2, year: 2004, recurring: true },
+        today,
+      ),
     ).toMatchObject({ date: "Sun, 28 February", title: "Birthday, turns 23" });
   });
 });
@@ -85,8 +158,16 @@ describe("personView", () => {
     const p = personView(
       row({
         occasions: [
-          { id: "b", kind: "birthday", title: null, day: 9, month: 1, year: 1965 },
-          { id: "a", kind: "anniversary", title: null, day: 16, month: 11, year: 1993 },
+          { id: "b", kind: "birthday", title: null, day: 9, month: 1, year: 1965, recurring: true },
+          {
+            id: "a",
+            kind: "anniversary",
+            title: null,
+            day: 16,
+            month: 11,
+            year: 1993,
+            recurring: true,
+          },
         ],
       }),
       today,
@@ -101,7 +182,17 @@ describe("personView", () => {
       day: 9,
       month: 1,
       year: 1965,
-      days: [{ id: "a", kind: "anniversary", title: "", day: 16, month: 11, year: 1993 }],
+      days: [
+        {
+          id: "a",
+          kind: "anniversary",
+          title: "",
+          day: 16,
+          month: 11,
+          year: 1993,
+          recurring: true,
+        },
+      ],
     });
   });
 
@@ -119,19 +210,41 @@ describe("peopleView and filterPeople", () => {
         id: "far",
         name: "Sara",
         group: "friends",
-        occasions: [{ id: "1", kind: "birthday", title: null, day: 3, month: 3, year: null }],
+        occasions: [
+          { id: "1", kind: "birthday", title: null, day: 3, month: 3, year: null, recurring: true },
+        ],
       }),
       row({
         id: "soon",
         name: "Omar",
         group: "work",
-        occasions: [{ id: "2", kind: "birthday", title: null, day: 5, month: 11, year: null }],
+        occasions: [
+          {
+            id: "2",
+            kind: "birthday",
+            title: null,
+            day: 5,
+            month: 11,
+            year: null,
+            recurring: true,
+          },
+        ],
       }),
       row({
         id: "mom",
         name: "Mom & Dad",
         group: "family",
-        occasions: [{ id: "3", kind: "birthday", title: null, day: 20, month: 11, year: null }],
+        occasions: [
+          {
+            id: "3",
+            kind: "birthday",
+            title: null,
+            day: 20,
+            month: 11,
+            year: null,
+            recurring: true,
+          },
+        ],
       }),
     ],
     today,

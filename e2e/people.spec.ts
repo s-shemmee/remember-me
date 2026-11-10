@@ -42,6 +42,9 @@ test("add a person and see them in People", async ({ page }) => {
   const date = dialog.getByRole("group", { name: "Date" });
   await date.getByRole("combobox", { name: "Day" }).selectOption("24");
   await date.getByRole("combobox", { name: "Month" }).selectOption("6");
+  // A graduation happens once, so it needs its year.
+  await expect(dialog.getByRole("radio", { name: "Once" })).toBeChecked();
+  await date.getByLabel("Year (optional)").fill(String(new Date().getFullYear() + 1));
 
   const things = dialog.getByLabel("Little things they love (optional)");
   await things.fill("sunflowers");

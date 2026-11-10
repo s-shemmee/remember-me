@@ -30,7 +30,9 @@ export async function loadDays(supabase: Supabase): Promise<DaysData> {
       .maybeSingle(),
     supabase
       .from("people")
-      .select("id, name, color, little_things, occasions(id, kind, title, day, month, year)")
+      .select(
+        "id, name, color, little_things, occasions(id, kind, title, day, month, year, recurring)",
+      )
       .is("archived_at", null)
       .order("created_at"),
     supabase.from("reminder_settings").select("offsets_days").maybeSingle(),
@@ -49,6 +51,7 @@ export async function loadDays(supabase: Supabase): Promise<DaysData> {
         day: o.day,
         month: o.month,
         year: o.year,
+        recurring: o.recurring,
         color: asPastel(p.color),
         littleThings: p.little_things,
       });
@@ -67,6 +70,7 @@ export async function loadDays(supabase: Supabase): Promise<DaysData> {
       day: profile.birthday_day,
       month: profile.birthday_month,
       year: null,
+      recurring: true,
       color: asPastel(profile.avatar_color ?? "rose"),
       littleThings: [],
     });

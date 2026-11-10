@@ -19,7 +19,6 @@ import { cn } from "@/lib/utils";
 
 import { removePerson, savePerson } from "../actions";
 import {
-  DAY_KINDS,
   DAY_TITLE_MAX,
   DESCRIPTION_MAX,
   LITTLE_THING_MAX,
@@ -34,6 +33,14 @@ import {
   personFieldErrors,
   personFormSchema,
 } from "../schema";
+import { ChoiceGroup, ChoiceItem } from "@/components/ui/choice-group";
+import {
+  OCCASION_TYPES,
+  occasionType,
+  OTHER_DAY_KINDS,
+  type OtherDayKind,
+} from "@/features/occasions/types";
+
 import { ColorSwatches } from "./color-swatches";
 import { RelationChips } from "./relation-chips";
 
@@ -161,7 +168,15 @@ export function PersonDialog({
     update({
       days: [
         ...values.days,
-        { id: null, kind: "anniversary", title: "", day: null, month: null, year: null },
+        {
+          id: null,
+          kind: "anniversary",
+          title: "",
+          recurring: OCCASION_TYPES.anniversary.defaultRecurring,
+          day: null,
+          month: null,
+          year: null,
+        },
       ],
     });
     requestAnimationFrame(() =>
@@ -476,22 +491,32 @@ function OtherDayRow({
   onRemove: () => void;
 }) {
   const key = (f: string) => errors[`days.${index}.${f}`];
-  const kindLabel = DAY_KINDS.find((k) => k.key === value.kind)?.label ?? "Day";
+  const type = occasionType(value.kind);
+  const id = (f: string) => `pf-day-${index}-${f}`;
+  const titleRef = React.useRef<HTMLInputElement>(null);
+
   return (
     <div className="grid gap-3 rounded-[20px] bg-card2 p-4">
       <div className="flex items-end gap-2">
         <div className="grid min-w-0 flex-1 gap-1.5">
-          <label htmlFor={`pf-day-${index}-kind`} className="text-14 font-semibold">
+          <label htmlFor={id("kind")} className="text-14 font-semibold">
             Kind of day
           </label>
           <SelectField
-            id={`pf-day-${index}-kind`}
+            id={id("kind")}
             value={value.kind}
-            onChange={(e) => onChange({ kind: e.currentTarget.value as OtherDayValues["kind"] })}
+            onChange={(e) => {
+              const kind = e.currentTarget.value as OtherDayKind;
+              // A new type brings its own repeat default, unless the person chose one.
+              onChange({
+                kind,
+                ...(value.repeatChosen ? {} : { recurring: OCCASION_TYPES[kind].defaultRecurring }),
+              });
+            }}
           >
-            {DAY_KINDS.map((k) => (
-              <option key={k.key} value={k.key}>
-                {k.label}
+            {OTHER_DAY_KINDS.map((k) => (
+              <option key={k} value={k}>
+                {OCCASION_TYPES[k].label}
               </option>
             ))}
           </SelectField>
@@ -501,28 +526,92 @@ function OtherDayRow({
           variant="transparent"
           size="icon"
           onClick={onRemove}
-          aria-label={`Remove this ${kindLabel.toLocaleLowerCase()}`}
+          aria-label={`Remove this ${type.label.toLocaleLowerCase()}`}
           className="mb-1 shrink-0 text-sub hover:text-text"
         >
           <Trash2Icon aria-hidden />
         </Button>
       </div>
-      {value.kind === "other" && (
+
+      <div className="grid gap-2">
         <Field
-          id={`pf-day-${index}-title`}
-          label="What's the day called?"
-          placeholder="e.g. Name day"
+          ref={titleRef}
+          id={id("title")}
+          label={type.titleRequired ? "What's the day called?" : "Title (optional)"}
+          placeholder={type.placeholder}
           autoComplete="off"
           maxLength={DAY_TITLE_MAX}
           value={value.title}
           onChange={(e) => onChange({ title: e.currentTarget.value })}
           error={key("title")}
         />
-      )}
+        {type.chips.length > 0 && (
+          <div role="group" aria-label="Suggestions" className="flex flex-wrap gap-1.5">
+            {type.chips.map((chip) => (
+              <button
+                key={chip.title}
+                type="button"
+                aria-pressed={value.title.trim() === chip.title}
+                onClick={() => {
+                  // Fill the title (still editable) and, unless the person
+                  // chose a repeat, use the chip's.
+                  onChange({
+                    title: chip.title,
+                    ...(value.repeatChosen ? {} : { recurring: chip.recurring }),
+                  });
+                  requestAnimationFrame(() => titleRef.current?.focus());
+                }}
+                className={cn(
+                  "min-h-11 cursor-pointer rounded-pill px-3.5 text-14 font-semibold transition-colors duration-200 ease-soft",
+                  value.title.trim() === chip.title
+                    ? "bg-text text-bg"
+                    : "bg-card text-text hover:bg-line",
+                )}
+              >
+                {chip.title}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="grid gap-2">
+        <span id={id("repeat-label")} className="text-14 font-semibold">
+          Repeats
+        </span>
+        <ChoiceGroup
+          aria-labelledby={id("repeat-label")}
+          value={value.recurring ? "yearly" : "once"}
+          onValueChange={(v) => onChange({ recurring: v === "yearly", repeatChosen: true })}
+          className="w-fit gap-1 rounded-pill bg-card p-1"
+        >
+          {(
+            [
+              ["once", "Once"],
+              ["yearly", "Every year"],
+            ] as const
+          ).map(([v, label]) => (
+            <ChoiceItem
+              key={v}
+              value={v}
+              className="min-h-11 rounded-pill px-4 text-15 font-semibold text-text data-[state=checked]:bg-text data-[state=checked]:text-bg"
+            >
+              {label}
+            </ChoiceItem>
+          ))}
+        </ChoiceGroup>
+      </div>
+
       <DateFields
         idPrefix={`pf-day-${index}`}
         legend="Date"
-        hint={value.kind === "anniversary" ? "Add the year to see how many years." : undefined}
+        hint={
+          !value.recurring
+            ? "It happens once, so it needs the year."
+            : type.countsYears
+              ? "Add the year to count the years."
+              : undefined
+        }
         value={value}
         onChange={onChange}
         errors={{ day: key("day"), month: key("month"), year: key("year") }}

@@ -42,6 +42,7 @@ const src = (over: Partial<DaySource>): DaySource => ({
   day: 6,
   month: 11,
   year: 1996,
+  recurring: true,
   color: "butter",
   littleThings: [],
   ...over,
@@ -191,7 +192,7 @@ describe("Calendar", () => {
       .map((b) => b.textContent);
     expect(items).toEqual([
       "NOV6🎂 Khalid's birthdayFri, 6 November, in 2 days",
-      "NOV16💍 Mom & Dad's anniversaryMon, 16 November, in 12 days",
+      "NOV16💞 Mom & Dad's anniversaryMon, 16 November, in 12 days",
       "NOV22✨ Your daySun, 22 November, in 18 days",
       "DEC2🎂 Omar's birthdayWed, 2 December, in 28 days",
     ]);

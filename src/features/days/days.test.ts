@@ -16,6 +16,7 @@ import {
   monthEvents,
   monthGrid,
   moreThisMonth,
+  nextUp,
   nextUpLine,
   noorNudge,
   remindersLine,
@@ -35,6 +36,7 @@ const src = (over: Partial<DaySource> = {}): DaySource => ({
   day: 6,
   month: 11,
   year: 1996,
+  recurring: true,
   color: "butter",
   littleThings: [],
   ...over,
@@ -64,6 +66,7 @@ const yasmine = src({
   personId: "p3",
   name: "Yasmine",
   kind: "graduation",
+  recurring: false,
   day: 24,
   year: 2026,
   color: "mint",
@@ -156,7 +159,9 @@ describe("upcoming", () => {
   it("a graduation with a year happens once; other days repeat", () => {
     const later = { year: 2026, month: 12, day: 1 };
     expect(upcoming([yasmine], later)).toEqual([]);
-    expect(upcoming([src({ kind: "graduation", year: 2027, day: 24 })], today)[0]!.on).toEqual({
+    expect(
+      upcoming([src({ kind: "graduation", year: 2027, day: 24, recurring: false })], today)[0]!.on,
+    ).toEqual({
       year: 2027,
       month: 11,
       day: 24,
@@ -248,13 +253,13 @@ describe("Home copy", () => {
     });
 
     it("covers anniversaries, graduations and other days", () => {
-      expect(nudge([moms]).text).toBe("Mom & Dad celebrate 32 years in 12 days 💍");
+      expect(nudge([moms]).text).toBe("Mom & Dad celebrate 32 years in 12 days 💞");
       expect(nudge([src({ kind: "anniversary", year: null })]).text).toBe(
-        "Khalid's anniversary is in 2 days 💍",
+        "Khalid's anniversary is in 2 days 💞",
       );
       expect(nudge([yasmine]).text).toBe("Yasmine's graduation is in 20 days 🎓");
       expect(nudge([src({ kind: "other", title: "Name day" })]).text).toBe(
-        "Name day for Khalid is in 2 days ✨",
+        "Khalid · Name day is in 2 days ✨",
       );
     });
 
@@ -294,5 +299,107 @@ describe("Home copy", () => {
   it("lists your reminder days", () => {
     expect(remindersLine([0, 7, 1])).toBe("Noor reminds you 7 days, 1 day and the morning of.");
     expect(remindersLine([14])).toBe("Noor reminds you 2 weeks.");
+  });
+});
+
+describe("occasion types on Home and Calendar", () => {
+  const grandma = src({
+    id: "r1",
+    personId: "g",
+    name: "Grandma",
+    kind: "remembrance",
+    day: 7,
+    year: 2019,
+    littleThings: ["roses"],
+  });
+  const sara = src({
+    id: "r2",
+    personId: "s",
+    name: "Sara",
+    kind: "remembrance",
+    title: "In memory of Dad",
+    day: 7,
+  });
+  const newJob = src({
+    id: "w1",
+    name: "Khalid",
+    kind: "work_milestone",
+    title: "New job",
+    day: 20,
+    year: 2026,
+    recurring: false,
+  });
+  const workAnniv = src({
+    id: "w2",
+    name: "Khalid",
+    kind: "work_milestone",
+    title: "Work anniversary",
+    day: 21,
+    year: 2019,
+  });
+  const nudge = (sources: DaySource[]) => noorNudge(upcoming(sources, today), true, "Maya").text;
+
+  it("Remembrance, no title: gentle, no little thing", () => {
+    expect(nudge([grandma])).toBe("Grandma's day of remembrance is in 3 days 🕊️");
+    expect(nudge([src({ ...grandma, day: 4 })])).toBe("Grandma's day of remembrance is today 🕊️");
+  });
+
+  it("Remembrance with a title: 'In 3 days: Sara · In memory of Dad'", () => {
+    expect(nudge([sara])).toBe("In 3 days: Sara · In memory of Dad 🕊️ A kind word can mean a lot.");
+    expect(nudge([src({ ...sara, day: 5 })])).toBe(
+      "Tomorrow: Sara · In memory of Dad 🕊️ A kind word can mean a lot.",
+    );
+    expect(nudge([src({ ...sara, day: 4 })])).toBe(
+      "Today: Sara · In memory of Dad 🕊️ A kind word can mean a lot.",
+    );
+  });
+
+  it("Remembrance never celebrates: no 🎂, 🎉, confetti, 'celebrate', 'turns' or years", () => {
+    const events = upcoming([grandma, sara], today);
+    for (const e of events) {
+      expect(e.gentle).toBe(true);
+      expect(e.detail).toBeNull();
+      expect(e.emoji).toBe("🕊️");
+    }
+    for (const line of [nudge([grandma]), nudge([sara])]) {
+      expect(line).not.toMatch(/🎂|🎉|🥳|🎊|celebrat|turns|years|Little thing/i);
+    }
+  });
+
+  it("Remembrance doesn't count as a day to celebrate, and never takes Next up", () => {
+    expect(moreThisMonth([grandma, sara, khalid], today)).toBe(1);
+    const events = upcoming([grandma, khalid], today);
+    expect(events[0]!.source.name).toBe("Khalid"); // 2 days vs 3
+    expect(nextUp(upcoming([grandma, src({ ...khalid, day: 30 })], today))?.source.name).toBe(
+      "Khalid",
+    );
+    expect(nextUp(upcoming([grandma], today))).toBeNull();
+  });
+
+  it("other types use their title, or the type name, with their emoji", () => {
+    expect(upcoming([newJob], today)[0]).toMatchObject({
+      title: "Khalid · New job",
+      emoji: "💼",
+      detail: null,
+    });
+    expect(upcoming([workAnniv], today)[0]).toMatchObject({
+      title: "Khalid · Work anniversary",
+      detail: "7 years",
+    });
+    expect(upcoming([src({ kind: "anniversary", year: null })], today)[0]!.title).toBe(
+      "Khalid's anniversary",
+    );
+    expect(nudge([newJob])).toBe("Khalid · New job is in 16 days 💼");
+    expect(nudge([src({ kind: "anniversary", title: "Wedding", year: null })])).toBe(
+      "Khalid · Wedding is in 2 days 💞",
+    );
+    expect(nextUpLine(upcoming([newJob], today)[0]!)).toBe("new job in 16 days");
+  });
+
+  it("a day set to once happens only in its year; yearly days every year", () => {
+    expect(monthEvents([newJob], 2026, 11, today).get(20)?.[0]?.title).toBe("Khalid · New job");
+    expect(monthEvents([newJob], 2027, 11, today).size).toBe(0);
+    expect(monthEvents([workAnniv], 2030, 11, today).get(21)?.[0]?.detail).toBe("11 years");
+    expect(upcoming([newJob], { year: 2026, month: 11, day: 21 })).toEqual([]);
   });
 });

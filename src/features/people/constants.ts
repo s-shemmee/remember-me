@@ -40,13 +40,5 @@ export const FILTERS = [
 ] as const;
 export type FilterKey = (typeof FILTERS)[number]["key"];
 
-/** Other days a person can have. "other" needs a title. */
-export const DAY_KINDS = [
-  { key: "anniversary", label: "Anniversary", emoji: "💍" },
-  { key: "graduation", label: "Graduation", emoji: "🎓" },
-  { key: "other", label: "Something else", emoji: "✨" },
-] as const;
-export type OtherDayKind = (typeof DAY_KINDS)[number]["key"];
-
 export const isRelation = (value: string | null | undefined): value is Relation =>
   RELATIONS.includes(value as Relation);

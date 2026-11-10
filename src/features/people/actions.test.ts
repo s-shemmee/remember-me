@@ -62,8 +62,16 @@ const form = {
   year: null,
   littleThings: ["roses"],
   days: [
-    { id: DAY_ID, kind: "anniversary", title: "ignored", day: 16, month: 11, year: 1993 },
-    { id: null, kind: "other", title: "Name day", day: 3, month: 5, year: null },
+    {
+      id: DAY_ID,
+      kind: "anniversary",
+      title: "Wedding",
+      day: 16,
+      month: 11,
+      year: 1993,
+      recurring: true,
+    },
+    { id: null, kind: "other", title: "Name day", day: 3, month: 5, year: null, recurring: true },
   ],
 };
 
@@ -84,7 +92,7 @@ beforeEach(() => {
 });
 
 describe("savePerson", () => {
-  it("calls save_person once with trimmed values; only 'other' days keep a title", async () => {
+  it("calls save_person once with trimmed values; titles are kept for every type", async () => {
     rpc.mockResolvedValue({ data: ID, error: null });
     const { result } = await run(() => savePerson(form));
     expect(result).toEqual({ ok: true, id: ID, name: "Mom" });
@@ -99,8 +107,24 @@ describe("savePerson", () => {
       p_birthday_year: undefined,
       p_little_things: ["roses"],
       p_days: [
-        { id: DAY_ID, kind: "anniversary", title: null, day: 16, month: 11, year: 1993 },
-        { id: null, kind: "other", title: "Name day", day: 3, month: 5, year: null },
+        {
+          id: DAY_ID,
+          kind: "anniversary",
+          title: "Wedding",
+          day: 16,
+          month: 11,
+          year: 1993,
+          recurring: true,
+        },
+        {
+          id: null,
+          kind: "other",
+          title: "Name day",
+          day: 3,
+          month: 5,
+          year: null,
+          recurring: true,
+        },
       ],
     });
   });

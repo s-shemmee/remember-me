@@ -54,7 +54,8 @@ export async function savePerson(input: unknown): Promise<SavePersonResult> {
     p_days: p.days.map((d) => ({
       id: d.id,
       kind: d.kind,
-      title: d.kind === "other" ? d.title : null,
+      title: d.title || null,
+      recurring: d.recurring,
       day: d.day,
       month: d.month,
       year: d.year,

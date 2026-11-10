@@ -262,7 +262,8 @@ export type Database = {
     };
     Enums: {
       avatar_kind: "initials" | "photo" | "character";
-      occasion_kind: "birthday" | "anniversary" | "graduation" | "other";
+      occasion_kind:
+        "birthday" | "anniversary" | "graduation" | "work_milestone" | "remembrance" | "other";
       person_group: "family" | "friends" | "work" | "other";
     };
     CompositeTypes: {
@@ -376,7 +377,14 @@ export const Constants = {
   public: {
     Enums: {
       avatar_kind: ["initials", "photo", "character"],
-      occasion_kind: ["birthday", "anniversary", "graduation", "other"],
+      occasion_kind: [
+        "birthday",
+        "anniversary",
+        "graduation",
+        "work_milestone",
+        "remembrance",
+        "other",
+      ],
       person_group: ["family", "friends", "work", "other"],
     },
   },

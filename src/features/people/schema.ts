@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { birthdayRules, dayField, monthField, optionalYear } from "@/features/onboarding/schema";
 import { isLeapYear, isRealDayMonth } from "@/lib/dates";
+import { occasionType, OTHER_DAY_KINDS, type OtherDayKind } from "@/features/occasions/types";
 import { pastels } from "@/styles/tokens";
 
 import {
@@ -24,7 +25,11 @@ const otherDaySchema = z
   .object({
     /** Set when editing an existing day, so its id stays the same. */
     id: z.uuid().nullable(),
-    kind: z.enum(["anniversary", "graduation", "other"]),
+    kind: z.enum(OTHER_DAY_KINDS as [OtherDayKind, ...OtherDayKind[]]),
+    /** Every year (true) or once, on day/month/year (false). */
+    recurring: z.boolean(),
+    /** The person changed the repeat themselves: chips no longer change it. */
+    repeatChosen: z.boolean().optional(),
     title: z
       .string()
       .trim()
@@ -39,8 +44,15 @@ const otherDaySchema = z
       .nullable(),
   })
   .superRefine((v, ctx) => {
-    if (v.kind === "other" && !v.title) {
+    if (occasionType(v.kind).titleRequired && !v.title) {
       ctx.addIssue({ code: "custom", path: ["title"], message: "What's the day called?" });
+    }
+    if (!v.recurring && v.year === null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["year"],
+        message: "Add the year, so I know when it happens.",
+      });
     }
     if (v.day === null || v.month === null) {
       ctx.addIssue({

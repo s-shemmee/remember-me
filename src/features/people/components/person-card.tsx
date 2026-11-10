@@ -45,7 +45,7 @@ export function PersonCard({
           <span
             className={cn(
               "max-w-full truncate rounded-pill px-3 py-1.5 text-13 font-bold",
-              pastelClasses[person.color],
+              person.next.gentle ? "bg-card2 text-text" : pastelClasses[person.color],
             )}
           >
             {person.next.label} · {person.next.when}

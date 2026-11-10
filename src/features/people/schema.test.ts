@@ -13,7 +13,9 @@ const valid: PersonFormValues = {
   month: 11,
   year: 1996,
   littleThings: ["black coffee"],
-  days: [{ id: null, kind: "anniversary", title: "", day: 16, month: 11, year: 1993 }],
+  days: [
+    { id: null, kind: "anniversary", title: "", day: 16, month: 11, year: 1993, recurring: true },
+  ],
 };
 
 const errorsOf = (input: unknown) => {
@@ -69,7 +71,15 @@ describe("personFormSchema", () => {
   });
 
   it("checks other days, keyed by their row", () => {
-    const other = { id: null, kind: "other", title: " ", day: 1, month: 5, year: null };
+    const other = {
+      id: null,
+      kind: "other",
+      title: " ",
+      day: 1,
+      month: 5,
+      year: null,
+      recurring: true,
+    };
     expect(errorsOf({ ...valid, days: [valid.days[0], other] })).toEqual({
       "days.1.title": "What's the day called?",
     });

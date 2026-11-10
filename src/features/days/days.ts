@@ -13,17 +13,19 @@ import {
 } from "@/lib/dates";
 import type { Pastel } from "@/styles/tokens";
 
+import { type OccasionKind, occasionTitle, occasionType } from "../occasions/types";
+
 /**
  * Every day worth remembering, from your people and your own birthday, and
  * what Home and Calendar say about them. Pure functions on plain calendar
  * dates ("today" comes from the user's timezone), so they're unit-tested.
  *
- * Birthdays, anniversaries and other days repeat every year (29 February
- * falls on the 28th in non-leap years). A graduation with a year happens
- * once, on that date.
+ * A day repeats every year (29 February falls on the 28th in non-leap
+ * years) or happens once, on its date and year (`recurring`). Types, emojis
+ * and the gentle Remembrance wording come from features/occasions/types.
  */
 
-export type DayKind = "birthday" | "anniversary" | "graduation" | "other";
+export type DayKind = OccasionKind;
 
 /** One remembered day: an occasion of one of your people, or your own birthday. */
 export type DaySource = {
@@ -39,6 +41,8 @@ export type DaySource = {
   day: number;
   month: number;
   year: number | null;
+  /** Every year, or once on day/month/year. */
+  recurring: boolean;
   color: Pastel;
   littleThings: string[];
 };
@@ -50,12 +54,14 @@ export type DayEvent = {
   on: CalendarDate;
   daysUntil: number;
   emoji: string;
-  /** "Khalid's birthday", "Mom & Dad's anniversary", "Your day". */
+  /** "Khalid's birthday", "Khalid · New job", "Grandma's day of remembrance", "Your day". */
   title: string;
   /** For name tags: "Khalid", "You". */
   short: string;
-  /** "Turns 30", "32 years", "Graduation"… null when there's nothing to add. */
+  /** "Turns 30", "32 years"… null when there's nothing to add. */
   detail: string | null;
+  /** Remembrance: no confetti, "celebrate", excitement or gift actions. */
+  gentle: boolean;
   /** "today", "tomorrow", "in 12 days". */
   when: string;
   /** "Fri, 6 November". */
@@ -64,21 +70,13 @@ export type DayEvent = {
   shortDate: string;
 };
 
-const EMOJI: Record<DayKind, string> = {
-  birthday: "🎂",
-  anniversary: "💍",
-  graduation: "🎓",
-  other: "✨",
-};
-
 const possessive = (name: string) => `${name}'s`;
 
-const isOneOff = (s: Pick<DaySource, "kind" | "year">) =>
-  s.kind === "graduation" && s.year !== null;
+const isOneOff = (s: Pick<DaySource, "recurring" | "year">) => !s.recurring && s.year !== null;
 
 /**
- * When this day next happens, on or after `today`. A one-off graduation
- * that has passed returns null.
+ * When this day next happens, on or after `today`. A one-off day that has
+ * passed returns null.
  */
 export function nextDate(s: DaySource, today: CalendarDate): CalendarDate | null {
   if (isOneOff(s)) {
@@ -96,22 +94,13 @@ export function dateInMonth(s: DaySource, year: number, month: number): Calendar
 }
 
 export function eventOn(s: DaySource, on: CalendarDate, today: CalendarDate): DayEvent {
+  const type = occasionType(s.kind);
   const years = isOneOff(s) ? null : yearsOn(s.year, on);
   const daysUntil = daysBetween(today, on);
-  const label = s.kind === "other" ? s.title?.trim() || "A special day" : null;
-  const title = s.isYou
-    ? "Your day"
-    : s.kind === "birthday"
-      ? `${possessive(s.name)} birthday`
-      : s.kind === "anniversary"
-        ? `${possessive(s.name)} anniversary`
-        : s.kind === "graduation"
-          ? `${possessive(s.name)} graduation`
-          : `${label} (${s.name})`;
   const detail =
     s.kind === "birthday" && years
       ? `Turns ${years}`
-      : s.kind === "anniversary" && years
+      : type.countsYears && years
         ? `${years} ${years === 1 ? "year" : "years"}`
         : null;
   return {
@@ -119,10 +108,11 @@ export function eventOn(s: DaySource, on: CalendarDate, today: CalendarDate): Da
     source: s,
     on,
     daysUntil,
-    emoji: s.isYou ? "✨" : EMOJI[s.kind],
-    title,
+    emoji: s.isYou ? "✨" : type.emoji,
+    title: s.isYou ? "Your day" : occasionTitle(s.name, s.kind, s.title),
     short: s.isYou ? "You" : s.name,
     detail,
+    gentle: type.gentle,
     when: countdownLabel(daysUntil),
     date: formatLongDate(on),
     shortDate: formatShortDate(on),
@@ -225,47 +215,55 @@ export function noorNudge(
     };
   }
   const when = next.when;
-  const years = next.detail?.startsWith("Turns ") ? next.detail.slice(6) : null;
+  const type = occasionType(s.kind);
+  const title = s.title?.trim();
+
+  // Remembrance: quiet, no little thing (it reads like a gift idea).
+  if (type.gentle) {
+    const text = title
+      ? `${when.charAt(0).toUpperCase()}${when.slice(1)}: ${s.name} · ${title} ${type.emoji} A kind word can mean a lot.`
+      : `${possessive(s.name)} ${type.noun} is ${when} ${type.emoji}`;
+    return { text, personId: s.personId, name: s.name, isYou: false };
+  }
+
   let text: string;
   if (s.kind === "birthday") {
-    text = years
-      ? `${s.name} turns ${years} ${when} 🎂`
-      : `It's ${possessive(s.name)} birthday ${when} 🎂`;
-  } else if (s.kind === "anniversary") {
+    // "turns N" only when the birth year is known.
     text = next.detail
-      ? `${s.name} celebrate ${next.detail} ${when} 💍`
-      : `${possessive(s.name)} anniversary is ${when} 💍`;
-  } else if (s.kind === "graduation") {
-    text = `${possessive(s.name)} graduation is ${when} 🎓`;
+      ? `${s.name} ${next.detail.toLowerCase()} ${when} ${type.emoji}`
+      : `It's ${possessive(s.name)} birthday ${when} ${type.emoji}`;
+  } else if (s.kind === "anniversary" && next.detail) {
+    text = `${s.name} celebrate ${next.detail} ${when} ${type.emoji}`;
   } else {
-    text = `${s.title?.trim() || "A special day"} for ${s.name} is ${when} ✨`;
+    text = `${occasionTitle(s.name, s.kind, title)} is ${when} ${type.emoji}`;
   }
   const thing = s.littleThings[0]?.trim();
   if (thing) text += ` Little thing: ${thing}`;
   return { text, personId: s.personId, name: s.name, isYou: false };
 }
 
-/** "turns 30 in 2 days", "birthday in 2 days", "anniversary today"… for the Next up card. */
+/** "turns 30 in 2 days", "birthday in 2 days", "new job today"… for the Next up card. */
 export function nextUpLine(e: DayEvent): string {
   const s = e.source;
   const what =
-    s.kind === "birthday"
-      ? e.detail
-        ? `turns ${e.detail.slice(6)}`
-        : "birthday"
-      : s.kind === "anniversary"
-        ? "anniversary"
-        : s.kind === "graduation"
-          ? "graduation"
-          : s.title?.trim() || "a special day";
+    s.kind === "birthday" && e.detail
+      ? e.detail.toLowerCase()
+      : s.title?.trim().toLowerCase() || occasionType(s.kind).noun;
   return `${what} ${e.when}`;
 }
 
-/** Days still to come this month (today included), your own day too. */
+/** The Next up card: the first day that isn't yours or a day of remembrance. */
+export const nextUp = (events: DayEvent[]) =>
+  events.find((e) => !e.source.isYou && !e.gentle) ?? null;
+
+/**
+ * Days still to celebrate this month (today included), your own day too.
+ * Days of remembrance aren't counted: they're not for celebrating.
+ */
 export function moreThisMonth(sources: DaySource[], today: CalendarDate): number {
   let n = 0;
   for (const list of monthEvents(sources, today.year, today.month, today).values()) {
-    for (const e of list) if (e.daysUntil >= 0) n++;
+    for (const e of list) if (e.daysUntil >= 0 && !e.gentle) n++;
   }
   return n;
 }

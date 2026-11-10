@@ -6,7 +6,19 @@ import { expect, type Page } from "@playwright/test";
 const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
 export const PASSWORD = "test_password_00000000";
 
+/**
+ * Runs axe once the page has settled. Mid-animation, elements that fade in
+ * (toasts, dialogs) have blended colours and fail color-contrast at random;
+ * so wait for every finite animation and transition to finish first (Noor's
+ * endless bob is ignored: it never finishes and changes no colours).
+ */
 export async function expectAccessible(page: Page, label: string) {
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+      .every((a) => a.playState !== "running"),
+  );
   const { violations } = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();

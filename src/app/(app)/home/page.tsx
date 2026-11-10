@@ -14,6 +14,7 @@ import {
   greeting,
   monthName,
   moreThisMonth,
+  nextUp,
   nextUpLine,
   noorNudge,
   upcoming,
@@ -74,7 +75,8 @@ async function Dashboard() {
   const peopleEvents = events.filter((e) => !e.source.isYou);
   const you = sources.find((s) => s.isYou) ?? null;
   const yourDay = events.find((e) => e.source.isYou) ?? null;
-  const next = peopleEvents[0] ?? null;
+  // Next up is celebratory, so days of remembrance never take it.
+  const next = nextUp(peopleEvents);
   const more = moreThisMonth(sources, today);
   const nudge = noorNudge(events, peopleCount > 0, firstName);
   const greet = greeting(data.hour);

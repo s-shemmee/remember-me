@@ -32,7 +32,7 @@ select lives_ok($$
     p_name => ' Mom ', p_relation_kind => 'Family', p_relation => ' Mom & Dad ',
     p_birthday_day => 9, p_birthday_month => 1, p_birthday_year => 1965,
     p_little_things => array[' roses ', '', '  ', 'mint tea'],
-    p_days => '[{"kind": "anniversary", "title": "ignored", "day": 16, "month": 11, "year": 1993}]')
+    p_days => '[{"kind": "anniversary", "title": " Wedding ", "day": 16, "month": 11, "year": 1993}]')
 $$, 'A adds a person with a birthday, an anniversary and little things');
 
 select is(
@@ -43,8 +43,8 @@ select is(
 select is(
   (select string_agg(kind || ':' || coalesce(title, '-') || ':' || day || '/' || month || '/' || year, ' ' order by kind)
    from public.occasions where person_id = (select id from ids where key = 'mom')),
-  'birthday:-:9/1/1965 anniversary:-:16/11/1993',
-  'the birthday and the anniversary are saved (only "other" days keep a title)');
+  'birthday:-:9/1/1965 anniversary:Wedding:16/11/1993',
+  'the birthday and the anniversary are saved; titles are kept (trimmed) for every type');
 select is(
   (select owner_id from public.people where id = (select id from ids where key = 'mom')),
   '00000000-0000-0000-0000-00000000aa01'::uuid, 'the person belongs to A');
@@ -58,7 +58,7 @@ select lives_ok(format($$
     p_id => %L, p_name => 'Mom', p_relation_kind => 'Family', p_color => 'butter',
     p_birthday_day => 10, p_birthday_month => 1,
     p_days => '[{"id": "%s", "kind": "anniversary", "day": 17, "month": 11},
-                {"kind": "other", "title": " Name day ", "day": 3, "month": 5}]')
+                {"kind": "other", "title": " Name day ", "day": 3, "month": 5, "recurring": true}]')
 $$, (select id from ids where key = 'mom'), (select id from ids where key = 'anniversary')),
   'A edits the person: new colour, birthday, the anniversary moved, a new day');
 
@@ -133,7 +133,7 @@ select throws_ok($$ select public.save_person(p_name => 'Ali', p_relation_kind =
   p_days => (select jsonb_agg(jsonb_build_object('kind', 'anniversary', 'day', 1, 'month', 1)) from generate_series(1, 11))) $$,
   '22023', 'invalid_days', 'more than 10 other days are refused');
 select throws_ok(format($$ select public.save_person(p_id => %L, p_name => 'Mom', p_relation_kind => 'Family',
-  p_birthday_day => 10, p_birthday_month => 1, p_days => '[{"id": "%s", "kind": "graduation", "day": 1, "month": 6}]') $$,
+  p_birthday_day => 10, p_birthday_month => 1, p_days => '[{"id": "%s", "kind": "graduation", "day": 1, "month": 6, "recurring": true}]') $$,
   (select id from ids where key = 'mom'), (select id from ids where key = 'graduation')),
   '22023', 'invalid_days', 'a day id from another person cannot be taken over');
 select is((select count(*)::int from public.people where name = 'Ali'), 0,

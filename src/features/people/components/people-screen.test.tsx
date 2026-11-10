@@ -56,7 +56,9 @@ const rows: PersonRow[] = [
     color: "butter",
     group: "friends",
     little_things: ["black coffee", "sci-fi"],
-    occasions: [{ id: "k1", kind: "birthday", title: null, day: 6, month: 11, year: 1996 }],
+    occasions: [
+      { id: "k1", kind: "birthday", title: null, day: 6, month: 11, year: 1996, recurring: true },
+    ],
   },
   {
     id: MD,
@@ -67,8 +69,16 @@ const rows: PersonRow[] = [
     group: "family",
     little_things: [],
     occasions: [
-      { id: "m1", kind: "birthday", title: null, day: 9, month: 1, year: null },
-      { id: "m2", kind: "anniversary", title: null, day: 16, month: 11, year: 1994 },
+      { id: "m1", kind: "birthday", title: null, day: 9, month: 1, year: null, recurring: true },
+      {
+        id: "m2",
+        kind: "anniversary",
+        title: null,
+        day: 16,
+        month: 11,
+        year: 1994,
+        recurring: true,
+      },
     ],
   },
   {
@@ -79,7 +89,9 @@ const rows: PersonRow[] = [
     color: "peach",
     group: "work",
     little_things: ["pizza Fridays"],
-    occasions: [{ id: "o1", kind: "birthday", title: null, day: 2, month: 12, year: null }],
+    occasions: [
+      { id: "o1", kind: "birthday", title: null, day: 2, month: 12, year: null, recurring: true },
+    ],
   },
 ];
 const people = peopleView(rows, today);
@@ -226,6 +238,9 @@ describe("Add and edit dialog", () => {
     );
     await userEvent.selectOptions(within(dialog).getByLabelText("Kind of day"), "other");
     await userEvent.type(within(dialog).getByLabelText("What's the day called?"), "Name day");
+    // Something else happens once by default; a name day repeats.
+    expect(within(dialog).getByRole("radio", { name: "Once" })).toBeChecked();
+    await userEvent.click(within(dialog).getByRole("radio", { name: "Every year" }));
     const date = within(dialog).getByRole("group", { name: "Date" });
     await userEvent.selectOptions(within(date).getByRole("combobox", { name: "Day" }), "3");
     await userEvent.selectOptions(within(date).getByRole("combobox", { name: "Month" }), "5");
@@ -247,13 +262,97 @@ describe("Add and edit dialog", () => {
       day: 14,
       month: 4,
       littleThings: ["sunflowers", "watercolours", "her cat Mimi"],
-      days: [{ id: null, kind: "other", title: "Name day", day: 3, month: 5, year: null }],
+      days: [
+        {
+          id: null,
+          kind: "other",
+          title: "Name day",
+          day: 3,
+          month: 5,
+          year: null,
+          recurring: true,
+          repeatChosen: true,
+        },
+      ],
     });
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(toast.success).toHaveBeenCalledWith("Yasmine added");
     expect(refresh).toHaveBeenCalled();
     expect(window.location.search).toBe(`?person=${OM}`);
   }, 15_000); // types a lot; slow when the whole suite runs in parallel
+
+  it("type chips fill the title and set the repeat; a repeat you chose stays", async () => {
+    render(<PeopleScreen people={people} />);
+    await userEvent.click(screen.getByRole("button", { name: "Add someone" }));
+    const dialog = screen.getByRole("dialog");
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: /Add an anniversary or another day/ }),
+    );
+    const kind = within(dialog).getByLabelText("Kind of day");
+    expect(
+      within(kind)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["Anniversary", "Graduation", "Work milestone", "Remembrance", "Something else"]);
+
+    await userEvent.selectOptions(kind, "work_milestone");
+    expect(within(dialog).getByRole("radio", { name: "Every year" })).toBeChecked();
+    const suggestions = within(dialog).getByRole("group", { name: "Suggestions" });
+    const title = within(dialog).getByLabelText("Title (optional)");
+    expect(title).toHaveAttribute("placeholder", "e.g. New job");
+
+    await userEvent.click(within(suggestions).getByRole("button", { name: "New job" }));
+    expect(title).toHaveValue("New job");
+    expect(within(suggestions).getByRole("button", { name: "New job" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await waitFor(() => expect(title).toHaveFocus());
+    expect(within(dialog).getByRole("radio", { name: "Once" })).toBeChecked();
+    expect(within(dialog).getByText("It happens once, so it needs the year.")).toBeInTheDocument();
+    await userEvent.type(title, " in Rabat");
+    expect(title).toHaveValue("New job in Rabat"); // still editable
+
+    // Chosen by hand: chips and type changes no longer touch the repeat.
+    await userEvent.click(within(dialog).getByRole("radio", { name: "Every year" }));
+    await userEvent.click(within(suggestions).getByRole("button", { name: "Promotion" }));
+    expect(title).toHaveValue("Promotion");
+    expect(within(dialog).getByRole("radio", { name: "Every year" })).toBeChecked();
+
+    await userEvent.selectOptions(kind, "remembrance");
+    expect(within(dialog).queryByRole("group", { name: "Suggestions" })).not.toBeInTheDocument();
+    expect(within(dialog).getByLabelText("Title (optional)")).toHaveAttribute(
+      "placeholder",
+      "In memory of…",
+    );
+  });
+
+  it("a day that happens once needs its year; Something else needs a title", async () => {
+    render(<PeopleScreen people={people} />);
+    await userEvent.click(screen.getByRole("button", { name: "Add someone" }));
+    const dialog = screen.getByRole("dialog");
+    await userEvent.type(within(dialog).getByLabelText("Their name"), "Lina");
+    const bday = within(dialog).getByRole("group", { name: "Their birthday" });
+    await userEvent.selectOptions(within(bday).getByRole("combobox", { name: "Day" }), "1");
+    await userEvent.selectOptions(within(bday).getByRole("combobox", { name: "Month" }), "2");
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: /Add an anniversary or another day/ }),
+    );
+    await userEvent.selectOptions(within(dialog).getByLabelText("Kind of day"), "other");
+    expect(within(dialog).getByRole("radio", { name: "Once" })).toBeChecked();
+    const date = within(dialog).getByRole("group", { name: "Date" });
+    await userEvent.selectOptions(within(date).getByRole("combobox", { name: "Day" }), "3");
+    await userEvent.selectOptions(within(date).getByRole("combobox", { name: "Month" }), "5");
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Add Lina" }));
+    expect(within(dialog).getByLabelText("What's the day called?")).toHaveAccessibleDescription(
+      /What's the day called\?/,
+    );
+    expect(within(date).getByLabelText("Year (optional)")).toHaveAccessibleDescription(
+      /Add the year, so I know when it happens\./,
+    );
+    expect(savePerson).not.toHaveBeenCalled();
+  });
 
   it("shows the database's message on the field it's about", async () => {
     savePerson.mockResolvedValue({
