@@ -81,6 +81,9 @@ All live in `src/components/ui/`. Button, Switch, Dialog, Dropdown Menu, Tabs an
 - **Sidebar (desktop app):** 248px, logo, 5 nav items, "Your day" lilac card, Settings, account chip that opens the account menu (profile, settings, help, log out).
 - **Mobile app shell (below 1024px):** a top bar with the logo and your avatar (opens the same account menu, where Settings lives), and a bottom tab bar with the five sections: glass background, 24px icon over a 12px label, at least 60px tall, the current one in `accentText`, room for the home indicator (`safe-area-inset-bottom`).
 - **Person card (People grid):** card with the avatar in their pastel, name, relation (their description when set, else the chip) and a countdown pill for their next day ("Birthday · in 2 days"). Three columns when there's room; in a narrow list (phones) it becomes a compact row with the avatar on the left. The open person gets a 2.5px accent ring.
+- **Stat card (Home):** person-pastel fill with its ink, radius 24, at least 128px tall: a small caps label with an emoji, a 30px value, one line under it. 2 columns on phones, 4 from 1280px.
+- **Mini month (Home):** a table, Monday first, 34px day circles; days with something get bold text and up to three 5px dots in each person's ink; today is filled accent. Legend: ● today, ● your day.
+- **Calendar grid:** 92px cells (56px on phones), radius 16, name tags (`🎂 Khalid`, person pastel, radius 8, 12px) on wider screens and dots on phones; days with something get `card2`; today's number is filled accent; the selected day has a 2px accent ring; past days have a `sub` number and no background (no opacity: it would break contrast).
 - **Profile panel (People):** next to the grid from 1280px; below that it replaces the grid with "← All people". Sections: Days to remember (emoji, title, date, countdown in their ink), Little things (pills in their pastel), Their wishlist.
 
 ## Motion

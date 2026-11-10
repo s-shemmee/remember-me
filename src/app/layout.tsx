@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Kalam, Plus_Jakarta_Sans } from "next/font/google";
+import { SkipLink } from "@/components/ui/skip-link";
 import { Toaster } from "@/components/ui/sonner";
 import { themeScript } from "@/lib/theme";
 
@@ -43,12 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col">
         {/* Every page has a <main id="main">. */}
-        <a
-          href="#main"
-          className="sr-only z-50 rounded-pill bg-card px-5 font-semibold shadow-card focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:inline-flex focus:min-h-11 focus:items-center"
-        >
-          Skip to content
-        </a>
+        <SkipLink />
         {children}
         <Toaster />
       </body>

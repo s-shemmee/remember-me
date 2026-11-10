@@ -72,12 +72,10 @@ test("sign up, confirm, onboard, and see your first person at home", async ({ pa
 
   // Home shows the person; onboarding is closed now
   await expect(page).toHaveURL(/\/home$/);
-  await expect(page.getByRole("heading", { level: 2, name: "Your people" })).toBeVisible();
-  await expect(page.getByText("Khalid", { exact: true })).toBeVisible();
-  await expect(page.getByText("Family · 14 March")).toBeVisible();
-  await expect(
-    page.locator("li", { hasText: "Khalid" }).locator("[data-slot='avatar']"),
-  ).toHaveClass(/bg-sky/);
+  const comingUp = page.getByRole("region", { name: "Coming up" });
+  const row = comingUp.getByRole("link", { name: /Khalid/ });
+  await expect(row).toContainText(/Birthday · \w{3}, 14 Mar/);
+  await expect(row.locator("[data-slot='avatar']")).toHaveClass(/bg-sky/);
   await expectAccessible(page, "home");
 
   await page.goto("/onboarding");

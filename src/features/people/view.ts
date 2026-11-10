@@ -77,9 +77,12 @@ const EMOJI: Record<OccasionRow["kind"], string> = {
 };
 
 export function dayView(o: OccasionRow, today: CalendarDate): DayView {
-  const on = nextOccurrence(o, today);
-  const years = yearsOn(o.year, on);
+  // A graduation with a year happens once; the rest repeat every year.
+  const oneOff = o.kind === "graduation" && o.year !== null;
+  const on = oneOff ? { year: o.year!, month: o.month, day: o.day } : nextOccurrence(o, today);
+  const years = oneOff ? null : yearsOn(o.year, on);
   const daysUntil = daysBetween(today, on);
+  const passed = daysUntil < 0;
   const label =
     o.kind === "birthday"
       ? "Birthday"
@@ -100,9 +103,10 @@ export function dayView(o: OccasionRow, today: CalendarDate): DayView {
     emoji: EMOJI[o.kind],
     label,
     title,
-    date: formatLongDate(on),
-    when: countdownLabel(daysUntil),
-    daysUntil,
+    date: passed ? `${formatLongDate(on)} ${on.year}` : formatLongDate(on),
+    when: passed ? "passed" : countdownLabel(daysUntil),
+    // Passed one-off days sort last and are never "next".
+    daysUntil: passed ? Number.POSITIVE_INFINITY : daysUntil,
   };
 }
 
@@ -124,7 +128,7 @@ export function personView(row: PersonRow, today: CalendarDate): PersonView {
     group: row.group,
     littleThings: row.little_things,
     days,
-    next: days[0] ?? null,
+    next: days.find((d) => Number.isFinite(d.daysUntil)) ?? null,
     form: {
       id: row.id,
       name: row.name,

@@ -34,7 +34,8 @@ export function PeopleScreen({ people }: { people: PersonView[] }) {
   const params = useSearchParams();
   const selectedId = params.get("person");
 
-  const [query, setQuery] = React.useState("");
+  // Home's search opens People with ?q=…
+  const [query, setQuery] = React.useState(() => params.get("q") ?? "");
   const [filter, setFilter] = React.useState<FilterKey>("all");
   const [dialog, setDialog] = React.useState<{ key: number; initial: PersonFormValues } | null>(
     null,

@@ -124,3 +124,76 @@ export function formatShortDate(d: CalendarDate): string {
 export function formatDayMonth(dm: DayMonth): string {
   return `${dm.day} ${MONTHS[dm.month - 1]}`;
 }
+
+const WEEKDAYS_LONG = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+] as const;
+
+/** The hour (0–23) right now in a timezone. An unknown timezone falls back to Casablanca. */
+export function hourIn(timeZone: string | null | undefined, now: Date = new Date()): number {
+  const format = (zone: string) =>
+    new Intl.DateTimeFormat("en-GB", { timeZone: zone, hour: "2-digit", hourCycle: "h23" })
+      .formatToParts(now)
+      .find((p) => p.type === "hour")?.value;
+  let hour: string | undefined;
+  try {
+    hour = format(timeZone || DEFAULT_TIMEZONE);
+  } catch {
+    hour = format(DEFAULT_TIMEZONE);
+  }
+  return Number(hour) % 24;
+}
+
+const fromUtc = (ms: number): CalendarDate => {
+  const d = new Date(ms);
+  return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() };
+};
+
+/** The date `n` days after (or before, if negative) `d`. */
+export function addDays(d: CalendarDate, n: number): CalendarDate {
+  return fromUtc(toUtc(d) + n * 86_400_000);
+}
+
+/** The month `n` months after `{year, month}`. */
+export function addMonths(ym: { year: number; month: number }, n: number) {
+  const index = ym.year * 12 + (ym.month - 1) + n;
+  return { year: Math.floor(index / 12), month: (index % 12) + 1 };
+}
+
+/** 0 = Monday … 6 = Sunday (weeks start on Monday, as in the screens). */
+export function weekdayIndex(d: CalendarDate): number {
+  return (new Date(toUtc(d)).getUTCDay() + 6) % 7;
+}
+
+/** "Wednesday". */
+export function weekdayName(d: CalendarDate): string {
+  return WEEKDAYS_LONG[new Date(toUtc(d)).getUTCDay()]!;
+}
+
+/** "Wednesday 4 November". */
+export function formatFullDate(d: CalendarDate): string {
+  return `${weekdayName(d)} ${d.day} ${MONTHS[d.month - 1]}`;
+}
+
+export const sameDate = (a: CalendarDate, b: CalendarDate) =>
+  a.year === b.year && a.month === b.month && a.day === b.day;
+
+/** "2026-11-06", for URLs. */
+export const toIsoDate = (d: CalendarDate) =>
+  `${d.year}-${String(d.month).padStart(2, "0")}-${String(d.day).padStart(2, "0")}`;
+
+/** Parses "2026-11-06"; null if it isn't a real date. */
+export function fromIsoDate(value: string | null | undefined): CalendarDate | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value ?? "");
+  if (!m) return null;
+  const d = { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) };
+  return d.month >= 1 && d.month <= 12 && d.day >= 1 && d.day <= daysInMonth(d.month, d.year)
+    ? d
+    : null;
+}

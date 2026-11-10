@@ -53,7 +53,13 @@ describe("dayView", () => {
     expect(other).toMatchObject({ label: "Name day", title: "Name day", emoji: "✨" });
     expect(
       dayView({ id: "o", kind: "graduation", title: null, day: 24, month: 11, year: 2027 }, today),
-    ).toMatchObject({ title: "Graduation", when: "in 20 days" });
+    ).toMatchObject({ title: "Graduation", when: "in 13 months" }); // once, in 2027
+    expect(
+      dayView({ id: "o", kind: "graduation", title: null, day: 24, month: 6, year: 2025 }, today),
+    ).toMatchObject({ when: "passed", date: "Tue, 24 June 2025" });
+    expect(
+      dayView({ id: "o", kind: "graduation", title: null, day: 24, month: 11, year: null }, today),
+    ).toMatchObject({ when: "in 20 days" });
   });
 
   it("is 'today' on the day, and a 29 February birthday falls on the 28th", () => {

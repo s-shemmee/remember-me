@@ -18,7 +18,9 @@ test("add a person and see them in People", async ({ page }) => {
     .click();
   await expect(page).toHaveURL(/\/people$/);
   await expect(page.getByRole("heading", { level: 1, name: "People" })).toBeVisible();
-  await expect(page.getByText("Add the first person you'd hate to forget")).toBeVisible();
+  await expect(
+    page.getByText("Add the first person you'd hate to forget").filter({ visible: true }),
+  ).toBeVisible();
   await expectAccessible(page, "people, empty");
 
   // Add someone
