@@ -62,6 +62,29 @@ export function todayIn(timeZone: string | null | undefined, now: Date = new Dat
   return { year: get("year"), month: get("month"), day: get("day") };
 }
 
+/**
+ * Minutes since local midnight in a timezone (9:00 → 540), read from the
+ * wall clock with Intl, so daylight-saving changes are already applied.
+ * An unknown timezone falls back to Casablanca.
+ */
+export function minutesIn(timeZone: string | null | undefined, now: Date = new Date()): number {
+  const format = (zone: string) =>
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: zone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(now);
+  let parts: Intl.DateTimeFormatPart[];
+  try {
+    parts = format(timeZone || DEFAULT_TIMEZONE);
+  } catch {
+    parts = format(DEFAULT_TIMEZONE);
+  }
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return (get("hour") % 24) * 60 + get("minute");
+}
+
 /** The date a day + month falls on in a given year (29 Feb → 28 Feb when needed). */
 export function occurrenceIn(dm: DayMonth, year: number): CalendarDate {
   return { year, month: dm.month, day: Math.min(dm.day, daysInMonth(dm.month, year)) };

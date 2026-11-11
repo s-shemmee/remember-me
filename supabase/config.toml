@@ -438,3 +438,18 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# Edge Functions (M4). Each checks its own caller: CRON_SECRET for the
+# scheduled ones, the user's token for the test email, a signed token for
+# unsubscribe. Same versions as package.json: supabase/functions/deno.json.
+[functions.send-reminders]
+verify_jwt = false
+
+[functions.daily-cleanup]
+verify_jwt = false
+
+[functions.send-test-email]
+verify_jwt = false
+
+[functions.unsubscribe]
+verify_jwt = false

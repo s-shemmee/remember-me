@@ -14,6 +14,14 @@ export const FAKE_SECRET_KEY = "sb_secret_test_00000000";
 export const FAKE_LEGACY_JWT = "eyJ_test_00000000";
 export const FAKE_DB_PASSWORD = "test_password_00000000";
 
+/**
+ * Edge Function placeholders for local and CI runs (supabase/functions/
+ * local-dev.env). The functions refuse any "local-only" value unless
+ * Supabase itself is local.
+ */
+export const FAKE_CRON_SECRET = "local-only-cron-secret";
+export const FAKE_UNSUBSCRIBE_SECRET = "local-only-unsubscribe-secret-0000000000";
+
 /** A valid env for parseEnv() and anything that needs one. */
 export const fakeEnv = {
   NEXT_PUBLIC_SUPABASE_URL: FAKE_SUPABASE_URL,

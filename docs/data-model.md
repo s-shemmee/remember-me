@@ -37,7 +37,8 @@ Built (M3 part 2, `…_reservations.sql`): plus `cancelled_at` (the owner remove
 **reminder_settings**: `profile_id pk`, `offsets_days int[] default '{7,1,0}'`, `send_time time default '09:00'`, `email bool default true`, `push bool default false`, `remind_my_people bool default true`.
 Built (M1 part 2; 14 added in `…_onboarding_reminders_and_push.sql`): `offsets_days` limited to 14/7/3/1/0 (default `{7,1,0}`), `send_time` 09:00, `email` on, `push` off, `remind_my_people` on. RLS: owner select/insert/update; no delete (goes with the profile). `profiles.onboarded_at` is null until `complete_onboarding()` finishes.
 **push_subscriptions**: `id`, `profile_id`, `endpoint unique`, `p256dh`, `auth`, `user_agent`.
-**notification_log**: `id`, `profile_id`, `occasion_id`, `offset_days`, `occurs_on date`, `channel`, `sent_at`. Unique on `(occasion_id, offset_days, occurs_on, channel)` so a reminder is never sent twice.
+**notification_log**: `id`, `profile_id`, `occasion_id`, `offset_days`, `occurs_on date`, `channel`, `sent_at`.
+Built (M4 part 1, `…_email_reminders.sql`): plus `kind` (`reminder` | `test`), `status` (`claimed` | `sent` | `failed`), `batch_id` (one email; the Resend idempotency key), `attempts`, `provider_id`, `claimed_at`, `created_at`. Unique on `(profile_id, occasion_id, offset_days, occurs_on, channel)` for reminders. RLS: read your own; writes only through the server functions below. Rows go with their occasion; the clean-up drops rows older than 400 days. Unique on `(occasion_id, offset_days, occurs_on, channel)` so a reminder is never sent twice.
 
 **future_notes**: `id`, `profile_id`, `body text`, `opens_on date`. Readable by the owner only, and only on/after `opens_on` (enforce in the policy).
 **memories**: `id`, `profile_id`, `year`, `title`, `body`, `image_path`.
@@ -65,7 +66,9 @@ Built (M1 part 2; 14 added in `…_onboarding_reminders_and_push.sql`): `offsets
 Built (M3 part 1): `wish-images`, private, 2 MB, JPEG/PNG/WebP. Policies on `storage.objects`: read, upload, update and delete only under your own folder. Served with signed URLs (1 hour) made on the server. Photos are shrunk to 1600px and re-encoded in the browser before upload, so EXIF/GPS never leaves the device (e2e test). Since part 2, connections can read (and so sign) the image of a wish they can see: the policy calls `can_view_wish_image(name)`, which checks the wish is live, on a shared list, and its owner is connected to you.
 
 ## Jobs
-- `pg_cron` every 15 minutes → Edge Function `send-reminders`: finds occasions whose next occurrence minus an offset falls in the user's `send_time` window in their timezone; writes `notification_log` first (idempotent), then sends email (Resend) and/or web push.
+- `pg_cron` every 15 minutes → `public.call_edge_function('send-reminders')` → Edge Function `send-reminders` (pg_net, `Authorization: Bearer <CRON_SECRET>`; the project URL and secret come from Vault: `project_url`, `cron_secret`). Built in M4 part 1 (email; push in part 2). Logic: `src/features/reminders/due.ts` and `run.ts`; server functions (service role only): `reminder_candidates()`, `reminder_log_keys()`, `claim_reminders(profile, batch, keys)`, `reclaim_stuck_reminders()`, `finish_reminders(batch, provider_id)`, `release_reminders(batch)`, `allow_test_email(profile)`.
+- `pg_cron` daily at 02:30 UTC → Edge Function `daily-cleanup` → `run_cleanup()` (people archived > 30 days, final cancelled reservations, wishes removed > 30 days, invites past expiry, log rows > 400 days), then the deleted wishes' photos via the Storage API.
+- Edge Functions `send-test-email` (the user's own token; 3 an hour) and `unsubscribe` (signed token; RFC 8058 one-click).
 - Edge Function `link-preview`: fetches a product URL server side (SSRF-safe), extracts title/price/image.
 - Nightly: clean expired push subscriptions; remind connected people about your day if `remind_my_people`.
 

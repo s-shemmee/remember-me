@@ -68,8 +68,9 @@ jobs:
         with: { version: 3.0.0 }
       - run: pnpm install --frozen-lockfile
       # Only what the tests use: Postgres, Auth (gotrue), the API (kong +
-      # postgrest), Storage (wish images) and Mailpit for the confirmation email.
-      - run: supabase start -x realtime,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      # postgrest), Storage (wish images), Mailpit (emails) and the Edge
+      # runtime (reminder emails, the test email, unsubscribe).
+      - run: supabase start -x realtime,imgproxy,postgres-meta,studio,logflare,vector,supavisor
       - name: Point the app at local Supabase
         run: |
           supabase status -o env > /tmp/supabase.env
@@ -80,6 +81,19 @@ jobs:
             echo "MAILPIT_URL=$MAILPIT_URL"
           } >> "$GITHUB_ENV"
           rm /tmp/supabase.env
+      - name: Serve the Edge Functions
+        # local-dev.env holds placeholders the functions refuse off a local
+        # Supabase. The first request compiles the functions, so warm them up.
+        run: |
+          nohup supabase functions serve --env-file supabase/functions/local-dev.env > functions.log 2>&1 &
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$NEXT_PUBLIC_SUPABASE_URL/functions/v1/unsubscribe" || true)
+            [ "$code" = "303" ] && break
+            sleep 2
+          done
+          for i in 1 2 3; do
+            curl -s -m 120 -X POST "$NEXT_PUBLIC_SUPABASE_URL/functions/v1/send-reminders"               -H "Authorization: Bearer local-only-cron-secret" -H "Content-Type: application/json"               -d '{"now":"2000-01-01T00:00:00Z"}' && break
+          done
       - run: pnpm build
       - name: Playwright in its official image
         # Everything the app and tests read: the Supabase URL and key (checked
@@ -106,6 +120,7 @@ jobs:
           path: |
             playwright-report
             test-results
+            functions.log
           if-no-files-found: warn
 
   evals:

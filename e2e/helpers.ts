@@ -51,7 +51,8 @@ export async function confirmationLink(email: string): Promise<string> {
 }
 
 /** A new, confirmed and onboarded account (no first person), signed in on `page`. */
-export async function signUpAndOnboard(page: Page, firstName: string) {
+/** Signs up, confirms and onboards a new user; returns their email address. */
+export async function signUpAndOnboard(page: Page, firstName: string): Promise<string> {
   const email = `e2e.${firstName.toLowerCase()}.${Date.now()}@test.local`;
   await page.goto("/sign-up");
   await page.getByLabel("What should we call you?").fill(firstName);
@@ -70,4 +71,5 @@ export async function signUpAndOnboard(page: Page, firstName: string) {
   await page.getByRole("button", { name: "Finish" }).click();
   await page.getByRole("link", { name: "Take me home" }).click();
   await expect(page).toHaveURL(/\/home$/);
+  return email;
 }

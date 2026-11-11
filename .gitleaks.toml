@@ -14,4 +14,6 @@ regexes = [
   '''^sb_secret_test_0{8}$''',
   '''^eyJ_test_0{8}$''',
   '''^test_password_0{8}$''',
+  '''^local-only-cron-secret$''',
+  '''^local-only-unsubscribe-secret-0{10}$''',
 ]

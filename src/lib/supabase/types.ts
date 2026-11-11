@@ -145,6 +145,73 @@ export type Database = {
           },
         ];
       };
+      notification_log: {
+        Row: {
+          attempts: number;
+          batch_id: string | null;
+          channel: string;
+          claimed_at: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          occasion_id: string | null;
+          occurs_on: string | null;
+          offset_days: number | null;
+          profile_id: string;
+          provider_id: string | null;
+          sent_at: string | null;
+          status: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          attempts?: number;
+          batch_id?: string | null;
+          channel?: string;
+          claimed_at?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          occasion_id?: string | null;
+          occurs_on?: string | null;
+          offset_days?: number | null;
+          profile_id: string;
+          provider_id?: string | null;
+          sent_at?: string | null;
+          status?: string;
+        };
+        Update: {
+          attempts?: number;
+          batch_id?: string | null;
+          channel?: string;
+          claimed_at?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          occasion_id?: string | null;
+          occurs_on?: string | null;
+          offset_days?: number | null;
+          profile_id?: string;
+          provider_id?: string | null;
+          sent_at?: string | null;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_log_occasion_id_fkey";
+            columns: ["occasion_id"];
+            isOneToOne: false;
+            referencedRelation: "occasions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notification_log_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       occasions: {
         Row: {
           created_at: string;
@@ -498,8 +565,14 @@ export type Database = {
     };
     Functions: {
       accept_invite: { Args: { p_token: string }; Returns: string };
+      allow_test_email: { Args: { p_profile_id: string }; Returns: boolean };
       are_connected: { Args: { p_a: string; p_b: string }; Returns: boolean };
+      call_edge_function: { Args: { p_name: string }; Returns: number };
       can_view_wish_image: { Args: { p_name: string }; Returns: boolean };
+      claim_reminders: {
+        Args: { p_batch_id: string; p_keys: string[]; p_profile_id: string };
+        Returns: string[];
+      };
       complete_onboarding: {
         Args: {
           p_avatar_character?: string;
@@ -526,6 +599,7 @@ export type Database = {
         Returns: string;
       };
       create_invite: { Args: { p_person_id?: string }; Returns: string };
+      finish_reminders: { Args: { p_batch_id: string; p_provider_id: string }; Returns: undefined };
       friend_wishes: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -579,10 +653,50 @@ export type Database = {
         }[];
       };
       name_for: { Args: { p_profile: string; p_viewer: string }; Returns: string };
+      reclaim_stuck_reminders: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          batch_id: string;
+          keys: string[];
+          profile_id: string;
+        }[];
+      };
+      release_reminders: { Args: { p_batch_id: string }; Returns: undefined };
+      reminder_candidates: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          day: number;
+          email: string;
+          first_name: string;
+          kind: string;
+          little_thing: string;
+          month: number;
+          occasion_id: string;
+          offsets: number[];
+          person_color: string;
+          person_id: string;
+          person_name: string;
+          profile_id: string;
+          recurring: boolean;
+          send_time: string;
+          timezone: string;
+          title: string;
+          wishlist_friend_id: string;
+          year: number;
+        }[];
+      };
+      reminder_log_keys: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          key: string;
+          profile_id: string;
+        }[];
+      };
       remove_connection: { Args: { p_connection_id: string }; Returns: undefined };
       reorder_wishes: { Args: { p_ids: string[]; p_wishlist_id: string }; Returns: undefined };
       reserve_wish: { Args: { p_wish_id: string }; Returns: undefined };
       revoke_invite: { Args: { p_invite_id: string }; Returns: undefined };
+      run_cleanup: { Args: Record<PropertyKey, never>; Returns: Json };
       save_person: {
         Args: {
           p_birthday_day?: number;
