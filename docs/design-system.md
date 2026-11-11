@@ -97,5 +97,5 @@ All live in `src/components/ui/`. Button, Switch, Dialog, Dropdown Menu, Tabs an
 
 ## Voice
 - Warm, short, plain. Talk like a thoughtful friend.
-- Noor: first person, kind, encouraging, one emoji max per message. Examples: "Khalid turns 30 in 2 days 🎂 The football on his wishlist is still free. Want me to reserve it for you?" / "Reserved! Only you know 🤫".
+- Noor: first person, kind, encouraging, one emoji max per message. Examples: "Khalid turns 30 in 2 days 🎂 The match ball (350 MAD) on Khalid's wishlist is still free. Want me to reserve it for you?" (names, never pronouns) / "Reserved! Only you know 🤫".
 - No em dashes in UI copy. No guilt ("You forgot!"). No exclamation spam.

@@ -99,6 +99,52 @@ export type Database = {
           },
         ];
       };
+      notices: {
+        Row: {
+          actor_name: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          read_at: string | null;
+          user_id: string;
+          wish_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_name: string;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          read_at?: string | null;
+          user_id: string;
+          wish_id?: string | null;
+        };
+        Update: {
+          actor_name?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          read_at?: string | null;
+          user_id?: string;
+          wish_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notices_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notices_wish_id_fkey";
+            columns: ["wish_id"];
+            isOneToOne: false;
+            referencedRelation: "wishes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       occasions: {
         Row: {
           created_at: string;
@@ -309,6 +355,43 @@ export type Database = {
           },
         ];
       };
+      reservations: {
+        Row: {
+          cancelled_at: string | null;
+          created_at: string;
+          reserver_id: string;
+          wish_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          cancelled_at?: string | null;
+          created_at?: string;
+          reserver_id?: string;
+          wish_id: string;
+        };
+        Update: {
+          cancelled_at?: string | null;
+          created_at?: string;
+          reserver_id?: string;
+          wish_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reservations_reserver_id_fkey";
+            columns: ["reserver_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reservations_wish_id_fkey";
+            columns: ["wish_id"];
+            isOneToOne: true;
+            referencedRelation: "wishes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       wishes: {
         Row: {
           created_at: string;
@@ -415,6 +498,8 @@ export type Database = {
     };
     Functions: {
       accept_invite: { Args: { p_token: string }; Returns: string };
+      are_connected: { Args: { p_a: string; p_b: string }; Returns: boolean };
+      can_view_wish_image: { Args: { p_name: string }; Returns: boolean };
       complete_onboarding: {
         Args: {
           p_avatar_character?: string;
@@ -441,6 +526,21 @@ export type Database = {
         Returns: string;
       };
       create_invite: { Args: { p_person_id?: string }; Returns: string };
+      friend_wishes: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          currency: string;
+          id: string;
+          image_path: string;
+          note: string;
+          owner_id: string;
+          price_amount: number;
+          priority: Database["public"]["Enums"]["wish_priority"];
+          status: string;
+          title: string;
+          url: string;
+        }[];
+      };
       health_check: { Args: Record<PropertyKey, never>; Returns: boolean };
       invite_preview: {
         Args: { p_token: string };
@@ -464,8 +564,24 @@ export type Database = {
           profile_id: string;
         }[];
       };
+      my_friends: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          avatar_character: string;
+          avatar_color: string;
+          avatar_kind: Database["public"]["Enums"]["avatar_kind"];
+          birthday_day: number;
+          birthday_month: number;
+          first_name: string;
+          linked_person_id: string;
+          name: string;
+          profile_id: string;
+        }[];
+      };
+      name_for: { Args: { p_profile: string; p_viewer: string }; Returns: string };
       remove_connection: { Args: { p_connection_id: string }; Returns: undefined };
       reorder_wishes: { Args: { p_ids: string[]; p_wishlist_id: string }; Returns: undefined };
+      reserve_wish: { Args: { p_wish_id: string }; Returns: undefined };
       revoke_invite: { Args: { p_invite_id: string }; Returns: undefined };
       save_person: {
         Args: {
@@ -483,6 +599,7 @@ export type Database = {
         Returns: string;
       };
       unlink_person: { Args: { p_person_id: string }; Returns: undefined };
+      wish_is_shared: { Args: { p_wishlist_id: string }; Returns: boolean };
     };
     Enums: {
       avatar_kind: "initials" | "photo" | "character";

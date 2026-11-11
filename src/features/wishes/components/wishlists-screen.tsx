@@ -1,8 +1,7 @@
 "use client";
 
 import { EllipsisIcon, ExternalLinkIcon, PlusIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,8 @@ import {
 import { NoorBubble } from "@/components/ui/noor-bubble";
 import { toast } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FriendsWishlists } from "@/features/reservations/components/friends-wishlists";
+import type { Friend, Notice } from "@/features/reservations/logic";
 import { cn } from "@/lib/utils";
 import { type Pastel, pastels } from "@/styles/tokens";
 
@@ -32,7 +33,7 @@ const listLine = (list: Wishlist) => {
   const count = `${list.wishes.length} ${list.wishes.length === 1 ? "wish" : "wishes"}`;
   return list.kind === "treat"
     ? `Just for you. Only you can see this list · ${count}`
-    : `Your connections will see this list once sharing arrives · ${count}`;
+    : `Your connections can see this list · ${count}`;
 };
 
 function WishCard({
@@ -132,12 +133,37 @@ function WishCard({
 }
 
 /**
- * Wishlists (AppWishlists.dc.html), part 1: your own two lists. Add, edit,
- * reorder (Move earlier / later in each wish's menu) and remove with Undo.
- * Friends' wishlists come with sharing (M3 part 2).
+ * Wishlists (AppWishlists.dc.html): your own two lists (add, edit, reorder
+ * with Move earlier / later, remove with Undo) and your friends' birthday
+ * wishlists with secret reservations. Your own wishes never show whether
+ * they're reserved. The tab and friend live in the URL (?tab=friends&friend=).
  */
-export function WishlistsScreen({ lists, userId }: { lists: Wishlist[]; userId: string }) {
+export function WishlistsScreen({
+  lists,
+  userId,
+  friends,
+  notices,
+}: {
+  lists: Wishlist[];
+  userId: string;
+  friends: Friend[];
+  notices: Notice[];
+}) {
   const router = useRouter();
+  const params = useSearchParams();
+  const [tab, setTab] = React.useState(params.get("tab") === "friends" ? "friends" : "mine");
+  const [friendId, setFriendId] = React.useState(params.get("friend"));
+  // Keep the URL in step without a navigation, so refresh and links work.
+  const syncUrl = (nextTab: string, nextFriend: string | null) => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("tab");
+    url.searchParams.delete("friend");
+    if (nextTab === "friends") {
+      url.searchParams.set("tab", "friends");
+      if (nextFriend) url.searchParams.set("friend", nextFriend);
+    }
+    window.history.replaceState(null, "", url);
+  };
   const [listId, setListId] = React.useState(lists[0]?.id ?? "");
   const [order, setOrder] = React.useState<Record<string, string[]>>({});
   const [dialog, setDialog] = React.useState<{
@@ -226,7 +252,14 @@ export function WishlistsScreen({ lists, userId }: { lists: Wishlist[]; userId: 
         </Button>
       </div>
 
-      <Tabs defaultValue="mine" className="flex flex-col gap-5">
+      <Tabs
+        value={tab}
+        onValueChange={(v) => {
+          setTab(v);
+          syncUrl(v, friendId);
+        }}
+        className="flex flex-col gap-5"
+      >
         <TabsList aria-label="Wishlists" className="self-start">
           <TabsTrigger value="mine">My wishlists</TabsTrigger>
           <TabsTrigger value="friends">Friends&apos; wishlists</TabsTrigger>
@@ -291,21 +324,21 @@ export function WishlistsScreen({ lists, userId }: { lists: Wishlist[]; userId: 
           )}
 
           <p className="rounded-[20px] bg-card2 px-4 py-3.5 text-14 text-sub">
-            <span aria-hidden>🤫 </span>When someone reserves a gift, you&apos;ll only see
-            &ldquo;Someone&apos;s got this&rdquo;. Never who. Surprises stay surprises.
+            <span aria-hidden>🤫 </span>When your people reserve something, you won&apos;t see it.
+            Surprises stay surprises.
           </p>
         </TabsContent>
 
         <TabsContent value="friends">
-          <div className="flex max-w-xl flex-col gap-5 rounded-card-lg bg-card p-6 shadow-card sm:p-8">
-            <NoorBubble className="[&_p]:bg-card2 [&_p]:shadow-none">
-              Your people&apos;s wishlists arrive in the next update. Invite them now, so
-              they&apos;re ready 💛
-            </NoorBubble>
-            <Button asChild variant="card2" className="w-fit">
-              <Link href="/profile">Invite your people</Link>
-            </Button>
-          </div>
+          <FriendsWishlists
+            friends={friends}
+            notices={notices}
+            friendId={friendId}
+            onFriendChange={(id) => {
+              setFriendId(id);
+              syncUrl("friends", id);
+            }}
+          />
         </TabsContent>
       </Tabs>
 

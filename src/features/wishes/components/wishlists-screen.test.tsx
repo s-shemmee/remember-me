@@ -5,7 +5,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Wishlist } from "../load";
 
 const refresh = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+vi.mock("@/features/reservations/actions", () => ({
+  reserveWish: vi.fn(),
+  cancelReservation: vi.fn(),
+  dismissNotice: vi.fn(),
+}));
 vi.mock("@/lib/supabase/client", () => ({ createSupabaseBrowserClient: vi.fn() }));
 
 const saveWish = vi.fn();
@@ -58,7 +66,8 @@ const lists: Wishlist[] = [
   },
   { id: TREAT, kind: "treat", title: "Treat yourself", label: "Treat yourself", wishes: [] },
 ];
-const renderScreen = () => render(<WishlistsScreen lists={lists} userId={USER} />);
+const renderScreen = () =>
+  render(<WishlistsScreen lists={lists} userId={USER} friends={[]} notices={[]} />);
 const titles = () => screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent);
 const optionsFor = (title: string) => screen.getByRole("button", { name: `Options for ${title}` });
 
@@ -139,6 +148,15 @@ describe("Wishlists", () => {
     await act(() => options.action.onClick());
     expect(restoreWish).toHaveBeenCalledWith("a0000000-0000-4000-8000-000000000003");
     expect(toast.success).toHaveBeenCalledWith("Fig candle is back");
+  });
+
+  it("my own wishes never say whether they're reserved", () => {
+    renderScreen();
+    expect(screen.queryByText(/reserved|taken|got this|still free/i)).toBeNull();
+    expect(screen.getByText(/Your connections can see this list/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/When your people reserve something, you won't see it\./),
+    ).toBeInTheDocument();
   });
 
   it("the friends tab invites you to bring your people", async () => {

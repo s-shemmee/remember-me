@@ -1,13 +1,10 @@
 import { SearchIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Form from "next/form";
-import Link from "next/link";
 import { Suspense } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { pastelClasses } from "@/components/ui/chip";
-import { Noor } from "@/components/ui/noor";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { TruncatedName } from "@/components/ui/truncated-name";
 import {
@@ -23,9 +20,13 @@ import {
 import { loadDays } from "@/features/days/load";
 import { ComingUp } from "@/features/home/coming-up";
 import { MiniMonth } from "@/features/home/mini-month";
+import { NoorNudge, type NudgeOffer } from "@/features/home/noor-nudge";
 import { AddPersonButton } from "@/features/people/components/add-person-button";
+import { Notices } from "@/features/reservations/components/notices";
+import { loadFriends } from "@/features/reservations/load";
+import { giftsSorted, nudgeWishLine, pickNudgeWish } from "@/features/reservations/logic";
 import { AppMain } from "@/features/shell/app-shell";
-import { formatFullDate } from "@/lib/dates";
+import { formatFullDate, toIsoDate } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
@@ -68,7 +69,10 @@ function StatCard({
 
 async function Dashboard() {
   const supabase = await createSupabaseServerClient();
-  const data = await loadDays(supabase);
+  const [data, { friends, notices }] = await Promise.all([
+    loadDays(supabase),
+    loadFriends(supabase),
+  ]);
   const { sources, today, firstName, peopleCount } = data;
 
   const events = upcoming(sources, today);
@@ -80,6 +84,25 @@ async function Dashboard() {
   const more = moreThisMonth(sources, today);
   const nudge = noorNudge(events, peopleCount > 0, firstName);
   const greet = greeting(data.hour);
+  const gifts = giftsSorted(friends);
+
+  // "Reserve it 🤫" when the next day is a connected friend's birthday and
+  // their wishlist has something free (never on a day of remembrance).
+  let offer: NudgeOffer | null = null;
+  const friend =
+    nudge.kind === "birthday" && nudge.personId
+      ? friends.find((f) => f.linkedPersonId === nudge.personId)
+      : undefined;
+  const wish = friend ? pickNudgeWish(friend.wishes) : null;
+  if (friend && wish) {
+    offer = {
+      wishId: wish.id,
+      wishTitle: wish.title,
+      friendId: friend.profileId,
+      friendName: friend.name,
+      text: `${nudge.base} ${nudgeWishLine(wish, nudge.name ?? friend.name)}`,
+    };
+  }
   const month = monthName(today.month);
 
   return (
@@ -129,30 +152,15 @@ async function Dashboard() {
         <AddPersonButton />
       </div>
 
-      {/* Noor's nudge (template text; "Reserve it" waits for wishlists, M3). */}
-      <section
-        aria-label="Noor"
-        className="flex flex-wrap items-end gap-3.5 rounded-[28px] bg-linear-160 from-peach to-card px-5 py-5 sm:px-6"
-      >
-        <Noor size={58} mood="smiling" animated className="shrink-0" />
-        <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-1.5">
-          <span className="pl-2.5 text-12 font-semibold text-sub">Noor · now</span>
-          <p className="self-start rounded-[22px_22px_22px_6px] bg-card px-4 py-3 font-system text-16 leading-[1.4] [overflow-wrap:anywhere] shadow-card">
-            {nudge.text}
-          </p>
-        </div>
-        {nudge.personId ? (
-          <Button asChild variant="card2" className="bg-card">
-            <Link href={`/people?person=${nudge.personId}`}>
-              <span className="max-w-[20ch] truncate">Open {nudge.name}</span>
-            </Link>
-          </Button>
-        ) : nudge.isYou ? (
-          <Button asChild variant="card2" className="bg-card">
-            <Link href="/celebrate">Open Celebrate Me</Link>
-          </Button>
-        ) : null}
-      </section>
+      <NoorNudge
+        text={nudge.text}
+        personId={nudge.personId}
+        name={nudge.name}
+        isYou={nudge.isYou}
+        offer={offer}
+        today={toIsoDate(today)}
+      />
+      <Notices notices={notices} />
 
       <ul aria-label="At a glance" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard
@@ -191,14 +199,10 @@ async function Dashboard() {
           pastel={you?.color ?? "rose"}
         />
         <StatCard
-          label="YOUR PEOPLE"
-          emoji="💛"
-          value={String(peopleCount)}
-          line={
-            peopleCount
-              ? `${peopleCount === 1 ? "person" : "people"} you remember`
-              : "add someone to begin"
-          }
+          label="GIFTS SORTED"
+          emoji="🎁"
+          value={gifts.value}
+          line={gifts.line}
           pastel="mint"
         />
       </ul>

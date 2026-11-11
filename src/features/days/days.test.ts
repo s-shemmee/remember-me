@@ -234,6 +234,9 @@ describe("Home copy", () => {
         personId: "p1",
         name: "Khalid",
         isYou: false,
+        kind: "birthday",
+        // Without the little thing: Home adds a wish to reserve instead.
+        base: "Khalid turns 30 in 2 days 🎂",
       });
       expect(nudge([src({ year: null })]).text).toBe("It's Khalid's birthday in 2 days 🎂");
       expect(nudge([src({ year: null, day: 4 })]).text).toBe("It's Khalid's birthday today 🎂");

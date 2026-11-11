@@ -184,13 +184,24 @@ export function noorNudge(
   events: DayEvent[],
   hasPeople: boolean,
   firstName: string,
-): { text: string; personId: string | null; name: string | null; isYou: boolean } {
+): {
+  text: string;
+  personId: string | null;
+  name: string | null;
+  isYou: boolean;
+  /** The day's type (null without one), so Home offers "Reserve it" on birthdays only. */
+  kind: DayKind | null;
+  /** The text without the little thing, for when Noor offers a wish instead. */
+  base: string;
+} {
   if (!hasPeople) {
     return {
       text: "Add the first person you'd hate to forget, and I'll remind you before their day 💛",
       personId: null,
       name: null,
       isYou: false,
+      kind: null,
+      base: "",
     };
   }
   const next = events.find((e) => e.daysUntil < 30);
@@ -200,6 +211,8 @@ export function noorNudge(
       personId: null,
       name: null,
       isYou: false,
+      kind: null,
+      base: "",
     };
   }
   const s = next.source;
@@ -212,6 +225,8 @@ export function noorNudge(
       personId: null,
       name: null,
       isYou: true,
+      kind: null,
+      base: "",
     };
   }
   const when = next.when;
@@ -223,7 +238,7 @@ export function noorNudge(
     const text = title
       ? `${when.charAt(0).toUpperCase()}${when.slice(1)}: ${s.name} · ${title} ${type.emoji} A kind word can mean a lot.`
       : `${possessive(s.name)} ${type.noun} is ${when} ${type.emoji}`;
-    return { text, personId: s.personId, name: s.name, isYou: false };
+    return { text, personId: s.personId, name: s.name, isYou: false, kind: s.kind, base: text };
   }
 
   let text: string;
@@ -237,9 +252,10 @@ export function noorNudge(
   } else {
     text = `${occasionTitle(s.name, s.kind, title)} is ${when} ${type.emoji}`;
   }
+  const base = text;
   const thing = s.littleThings[0]?.trim();
   if (thing) text += ` Little thing: ${thing}`;
-  return { text, personId: s.personId, name: s.name, isYou: false };
+  return { text, personId: s.personId, name: s.name, isYou: false, kind: s.kind, base };
 }
 
 /** "turns 30 in 2 days", "birthday in 2 days", "new job today"… for the Next up card. */
