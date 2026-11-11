@@ -50,6 +50,12 @@ jobs:
 
   e2e:
     # Playwright end to end (e2e/), against local Supabase with Mailpit.
+    # Supabase and the build run on the runner (Supabase publishes its ports
+    # on the runner's localhost). The tests run inside the official Playwright
+    # image with the host network, so browsers and their system libraries come
+    # from the image: no apt, no --with-deps. The image tag is read from the
+    # installed @playwright/test (pinned exactly in package.json), so the two
+    # can't drift; a Renovate bump moves both.
     needs: [quality, database]
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -74,12 +80,33 @@ jobs:
             echo "MAILPIT_URL=$MAILPIT_URL"
           } >> "$GITHUB_ENV"
           rm /tmp/supabase.env
-      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build
-      - run: pnpm e2e
+      - name: Playwright in its official image
+        # Everything the app and tests read: the Supabase URL and key (checked
+        # when the server starts), Mailpit (confirmation emails) and CI=true
+        # (retries, forbidOnly, HTML report, `next start`). The workspace is
+        # mounted at the same path (pnpm's .bin launchers use it) and the
+        # tests run as the runner's user, so nothing is left owned by root.
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "Playwright $PLAYWRIGHT_VERSION"
+          docker run --rm --init --network host --ipc host \
+            --user "$(id -u):$(id -g)" -e HOME=/tmp \
+            -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" -w "$GITHUB_WORKSPACE" \
+            -e CI=true \
+            -e NEXT_PUBLIC_SUPABASE_URL -e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY -e MAILPIT_URL \
+            "mcr.microsoft.com/playwright:v$PLAYWRIGHT_VERSION-noble" \
+            node_modules/.bin/playwright test
+      # The HTML report, plus test-results/ with the raw traces and screenshots
+      # (trace: retain-on-failure), both written to the mounted workspace.
       - uses: actions/upload-artifact@v4
         if: failure()
-        with: { name: playwright-report, path: playwright-report }
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: warn
 
   evals:
     needs: quality
