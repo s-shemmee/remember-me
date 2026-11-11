@@ -3,6 +3,102 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      connections: {
+        Row: {
+          created_at: string;
+          id: string;
+          user_high: string;
+          user_low: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          user_high: string;
+          user_low: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          user_high?: string;
+          user_low?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "connections_user_high_fkey";
+            columns: ["user_high"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "connections_user_low_fkey";
+            columns: ["user_low"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      invites: {
+        Row: {
+          created_at: string;
+          expires_at: string;
+          id: string;
+          inviter_id: string;
+          person_id: string | null;
+          revoked_at: string | null;
+          token_hash: string;
+          used_at: string | null;
+          used_by: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          inviter_id: string;
+          person_id?: string | null;
+          revoked_at?: string | null;
+          token_hash: string;
+          used_at?: string | null;
+          used_by?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          inviter_id?: string;
+          person_id?: string | null;
+          revoked_at?: string | null;
+          token_hash?: string;
+          used_at?: string | null;
+          used_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invites_inviter_id_fkey";
+            columns: ["inviter_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invites_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invites_used_by_fkey";
+            columns: ["used_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       occasions: {
         Row: {
           created_at: string;
@@ -213,11 +309,112 @@ export type Database = {
           },
         ];
       };
+      wishes: {
+        Row: {
+          created_at: string;
+          currency: string;
+          id: string;
+          image_path: string | null;
+          note: string | null;
+          owner_id: string;
+          position: number;
+          price_amount: number | null;
+          priority: Database["public"]["Enums"]["wish_priority"];
+          removed_at: string | null;
+          title: string;
+          url: string | null;
+          wishlist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          image_path?: string | null;
+          note?: string | null;
+          owner_id?: string;
+          position?: number;
+          price_amount?: number | null;
+          priority?: Database["public"]["Enums"]["wish_priority"];
+          removed_at?: string | null;
+          title: string;
+          url?: string | null;
+          wishlist_id: string;
+        };
+        Update: {
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          image_path?: string | null;
+          note?: string | null;
+          owner_id?: string;
+          position?: number;
+          price_amount?: number | null;
+          priority?: Database["public"]["Enums"]["wish_priority"];
+          removed_at?: string | null;
+          title?: string;
+          url?: string | null;
+          wishlist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "wishes_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "wishes_wishlist_id_fkey";
+            columns: ["wishlist_id"];
+            isOneToOne: false;
+            referencedRelation: "wishlists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      wishlists: {
+        Row: {
+          created_at: string;
+          id: string;
+          kind: Database["public"]["Enums"]["wishlist_kind"];
+          owner_id: string;
+          title: string;
+          visibility: Database["public"]["Enums"]["wishlist_visibility"];
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          kind: Database["public"]["Enums"]["wishlist_kind"];
+          owner_id?: string;
+          title: string;
+          visibility?: Database["public"]["Enums"]["wishlist_visibility"];
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          kind?: Database["public"]["Enums"]["wishlist_kind"];
+          owner_id?: string;
+          title?: string;
+          visibility?: Database["public"]["Enums"]["wishlist_visibility"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "wishlists_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      accept_invite: { Args: { p_token: string }; Returns: string };
       complete_onboarding: {
         Args: {
           p_avatar_character?: string;
@@ -243,7 +440,33 @@ export type Database = {
         };
         Returns: string;
       };
+      create_invite: { Args: { p_person_id?: string }; Returns: string };
       health_check: { Args: Record<PropertyKey, never>; Returns: boolean };
+      invite_preview: {
+        Args: { p_token: string };
+        Returns: {
+          inviter_name: string;
+          status: string;
+        }[];
+      };
+      link_person: { Args: { p_person_id: string; p_profile_id: string }; Returns: undefined };
+      my_connections: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          avatar_character: string;
+          avatar_color: string;
+          avatar_kind: Database["public"]["Enums"]["avatar_kind"];
+          connected_at: string;
+          connection_id: string;
+          first_name: string;
+          linked_person_id: string;
+          linked_person_name: string;
+          profile_id: string;
+        }[];
+      };
+      remove_connection: { Args: { p_connection_id: string }; Returns: undefined };
+      reorder_wishes: { Args: { p_ids: string[]; p_wishlist_id: string }; Returns: undefined };
+      revoke_invite: { Args: { p_invite_id: string }; Returns: undefined };
       save_person: {
         Args: {
           p_birthday_day?: number;
@@ -259,12 +482,16 @@ export type Database = {
         };
         Returns: string;
       };
+      unlink_person: { Args: { p_person_id: string }; Returns: undefined };
     };
     Enums: {
       avatar_kind: "initials" | "photo" | "character";
       occasion_kind:
         "birthday" | "anniversary" | "graduation" | "work_milestone" | "remembrance" | "other";
       person_group: "family" | "friends" | "work" | "other";
+      wish_priority: "love" | "like" | "nice";
+      wishlist_kind: "birthday" | "treat" | "other";
+      wishlist_visibility: "private" | "connections" | "selected";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -386,6 +613,9 @@ export const Constants = {
         "other",
       ],
       person_group: ["family", "friends", "work", "other"],
+      wish_priority: ["love", "like", "nice"],
+      wishlist_kind: ["birthday", "treat", "other"],
+      wishlist_visibility: ["private", "connections", "selected"],
     },
   },
 } as const;

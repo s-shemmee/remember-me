@@ -10,6 +10,8 @@ import { NoorBubble } from "@/components/ui/noor-bubble";
 import { toast } from "@/components/ui/sonner";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
+import { InviteLinkDialog } from "@/features/connections/components/invite-link-dialog";
+
 import { restorePerson } from "../actions";
 import { type FilterKey, FILTERS } from "../constants";
 import type { PersonFormValues } from "../schema";
@@ -37,6 +39,9 @@ export function PeopleScreen({ people }: { people: PersonView[] }) {
   // Home's search opens People with ?q=…
   const [query, setQuery] = React.useState(() => params.get("q") ?? "");
   const [filter, setFilter] = React.useState<FilterKey>("all");
+  const [inviting, setInviting] = React.useState<{ key: number; id: string; name: string } | null>(
+    null,
+  );
   const [dialog, setDialog] = React.useState<{ key: number; initial: PersonFormValues } | null>(
     null,
   );
@@ -231,10 +236,28 @@ export function PeopleScreen({ people }: { people: PersonView[] }) {
               headingRef={headingRef}
               onBack={backToList}
               onEdit={() => openEdit(panelPerson)}
+              onInvite={() => {
+                opener.current = document.activeElement as HTMLElement | null;
+                setInviting({ key: Date.now(), id: panelPerson.id, name: panelPerson.name });
+              }}
               className={selected ? undefined : "hidden xl:flex"}
             />
           )}
         </div>
+      )}
+
+      {inviting && (
+        <InviteLinkDialog
+          key={inviting.key}
+          open
+          onOpenChange={(o) => !o && setInviting(null)}
+          personId={inviting.id}
+          personName={inviting.name}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            requestAnimationFrame(() => (opener.current ?? titleRef.current)?.focus());
+          }}
+        />
       )}
 
       {dialog && (

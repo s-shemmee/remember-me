@@ -1,8 +1,9 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { siteOrigin } from "@/lib/site-origin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { onboardingRedirect } from "@/features/onboarding/redirect";
@@ -32,16 +33,6 @@ const MESSAGES = {
   resetSent: "If there's an account for that email, we've sent a link to reset your password.",
   resent: "Sent again. It can take a minute to arrive.",
 } as const;
-
-/** The site the request came from, for links in emails and OAuth returns. */
-async function siteOrigin(): Promise<string> {
-  const h = await headers();
-  const origin = h.get("origin");
-  if (origin && /^https?:\/\/[^/]+$/.test(origin)) return origin;
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
 
 const str = (formData: FormData, key: string) => {
   const value = formData.get(key);

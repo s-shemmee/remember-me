@@ -37,8 +37,12 @@ export function PersonCard({
       <span className="flex w-full min-w-0 flex-1 flex-col items-start gap-2 @[30rem]:gap-2.5">
         <span className="flex w-full min-w-0 flex-col gap-0.5">
           <span className="truncate text-17 font-bold">{person.name}</span>
-          {person.relationLabel && (
-            <span className="truncate text-14 text-sub">{person.relationLabel}</span>
+          {(person.relationLabel || person.connected) && (
+            <span className="truncate text-14 text-sub">
+              {[person.relationLabel, person.connected ? "Connected" : null]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
           )}
         </span>
         {person.next && (

@@ -38,6 +38,8 @@ export type PersonRow = {
   color: string;
   group: "family" | "friends" | "work" | "other";
   little_things: string[];
+  /** Set when they're one of your connections ("This is Khalid"). */
+  linked_profile_id?: string | null;
   occasions: OccasionRow[];
 };
 
@@ -63,6 +65,8 @@ export type PersonView = {
   name: string;
   /** What to show under their name: their description, else the chip. */
   relationLabel: string;
+  /** Linked to one of your connections. */
+  connected: boolean;
   color: Pastel;
   group: PersonRow["group"];
   littleThings: string[];
@@ -122,6 +126,7 @@ export function personView(row: PersonRow, today: CalendarDate): PersonView {
     color: asPastel(row.color ?? RELATION_COLORS[relationKind]),
     group: row.group,
     littleThings: row.little_things,
+    connected: Boolean(row.linked_profile_id),
     days,
     next: days.find((d) => Number.isFinite(d.daysUntil)) ?? null,
     form: {
@@ -165,6 +170,7 @@ export function filterPeople(people: PersonView[], filter: string, query: string
   const q = query.trim().toLocaleLowerCase();
   return people.filter(
     (p) =>
-      (filter === "all" || p.group === filter) && (!q || p.name.toLocaleLowerCase().includes(q)),
+      (filter === "all" || (filter === "connected" ? p.connected : p.group === filter)) &&
+      (!q || p.name.toLocaleLowerCase().includes(q)),
   );
 }

@@ -1,6 +1,8 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { INVITE_COOKIE, isInviteToken } from "@/features/connections/invite-token";
 import { characterEmoji } from "@/features/onboarding/constants";
 import { onboardingRedirect } from "@/features/onboarding/redirect";
 import { asPastel } from "@/features/people/view";
@@ -34,6 +36,10 @@ async function Shell({ children }: { children: React.ReactNode }) {
 
   const to = onboardingRedirect("/home", Boolean(profile?.onboarded_at));
   if (to) redirect(to);
+
+  // An invite was waiting (opened before signing up or logging in): go
+  // back to it once. /invite/resume clears the cookie.
+  if (isInviteToken((await cookies()).get(INVITE_COOKIE)?.value)) redirect("/invite/resume");
 
   const today = todayIn(profile?.timezone);
   const birthday =

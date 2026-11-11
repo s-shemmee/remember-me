@@ -20,7 +20,7 @@ async function People() {
     supabase
       .from("people")
       .select(
-        "id, name, relation, relation_kind, color, group, little_things, occasions(id, kind, title, day, month, year, recurring)",
+        "id, name, relation, relation_kind, color, group, little_things, linked_profile_id, occasions(id, kind, title, day, month, year, recurring)",
       )
       .is("archived_at", null)
       .order("created_at"),

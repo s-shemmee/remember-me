@@ -38,12 +38,14 @@ export function PersonPanel({
   person,
   onBack,
   onEdit,
+  onInvite,
   headingRef,
   className,
 }: {
   person: PersonView;
   onBack: () => void;
   onEdit: () => void;
+  onInvite: () => void;
   headingRef?: React.Ref<HTMLHeadingElement>;
   className?: string;
 }) {
@@ -82,8 +84,12 @@ export function PersonPanel({
           >
             {person.name}
           </h2>
-          {person.relationLabel && (
-            <span className="truncate text-14 text-sub">{person.relationLabel}</span>
+          {(person.relationLabel || person.connected) && (
+            <span className="truncate text-14 text-sub">
+              {[person.relationLabel, person.connected ? "Connected" : null]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
           )}
         </div>
       </div>
@@ -136,7 +142,18 @@ export function PersonPanel({
 
       <div className="flex flex-col gap-2">
         <SectionLabel id={`${headingId}-wishlist`}>Their wishlist</SectionLabel>
-        <p className="text-14 text-sub">Not connected yet, so no shared wishlist.</p>
+        {person.connected ? (
+          <p className="text-14 text-sub">
+            Connected 💛 Their wishlist shows up here once sharing arrives.
+          </p>
+        ) : (
+          <div className="flex flex-col items-start gap-2">
+            <p className="text-14 text-sub">Not connected yet, so no shared wishlist.</p>
+            <Button variant="card2" onClick={onInvite} className="max-w-full">
+              <span className="truncate">Invite {person.name} to Remember Me</span>
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2">

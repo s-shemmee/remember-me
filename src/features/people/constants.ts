@@ -37,6 +37,7 @@ export const FILTERS = [
   { key: "family", label: "Family" },
   { key: "friends", label: "Friends" },
   { key: "work", label: "Work" },
+  { key: "connected", label: "Connected" },
 ] as const;
 export type FilterKey = (typeof FILTERS)[number]["key"];
 
