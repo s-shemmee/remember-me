@@ -16,4 +16,6 @@ regexes = [
   '''^test_password_0{8}$''',
   '''^local-only-cron-secret$''',
   '''^local-only-unsubscribe-secret-0{10}$''',
+  '''^(AQEB){10}AQE$''',
+  '''^BG_wO5SSQc4drdQ1GeaWDgqFtBppoFwygQOqK84VlMoWPE91OlW_AdxT9sCwx-7ni0DG_30lqW4igrmJzvccFEo$''',
 ]

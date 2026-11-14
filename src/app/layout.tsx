@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
+import { SerwistProvider } from "@serwist/turbopack/react";
+import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Kalam, Plus_Jakarta_Sans } from "next/font/google";
+
 import { SkipLink } from "@/components/ui/skip-link";
 import { Toaster } from "@/components/ui/sonner";
 import { themeScript } from "@/lib/theme";
@@ -28,6 +30,17 @@ const kalam = Kalam({
 export const metadata: Metadata = {
   title: "Remember Me",
   description: "Remember the people you love, and your own day too.",
+  applicationName: "Remember Me",
+  appleWebApp: { capable: true, title: "Remember Me", statusBarStyle: "default" },
+  icons: { apple: "/apple-touch-icon.png" },
+};
+
+/** The browser bar follows the page colour in light and dark (the manifest can't). */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f5f9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e0e10" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -45,7 +58,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         {/* Every page has a <main id="main">. */}
         <SkipLink />
-        {children}
+        {/* The service worker: app shell only (src/sw/sw.ts). Never cache pages on
+            navigation (personal data), never reload a page with a half-filled form. */}
+        <SerwistProvider
+          swUrl="/serwist/sw.js"
+          cacheOnNavigation={false}
+          reloadOnOnline={false}
+          disable={process.env.NODE_ENV === "development"}
+        >
+          {children}
+        </SerwistProvider>
         <Toaster />
       </body>
     </html>

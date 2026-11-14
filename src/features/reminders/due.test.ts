@@ -19,6 +19,7 @@ const user = (extra: Partial<ReminderUser> = {}): ReminderUser => ({
   offsets: [14, 7, 3, 1, 0],
   sendTime: "09:00:00",
   emailOn: true,
+  pushOn: false,
   ...extra,
 });
 const day = (extra: Partial<ReminderDay> = {}): ReminderDay => ({
@@ -131,6 +132,16 @@ describe("offsets", () => {
     expect(keys("2026-11-12T10:00:00Z", { offsets: [7, 1, 0] })).toEqual(["o1|1|2026-11-13"]);
     // Unknown offsets are ignored.
     expect(keys("2026-11-11T10:00:00Z", { offsets: [2] })).toEqual([]);
+  });
+
+  it("each channel only when it's on", () => {
+    const now = new Date("2026-11-06T10:00:00Z");
+    const args = { now, days: [day()], sent: new Set<string>() };
+    expect(dueReminders({ ...args, user: user({ emailOn: false, pushOn: true }) })).toEqual([]);
+    expect(
+      dueReminders({ ...args, user: user({ emailOn: false, pushOn: true }), channel: "push" }),
+    ).toHaveLength(1);
+    expect(dueReminders({ ...args, user: user(), channel: "push" })).toEqual([]);
   });
 
   it("nothing at all with email off or no offsets", () => {

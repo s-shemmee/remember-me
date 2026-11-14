@@ -50,9 +50,15 @@ function secret(name: string, minLength = 16): string {
 export const cronSecret = () => secret("CRON_SECRET", 16);
 export const unsubscribeSecret = () => secret("UNSUBSCRIBE_SECRET", 32);
 
-/** The app (links in emails), e.g. https://remember-me.app. */
+/**
+ * The site (links in emails and notifications): SITE_URL, e.g.
+ * https://rememberme.shemme.codes. APP_URL is the older name, still read.
+ */
 export const appUrl = () =>
-  (Deno.env.get("APP_URL") ?? "http://localhost:3000").replace(/\/+$/, "");
+  (Deno.env.get("SITE_URL") ?? Deno.env.get("APP_URL") ?? "http://localhost:3000").replace(
+    /\/+$/,
+    "",
+  );
 
 /** Public functions URL for List-Unsubscribe (not SUPABASE_URL, which is internal locally). */
 export const functionsUrl = () =>

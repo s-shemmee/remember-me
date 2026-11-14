@@ -15,6 +15,16 @@ export const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z
     .string()
     .startsWith("sb_publishable_", { error: 'must be a publishable key ("sb_publishable_…")' }),
+  /** The public site, e.g. https://rememberme.shemme.codes (manifest id). Optional locally. */
+  NEXT_PUBLIC_SITE_URL: z
+    .url({ protocol: /^https?$/, error: "must be an http(s) URL" })
+    .transform((url) => url.replace(/\/+$/, ""))
+    .optional(),
+  /** The VAPID public key (base64url, 65 bytes). Without it, push stays unavailable. */
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{86,88}$/, { error: "must be a base64url VAPID public key" })
+    .optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -48,6 +58,8 @@ function readSource() {
   return {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || undefined,
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || undefined,
   };
 }
 
@@ -57,4 +69,16 @@ let cached: Env | undefined;
 export function getEnv(): Env {
   cached ??= parseEnv(readSource());
   return cached;
+}
+
+/**
+ * The public site URL, or localhost in development. Reads only this one
+ * variable (not the whole env), so static files like the manifest can be
+ * prerendered at build time, where the Supabase env isn't set.
+ */
+export function siteUrl(): string {
+  const parsed = envSchema.shape.NEXT_PUBLIC_SITE_URL.safeParse(
+    process.env.NEXT_PUBLIC_SITE_URL || undefined,
+  );
+  return (parsed.success ? parsed.data : undefined) ?? "http://localhost:3000";
 }

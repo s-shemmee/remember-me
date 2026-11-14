@@ -22,6 +22,15 @@ export const FAKE_DB_PASSWORD = "test_password_00000000";
 export const FAKE_CRON_SECRET = "local-only-cron-secret";
 export const FAKE_UNSUBSCRIBE_SECRET = "local-only-unsubscribe-secret-0000000000";
 
+/**
+ * A fake VAPID key pair for local and CI push. The private key is 32 bytes
+ * of 0x01 (a valid P-256 key, obviously not a real one); the public key is
+ * derived from it. The functions refuse this private key off a local Supabase.
+ */
+export const FAKE_VAPID_PRIVATE_KEY = "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE";
+export const FAKE_VAPID_PUBLIC_KEY =
+  "BG_wO5SSQc4drdQ1GeaWDgqFtBppoFwygQOqK84VlMoWPE91OlW_AdxT9sCwx-7ni0DG_30lqW4igrmJzvccFEo";
+
 /** A valid env for parseEnv() and anything that needs one. */
 export const fakeEnv = {
   NEXT_PUBLIC_SUPABASE_URL: FAKE_SUPABASE_URL,

@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { logOut } from "@/features/auth/actions";
+import { unsubscribeThisDevice } from "@/features/notifications/browser";
 import { clearOnboardingDraft } from "@/features/onboarding/store";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
@@ -106,7 +107,12 @@ export function AccountMenu({
           disabled={pending}
           onSelect={() => {
             clearOnboardingDraft();
-            startTransition(() => logOut());
+            // On a shared device, the next person never gets your reminders:
+            // this device's push subscription goes before you're signed out.
+            startTransition(async () => {
+              const endpoint = await unsubscribeThisDevice();
+              await logOut(endpoint);
+            });
           }}
         >
           <span aria-hidden>↪</span> Log out

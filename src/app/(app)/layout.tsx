@@ -6,6 +6,7 @@ import { INVITE_COOKIE, isInviteToken } from "@/features/connections/invite-toke
 import { characterEmoji } from "@/features/onboarding/constants";
 import { onboardingRedirect } from "@/features/onboarding/redirect";
 import { asPastel } from "@/features/people/view";
+import { InstallPromptListener } from "@/features/notifications/components/install-prompt-listener";
 import { AppShell } from "@/features/shell/app-shell";
 import { daysBetween, formatShortDate, nextOccurrence, todayIn } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -68,8 +69,12 @@ async function Shell({ children }: { children: React.ReactNode }) {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<div aria-busy="true" className="min-h-dvh" />}>
-      <Shell>{children}</Shell>
-    </Suspense>
+    <>
+      {/* The browser offers installing once, on any page: kept for Settings → App. */}
+      <InstallPromptListener />
+      <Suspense fallback={<div aria-busy="true" className="min-h-dvh" />}>
+        <Shell>{children}</Shell>
+      </Suspense>
+    </>
   );
 }

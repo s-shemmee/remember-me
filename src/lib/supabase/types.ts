@@ -383,6 +383,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      push_subscriptions: {
+        Row: {
+          auth: string;
+          created_at: string;
+          device_label: string;
+          endpoint: string;
+          id: string;
+          last_used_at: string | null;
+          p256dh: string;
+          profile_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          auth: string;
+          created_at?: string;
+          device_label?: string;
+          endpoint: string;
+          id?: string;
+          last_used_at?: string | null;
+          p256dh: string;
+          profile_id?: string;
+        };
+        Update: {
+          auth?: string;
+          created_at?: string;
+          device_label?: string;
+          endpoint?: string;
+          id?: string;
+          last_used_at?: string | null;
+          p256dh?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       reminder_settings: {
         Row: {
           email: boolean;
@@ -565,12 +607,12 @@ export type Database = {
     };
     Functions: {
       accept_invite: { Args: { p_token: string }; Returns: string };
-      allow_test_email: { Args: { p_profile_id: string }; Returns: boolean };
+      allow_test: { Args: { p_channel: string; p_profile_id: string }; Returns: boolean };
       are_connected: { Args: { p_a: string; p_b: string }; Returns: boolean };
       call_edge_function: { Args: { p_name: string }; Returns: number };
       can_view_wish_image: { Args: { p_name: string }; Returns: boolean };
       claim_reminders: {
-        Args: { p_batch_id: string; p_keys: string[]; p_profile_id: string };
+        Args: { p_batch_id: string; p_channel: string; p_keys: string[]; p_profile_id: string };
         Returns: string[];
       };
       complete_onboarding: {
@@ -623,6 +665,7 @@ export type Database = {
           status: string;
         }[];
       };
+      is_push_endpoint: { Args: { p_endpoint: string }; Returns: boolean };
       link_person: { Args: { p_person_id: string; p_profile_id: string }; Returns: undefined };
       my_connections: {
         Args: Record<PropertyKey, never>;
@@ -657,6 +700,7 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: {
           batch_id: string;
+          channel: string;
           keys: string[];
           profile_id: string;
         }[];
@@ -667,6 +711,7 @@ export type Database = {
         Returns: {
           day: number;
           email: string;
+          email_on: boolean;
           first_name: string;
           kind: string;
           little_thing: string;
@@ -677,6 +722,7 @@ export type Database = {
           person_id: string;
           person_name: string;
           profile_id: string;
+          push_on: boolean;
           recurring: boolean;
           send_time: string;
           timezone: string;
@@ -688,7 +734,18 @@ export type Database = {
       reminder_log_keys: {
         Args: Record<PropertyKey, never>;
         Returns: {
+          channel: string;
           key: string;
+          profile_id: string;
+        }[];
+      };
+      reminder_push_devices: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          auth: string;
+          endpoint: string;
+          id: string;
+          p256dh: string;
           profile_id: string;
         }[];
       };
@@ -710,6 +767,10 @@ export type Database = {
           p_relation?: string;
           p_relation_kind?: string;
         };
+        Returns: string;
+      };
+      save_push_subscription: {
+        Args: { p_auth: string; p_device_label: string; p_endpoint: string; p_p256dh: string };
         Returns: string;
       };
       unlink_person: { Args: { p_person_id: string }; Returns: undefined };

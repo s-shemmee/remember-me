@@ -43,3 +43,21 @@ describe("parseEnv", () => {
     }
   });
 });
+
+describe("siteUrl", () => {
+  it("reads NEXT_PUBLIC_SITE_URL alone, without a trailing slash, else localhost", async () => {
+    const { siteUrl } = await import("./env");
+    const before = process.env.NEXT_PUBLIC_SITE_URL;
+    try {
+      process.env.NEXT_PUBLIC_SITE_URL = "https://rememberme.shemme.codes/";
+      expect(siteUrl()).toBe("https://rememberme.shemme.codes");
+      process.env.NEXT_PUBLIC_SITE_URL = "not a url";
+      expect(siteUrl()).toBe("http://localhost:3000");
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+      expect(siteUrl()).toBe("http://localhost:3000");
+    } finally {
+      if (before === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+      else process.env.NEXT_PUBLIC_SITE_URL = before;
+    }
+  });
+});

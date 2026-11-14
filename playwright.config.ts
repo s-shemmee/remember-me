@@ -27,7 +27,9 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"], ...(CI ? {} : { channel: "msedge" }) },
+      // CI: full Chromium in new headless mode ("chromium"), not the
+      // headless shell, which always denies notifications (e2e/pwa.spec.ts).
+      use: { ...devices["Desktop Chrome"], channel: CI ? "chromium" : "msedge" },
     },
   ],
   webServer: {

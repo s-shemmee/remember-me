@@ -128,12 +128,15 @@ export function ReminderSettings({ initial, email }: { initial: Settings; email:
         </p>
       </div>
 
-      <div className="flex items-center justify-between gap-4 rounded-[20px] border-[1.5px] border-dashed border-line px-4 py-3.5">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-15 font-bold">Notifications on this device</span>
-          <span className="text-14 text-sub">Coming soon, with the app on your home screen</span>
-        </div>
-      </div>
+      <p className="text-14 text-sub">
+        Want a nudge on your phone too?{" "}
+        <a
+          href="#notifications"
+          className="font-semibold text-accent-text underline-offset-4 hover:underline"
+        >
+          Turn on notifications
+        </a>
+      </p>
     </section>
   );
 }

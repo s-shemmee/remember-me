@@ -56,17 +56,17 @@ select is((select count(*)::int from public.reminder_candidates()
 -- Claims: never twice ------------------------------------------------------------------------------
 insert into t select 'claim1', string_agg(c, ',') from public.claim_reminders(
   '00000000-0000-0000-0000-00000000a801', '11111111-1111-1111-1111-111111111111',
-  array[(select val from t where key = 'k7')]) c;
+  array[(select val from t where key = 'k7')], 'email') c;
 select is((select val from t where key = 'claim1'), (select val from t where key = 'k7'), 'the first claim wins');
 select is((select count(*)::int from public.claim_reminders(
   '00000000-0000-0000-0000-00000000a801', '22222222-2222-2222-2222-222222222222',
-  array[(select val from t where key = 'k7')])), 0, 'claiming the same key again claims nothing (a retry or a second run)');
+  array[(select val from t where key = 'k7')], 'email')), 0, 'claiming the same key again claims nothing (a retry or a second run)');
 select is((select count(*)::int from public.claim_reminders(
   '00000000-0000-0000-0000-00000000a801', '22222222-2222-2222-2222-222222222222',
-  array[(select val from t where key = 'k7_2027')])), 1, 'next year''s occurrence is a different key');
+  array[(select val from t where key = 'k7_2027')], 'email')), 1, 'next year''s occurrence is a different key');
 select is((select count(*)::int from public.claim_reminders(
   '00000000-0000-0000-0000-00000000b801', '33333333-3333-3333-3333-333333333333',
-  array[(select val from t where key = 'k7')])), 0, 'a key for someone else''s occasion is never claimed');
+  array[(select val from t where key = 'k7')], 'email')), 0, 'a key for someone else''s occasion is never claimed');
 select is((select key from public.reminder_log_keys() where profile_id = '00000000-0000-0000-0000-00000000a801'
            and key like '%2026-11-13'), (select val from t where key = 'k7'), 'logged keys come back as occasion|offset|date');
 reset role;
@@ -134,7 +134,7 @@ select throws_ok($$ delete from public.notification_log $$, '42501', null, 'or d
 select pg_temp.act_as('00000000-0000-0000-0000-00000000b801');
 select is((select count(*)::int from public.notification_log), 0, 'B can''t read A''s log');
 select throws_ok($$ select * from public.reminder_candidates() $$, '42501', null, 'users can''t read the candidates');
-select throws_ok($$ select public.claim_reminders(null, null, null) $$, '42501', null, 'or claim');
+select throws_ok($$ select public.claim_reminders(null, null, null, null) $$, '42501', null, 'or claim');
 select throws_ok($$ select * from public.reclaim_stuck_reminders() $$, '42501', null, 'or reclaim');
 select throws_ok($$ select public.run_cleanup() $$, '42501', null, 'or run the clean-up');
 select throws_ok($$ select public.call_edge_function('send-reminders') $$, '42501', null, 'or call the cron functions');
@@ -142,10 +142,10 @@ reset role;
 
 -- Test emails: 3 an hour ------------------------------------------------------------------------------
 set local role service_role;
-select is(public.allow_test_email('00000000-0000-0000-0000-00000000b801'), true, 'test email 1 allowed');
-select is(public.allow_test_email('00000000-0000-0000-0000-00000000b801'), true, 'test email 2 allowed');
-select is(public.allow_test_email('00000000-0000-0000-0000-00000000b801'), true, 'test email 3 allowed');
-select is(public.allow_test_email('00000000-0000-0000-0000-00000000b801'), false, 'the 4th within an hour is refused');
+select is(public.allow_test('00000000-0000-0000-0000-00000000b801', 'email'), true, 'test email 1 allowed');
+select is(public.allow_test('00000000-0000-0000-0000-00000000b801', 'email'), true, 'test email 2 allowed');
+select is(public.allow_test('00000000-0000-0000-0000-00000000b801', 'email'), true, 'test email 3 allowed');
+select is(public.allow_test('00000000-0000-0000-0000-00000000b801', 'email'), false, 'the 4th within an hour is refused');
 reset role;
 
 -- Cron --------------------------------------------------------------------------------------------------
@@ -214,16 +214,18 @@ select is((select count(*)::int from public.people where id = (select val::uuid 
 select is((select string_agg(title, ', ' order by title) from public.wishes
            where owner_id = '00000000-0000-0000-0000-00000000a801'),
   'Fresh cancel, Live wish, Old cancel, Recent wish', 'wishes removed over 30 days go; recent and live ones stay');
-select is((select count(*)::int from public.reservations where cancelled_at is null), 1, 'active reservations stay');
-select is((select count(*)::int from public.reservations where cancelled_at is not null), 1,
+select is((select count(*)::int from public.reservations where reserver_id = '00000000-0000-0000-0000-00000000c801' and cancelled_at is null), 1,
+  'active reservations stay');
+select is((select count(*)::int from public.reservations where reserver_id = '00000000-0000-0000-0000-00000000c801' and cancelled_at is not null), 1,
   'a cancellation still inside its 10 minutes stays; a final one goes');
 select is((select count(*)::int from public.invites where inviter_id = '00000000-0000-0000-0000-00000000a801'), 1,
   'invites past expiry go; valid ones stay');
 select is((select count(*)::int from public.notification_log where created_at < now() - interval '400 days'), 0,
   'log rows older than 400 days go');
-select is((select (val::jsonb ->> 'people')::int + (val::jsonb ->> 'wishes')::int + (val::jsonb ->> 'reservations')::int
-                  + (val::jsonb ->> 'invites')::int + (val::jsonb ->> 'notification_log')::int from t where key = 'cleanup'),
-  5, 'it reports what it deleted');
+-- At least this file's five (a local database used for e2e may hold more to clean).
+select ok((select (val::jsonb ->> 'people')::int + (val::jsonb ->> 'wishes')::int + (val::jsonb ->> 'reservations')::int
+                  + (val::jsonb ->> 'invites')::int + (val::jsonb ->> 'notification_log')::int from t where key = 'cleanup')
+          >= 5, 'it reports what it deleted');
 
 select * from finish();
 rollback;

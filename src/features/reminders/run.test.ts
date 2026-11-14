@@ -2,8 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import { FAKE_UNSUBSCRIBE_SECRET } from "@/test/fake-values";
 
-import type { ReminderDay, ReminderUser } from "./due";
-import { type OutgoingEmail, type ReminderStore, runReminders, type SendResult } from "./run";
+import type { Channel, ReminderDay, ReminderUser } from "./due";
+import {
+  loggedKey,
+  type OutgoingEmail,
+  type PushDeliver,
+  type ReminderStore,
+  runReminders,
+  type SendResult,
+  type StuckBatch,
+} from "./run";
 import {
   looksLikeUnsubscribeToken,
   signUnsubscribeToken,
@@ -35,6 +43,7 @@ describe("unsubscribe tokens", () => {
 // An in-memory notification_log with the same rules as the database.
 type Row = {
   key: string;
+  channel: Channel;
   profileId: string;
   batchId: string;
   status: "claimed" | "sent" | "failed";
@@ -48,21 +57,25 @@ function fakeStore(clock: { now: number }, users: ReminderUser[], days: Reminder
     async loadCandidates() {
       const logged = new Map<string, Set<string>>();
       for (const r of rows) {
-        if (!logged.has(r.profileId)) logged.set(r.profileId, new Set());
-        logged.get(r.profileId)!.add(r.key);
+        const k = loggedKey(r.channel, r.profileId);
+        if (!logged.has(k)) logged.set(k, new Set());
+        logged.get(k)!.add(r.key);
       }
       return {
-        users: users.filter((u) => u.emailOn),
+        users: users.filter((u) => u.emailOn || u.pushOn),
         days: new Map(users.map((u) => [u.profileId, days])),
         logged,
       };
     },
-    async claim(profileId, batchId, keys) {
+    async claim(profileId, batchId, keys, channel) {
       const claimed: string[] = [];
       for (const key of keys) {
-        if (rows.some((r) => r.profileId === profileId && r.key === key)) continue; // on conflict do nothing
+        // on conflict (profile, occasion, offset, occurrence, channel) do nothing
+        if (rows.some((r) => r.profileId === profileId && r.key === key && r.channel === channel))
+          continue;
         rows.push({
           key,
+          channel,
           profileId,
           batchId,
           status: "claimed",
@@ -77,7 +90,7 @@ function fakeStore(clock: { now: number }, users: ReminderUser[], days: Reminder
       const stuck = rows.filter(
         (r) => r.status === "claimed" && clock.now - r.claimedAt > 10 * 60_000,
       );
-      const byBatch = new Map<string, { batchId: string; profileId: string; keys: string[] }>();
+      const byBatch = new Map<string, StuckBatch>();
       for (const r of stuck) {
         if (r.attempts >= 5) {
           r.status = "failed";
@@ -88,6 +101,7 @@ function fakeStore(clock: { now: number }, users: ReminderUser[], days: Reminder
         const b = byBatch.get(r.batchId) ?? {
           batchId: r.batchId,
           profileId: r.profileId,
+          channel: r.channel,
           keys: [],
         };
         b.keys.push(r.key);
@@ -135,6 +149,7 @@ const user: ReminderUser = {
   offsets: [7, 1, 0],
   sendTime: "09:00",
   emailOn: true,
+  pushOn: false,
 };
 const khalid: ReminderDay = {
   occasionId: "o1",
@@ -152,7 +167,20 @@ const khalid: ReminderDay = {
   wishlistFriendId: null,
 };
 
-function setup(users = [user], days = [khalid]) {
+/** A push sender with devices: "ok", "fail" (5xx) or "gone" (every device 404/410). */
+function fakePush() {
+  const sent: { batchId: string; keys: string[] }[] = [];
+  let mode: "ok" | "fail" | "gone" = "ok";
+  const deliver: PushDeliver = async (_user, reminders, batchId) => {
+    if (mode === "fail") return { ok: false, error: "push 503" };
+    if (mode === "gone") return { ok: false, nothingToSend: true, error: "all devices gone" };
+    sent.push({ batchId, keys: reminders.map((r) => r.key) });
+    return { ok: true, id: null };
+  };
+  return { deliver, sent, setMode: (m: typeof mode) => (mode = m) };
+}
+
+function setup(users = [user], days = [khalid], push?: PushDeliver) {
   const clock = { now: Date.parse("2026-11-06T09:30:00Z") };
   const { store, rows } = fakeStore(clock, users, days);
   const resend = fakeResend();
@@ -168,6 +196,7 @@ function setup(users = [user], days = [khalid]) {
         text: "hi",
       }),
       headersFor: async () => ({ "List-Unsubscribe": "<https://x/unsubscribe?token=t>" }),
+      push,
       newId: () => `batch-${++n}`,
     });
   return { clock, rows, resend, run };
@@ -221,6 +250,7 @@ describe("a reminder run", () => {
     // As if the function died right after the claim insert.
     rows.push({
       key: "o1|7|2026-11-13",
+      channel: "email",
       profileId: "u1",
       batchId: "batch-0",
       status: "claimed",
@@ -266,5 +296,60 @@ describe("a reminder run", () => {
     const [a, b] = await Promise.all([run(), run()]);
     expect(a.sent + b.sent).toBe(1);
     expect(resend.delivered).toHaveLength(1);
+  });
+
+  describe("with push", () => {
+    const both = { ...user, pushOn: true };
+
+    it("email and push are each sent exactly once, with their own claims", async () => {
+      const push = fakePush();
+      const { rows, resend, run } = setup([both], [khalid], push.deliver);
+      expect(await run()).toEqual({ sent: 2, retried: 0, failed: 0, released: 0 });
+      expect(resend.delivered).toHaveLength(1);
+      expect(push.sent).toEqual([{ batchId: "batch-2", keys: ["o1|7|2026-11-13"] }]);
+      expect(rows.map((r) => `${r.channel} ${r.status}`).sort()).toEqual([
+        "email sent",
+        "push sent",
+      ]);
+      expect(await run()).toEqual({ sent: 0, retried: 0, failed: 0, released: 0 });
+      expect(push.sent).toHaveLength(1);
+    });
+
+    it("push only, when email is off", async () => {
+      const push = fakePush();
+      const { resend, run } = setup([{ ...both, emailOn: false }], [khalid], push.deliver);
+      expect(await run()).toMatchObject({ sent: 1 });
+      expect(resend.delivered).toHaveLength(0);
+      expect(push.sent).toHaveLength(1);
+    });
+
+    it("a failed push doesn't hold up the email, and is retried with the same tag", async () => {
+      const push = fakePush();
+      const { clock, rows, resend, run } = setup([both], [khalid], push.deliver);
+      push.setMode("fail");
+      expect(await run()).toEqual({ sent: 1, retried: 0, failed: 1, released: 0 });
+      expect(resend.delivered).toHaveLength(1);
+      expect(rows.find((r) => r.channel === "push")!.status).toBe("claimed");
+      push.setMode("ok");
+      clock.now += 11 * 60_000;
+      expect(await run()).toEqual({ sent: 0, retried: 1, failed: 0, released: 0 });
+      expect(push.sent).toEqual([{ batchId: "batch-2", keys: ["o1|7|2026-11-13"] }]);
+      expect(resend.delivered).toHaveLength(1);
+    });
+
+    it("every device gone: the push claim is dropped, the email still goes", async () => {
+      const push = fakePush();
+      push.setMode("gone");
+      const { rows, resend, run } = setup([both], [khalid], push.deliver);
+      expect(await run()).toEqual({ sent: 1, retried: 0, failed: 0, released: 1 });
+      expect(resend.delivered).toHaveLength(1);
+      expect(rows.map((r) => r.channel)).toEqual(["email"]);
+    });
+
+    it("no push sender configured: push is skipped", async () => {
+      const { rows, run } = setup([both]);
+      expect(await run()).toMatchObject({ sent: 1 });
+      expect(rows.map((r) => r.channel)).toEqual(["email"]);
+    });
   });
 });

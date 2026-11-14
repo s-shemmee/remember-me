@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     if (error || !user?.email || !user.email_confirmed_at)
       return json({ error: "unauthorized" }, 401);
 
-    const allowed = await db.rpc("allow_test_email", { p_profile_id: user.id });
+    const allowed = await db.rpc("allow_test", { p_profile_id: user.id, p_channel: "email" });
     if (allowed.error) throw new Error(allowed.error.message);
     if (allowed.data !== true) return json({ error: "too_many" }, 429);
 

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { siteOrigin } from "@/lib/site-origin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isPushEndpoint } from "@/features/reminders/push";
 
 import { onboardingRedirect } from "@/features/onboarding/redirect";
 
@@ -194,8 +195,15 @@ export async function resendConfirmation(
   return { notice: MESSAGES.resent };
 }
 
-export async function logOut(): Promise<void> {
+/**
+ * Logs out. With this device's push endpoint, its subscription is removed
+ * first (RLS: only your own), so a shared device stops getting your reminders.
+ */
+export async function logOut(pushEndpoint?: unknown): Promise<void> {
   const supabase = await createSupabaseServerClient();
+  if (typeof pushEndpoint === "string" && isPushEndpoint(pushEndpoint)) {
+    await supabase.from("push_subscriptions").delete().eq("endpoint", pushEndpoint);
+  }
   await supabase.auth.signOut();
   redirect("/log-in");
 }

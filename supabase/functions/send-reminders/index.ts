@@ -10,7 +10,12 @@ import { runReminders } from "../../../src/features/reminders/run.ts";
 
 import { allowNowOverride, isCron, json } from "../_shared/env.ts";
 import { sendEmail } from "../_shared/mailer.ts";
-import { adminClient, reminderStore, unsubscribeLinks } from "../_shared/reminders.ts";
+import {
+  adminClient,
+  pushDeliverer,
+  reminderStore,
+  unsubscribeLinks,
+} from "../_shared/reminders.ts";
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
@@ -26,9 +31,12 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const db = adminClient();
     const summary = await runReminders({
       now,
-      store: reminderStore(adminClient()),
+      store: reminderStore(db),
+      // Push loads devices once per run; without VAPID keys it is skipped.
+      push: await pushDeliverer(db),
       send: sendEmail,
       // React and the renderer load only when there's an email to render:
       // most runs (every 15 minutes) have nothing due and stay light.

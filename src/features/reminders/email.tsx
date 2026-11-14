@@ -39,7 +39,7 @@ const pastelOf = (c: string) =>
 const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 export type EmailLinks = {
-  /** The app, e.g. https://remember-me.app (no trailing slash). */
+  /** The site, from SITE_URL, e.g. https://rememberme.shemme.codes (no trailing slash). */
   appUrl: string;
   /** The unsubscribe page in the app, with its signed token. */
   unsubscribeUrl: string;

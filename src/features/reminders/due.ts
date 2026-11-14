@@ -24,6 +24,8 @@ import {
 export const REMINDER_OFFSETS = [14, 7, 3, 1, 0] as const;
 export const DEFAULT_SEND_TIME = "09:00";
 
+export type Channel = "email" | "push";
+
 export type ReminderUser = {
   profileId: string;
   email: string;
@@ -33,6 +35,8 @@ export type ReminderUser = {
   /** "HH:MM" (Postgres `time` may add ":SS"). */
   sendTime: string;
   emailOn: boolean;
+  /** Push on and at least one device. */
+  pushOn: boolean;
 };
 
 export type ReminderDay = {
@@ -92,14 +96,18 @@ export function dueReminders({
   user,
   days,
   sent,
+  channel = "email",
 }: {
   now: Date;
   user: ReminderUser;
   days: ReminderDay[];
   /** Keys already in notification_log for this user and channel (any status). */
   sent: ReadonlySet<string>;
+  /** Which channel this is for (default email): off means nothing is due. */
+  channel?: Channel;
 }): DueReminder[] {
-  if (!user.emailOn || !user.offsets.length) return [];
+  const on = channel === "push" ? user.pushOn : user.emailOn;
+  if (!on || !user.offsets.length) return [];
   const zone = user.timezone || DEFAULT_TIMEZONE;
   if (minutesIn(zone, now) < sendMinutes(user.sendTime)) return [];
   const today = todayIn(zone, now);

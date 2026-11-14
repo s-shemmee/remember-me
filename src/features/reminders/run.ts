@@ -1,7 +1,13 @@
 /**
  * One run of the reminder job (every 15 minutes), with its I/O passed in so
- * it can be tested: the Edge Function gives it the database (`store`) and
- * the mailer (Resend, or Mailpit locally).
+ * it can be tested: the Edge Function gives it the database (`store`), the
+ * mailer (Resend, or Mailpit locally) and the push sender.
+ *
+ * Two channels, email and push, each with its own claims in
+ * notification_log: each is sent exactly once, and one failing never holds
+ * up the other. Web push has no idempotency key; a retried push batch
+ * reuses its tag (the batch id), so the device replaces the notification
+ * instead of showing it twice.
  *
  * Never twice, never lost:
  * 1. Stuck batches first: rows still `claimed` after 10 minutes (a crash
@@ -13,6 +19,7 @@
  *    once it's 10 minutes old; after 5 attempts it's marked `failed`.
  */
 import {
+  type Channel,
   dueReminders,
   type DueReminder,
   type ReminderDay,
@@ -25,16 +32,21 @@ import type { RenderedEmail } from "./email.tsx";
 export type Candidates = {
   users: ReminderUser[];
   days: Map<string, ReminderDay[]>;
-  /** Per user: keys already in notification_log (claimed, sent or failed). */
+  /**
+   * Keys already in notification_log (claimed, sent or failed), per
+   * `loggedKey(channel, profileId)`.
+   */
   logged: Map<string, Set<string>>;
 };
 
-export type StuckBatch = { batchId: string; profileId: string; keys: string[] };
+export const loggedKey = (channel: Channel, profileId: string) => `${channel}:${profileId}`;
+
+export type StuckBatch = { batchId: string; profileId: string; channel: Channel; keys: string[] };
 
 export type ReminderStore = {
   loadCandidates(): Promise<Candidates>;
   /** Inserts claims; returns the keys this call actually claimed. */
-  claim(profileId: string, batchId: string, keys: string[]): Promise<string[]>;
+  claim(profileId: string, batchId: string, keys: string[], channel: Channel): Promise<string[]>;
   /** Claims older than 10 minutes, re-stamped so no other run takes them. */
   reclaimStuck(): Promise<StuckBatch[]>;
   markSent(batchId: string, providerId: string | null): Promise<void>;
@@ -50,8 +62,17 @@ export type OutgoingEmail = RenderedEmail & {
 
 export type SendResult =
   | { ok: true; id: string | null }
-  /** `alreadySent`: the provider already accepted this idempotency key. */
-  | { ok: false; alreadySent?: boolean; error: string };
+  /**
+   * `alreadySent`: the provider already accepted this idempotency key.
+   * `nothingToSend`: no device left (all gone), so the claims are dropped.
+   */
+  | { ok: false; alreadySent?: boolean; nothingToSend?: boolean; error: string };
+
+export type PushDeliver = (
+  user: ReminderUser,
+  reminders: DueReminder[],
+  batchId: string,
+) => Promise<SendResult>;
 
 export type RunDeps = {
   now: Date;
@@ -60,8 +81,12 @@ export type RunDeps = {
   render: (args: { user: ReminderUser; reminders: DueReminder[] }) => Promise<RenderedEmail>;
   /** List-Unsubscribe and friends, per user. */
   headersFor: (user: ReminderUser) => Promise<Record<string, string>>;
+  /** Sends one push to all of a user's devices. Without it, push is skipped. */
+  push?: PushDeliver;
   newId: () => string;
 };
+
+const CHANNELS: Channel[] = ["email", "push"];
 
 export type RunSummary = { sent: number; retried: number; failed: number; released: number };
 
@@ -92,57 +117,87 @@ export async function runReminders(deps: RunDeps): Promise<RunSummary> {
   const candidates = await store.loadCandidates();
   const users = new Map(candidates.users.map((u) => [u.profileId, u]));
 
-  const deliver = async (user: ReminderUser, reminders: DueReminder[], batchId: string) => {
+  const viaEmail = async (user: ReminderUser, reminders: DueReminder[], batchId: string) => {
     const email = await deps.render({ user, reminders });
-    const result = await deps.send({
+    return deps.send({
       ...email,
       to: user.email,
       headers: await deps.headersFor(user),
       idempotencyKey: batchId,
     });
-    if (result.ok || result.alreadySent) {
-      await store.markSent(batchId, result.ok ? result.id : null);
-      return true;
-    }
-    return false; // stays claimed: retried with the same key after 10 minutes
   };
 
-  // 1. Stuck batches: same batch id, same idempotency key.
+  /** true = sent, false = stays claimed (retried with the same key after 10 minutes). */
+  const deliver = async (
+    channel: Channel,
+    user: ReminderUser,
+    reminders: DueReminder[],
+    batchId: string,
+  ): Promise<"sent" | "failed" | "released"> => {
+    const result =
+      channel === "email"
+        ? await viaEmail(user, reminders, batchId)
+        : await deps.push!(user, reminders, batchId);
+    if (result.ok || result.alreadySent) {
+      await store.markSent(batchId, result.ok ? result.id : null);
+      return "sent";
+    }
+    if (result.nothingToSend) {
+      await store.release(batchId);
+      return "released";
+    }
+    return "failed";
+  };
+
+  const channelOn = (channel: Channel, user: ReminderUser) =>
+    channel === "email" ? user.emailOn : user.pushOn && Boolean(deps.push);
+
+  // 1. Stuck batches: same batch id, same idempotency key (or push tag).
   for (const stuck of await store.reclaimStuck()) {
     const user = users.get(stuck.profileId);
-    const reminders = user
-      ? remindersForKeys(stuck.keys, candidates.days.get(user.profileId) ?? [])
-      : [];
+    const reminders =
+      user && channelOn(stuck.channel, user)
+        ? remindersForKeys(stuck.keys, candidates.days.get(user.profileId) ?? [])
+        : [];
     if (!user || !reminders.length) {
       await store.release(stuck.batchId);
       summary.released += 1;
       continue;
     }
-    if (await deliver(user, reminders, stuck.batchId)) summary.retried += 1;
+    const outcome = await deliver(stuck.channel, user, reminders, stuck.batchId);
+    if (outcome === "sent") summary.retried += 1;
+    else if (outcome === "released") summary.released += 1;
     else summary.failed += 1;
   }
 
-  // 2. Newly due.
+  // 2. Newly due, per channel.
   for (const user of candidates.users) {
-    const due = dueReminders({
-      now: deps.now,
-      user,
-      days: candidates.days.get(user.profileId) ?? [],
-      sent: candidates.logged.get(user.profileId) ?? new Set(),
-    });
-    if (!due.length) continue;
-    const batchId = deps.newId();
-    const claimed = new Set(
-      await store.claim(
-        user.profileId,
-        batchId,
-        due.map((d) => d.key),
-      ),
-    );
-    const mine = due.filter((d) => claimed.has(d.key));
-    if (!mine.length) continue; // another run got them
-    if (await deliver(user, mine, batchId)) summary.sent += 1;
-    else summary.failed += 1;
+    for (const channel of CHANNELS) {
+      if (!channelOn(channel, user)) continue;
+      const due = dueReminders({
+        now: deps.now,
+        user,
+        days: candidates.days.get(user.profileId) ?? [],
+        sent: candidates.logged.get(loggedKey(channel, user.profileId)) ?? new Set(),
+        channel,
+      });
+      if (!due.length) continue;
+      const batchId = deps.newId();
+      const claimed = new Set(
+        await store.claim(
+          user.profileId,
+          batchId,
+          due.map((d) => d.key),
+          channel,
+        ),
+      );
+      const mine = due.filter((d) => claimed.has(d.key));
+      if (!mine.length) continue; // another run got them
+      const outcome = await deliver(channel, user, mine, batchId);
+      if (outcome === "sent") summary.sent += 1;
+      else if (outcome === "released") summary.released += 1;
+      else summary.failed += 1;
+    }
   }
   return summary;
 }
