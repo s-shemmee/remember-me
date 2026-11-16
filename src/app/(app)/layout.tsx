@@ -7,7 +7,10 @@ import { characterEmoji } from "@/features/onboarding/constants";
 import { onboardingRedirect } from "@/features/onboarding/redirect";
 import { asPastel } from "@/features/people/view";
 import { InstallPromptListener } from "@/features/notifications/components/install-prompt-listener";
+import { ThemeSync } from "@/features/profile/components/theme-sync";
+import { AVATARS_BUCKET } from "@/features/profile/constants";
 import { AppShell } from "@/features/shell/app-shell";
+import { parseThemeChoice } from "@/lib/theme";
 import { daysBetween, formatShortDate, nextOccurrence, todayIn } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -27,7 +30,7 @@ async function Shell({ children }: { children: React.ReactNode }) {
     supabase
       .from("profiles")
       .select(
-        "onboarded_at, first_name, avatar_kind, avatar_color, avatar_character, birthday_day, birthday_month, timezone",
+        "onboarded_at, first_name, avatar_kind, avatar_color, avatar_character, avatar_path, birthday_day, birthday_month, timezone, theme",
       )
       .eq("id", userId)
       .maybeSingle(),
@@ -48,6 +51,13 @@ async function Shell({ children }: { children: React.ReactNode }) {
       ? { day: profile.birthday_day, month: profile.birthday_month }
       : null;
   const on = birthday ? nextOccurrence(birthday, today) : null;
+  let photoUrl: string | null = null;
+  if (profile?.avatar_kind === "photo" && profile.avatar_path) {
+    const { data } = await supabase.storage
+      .from(AVATARS_BUCKET)
+      .createSignedUrl(profile.avatar_path, 3600);
+    photoUrl = data?.signedUrl ?? null;
+  }
 
   return (
     <AppShell
@@ -58,10 +68,12 @@ async function Shell({ children }: { children: React.ReactNode }) {
           profile?.avatar_kind === "character"
             ? (characterEmoji(profile.avatar_character) ?? null)
             : null,
+        photoUrl,
         peopleCount: count ?? 0,
       }}
       yourDay={on ? { daysUntil: daysBetween(today, on), date: formatShortDate(on) } : null}
     >
+      <ThemeSync theme={parseThemeChoice(profile?.theme)} />
       {children}
     </AppShell>
   );

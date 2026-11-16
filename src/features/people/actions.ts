@@ -83,6 +83,26 @@ export async function savePerson(input: unknown): Promise<SavePersonResult> {
  * from reminders, and Undo can bring them back. A job in M4 deletes people
  * archived for more than 30 days.
  */
+/**
+ * "In memory": someone who has passed. Every day of theirs then uses the
+ * gentle Remembrance wording (app, emails, push). RLS: your own people only.
+ */
+export async function setInMemory(id: unknown, on: unknown): Promise<PersonActionResult> {
+  const supabase = await signedInClient("/people");
+  const parsed = idSchema.safeParse(id);
+  if (!parsed.success || typeof on !== "boolean")
+    return { ok: false, message: "I couldn't find them." };
+  const { data, error } = await supabase
+    .from("people")
+    .update({ in_memory: on })
+    .eq("id", parsed.data)
+    .is("archived_at", null)
+    .select("id");
+  if (error) return { ok: false, message: "That didn't save. Please try again." };
+  if (!data?.length) return { ok: false, message: "I couldn't find them." };
+  return { ok: true };
+}
+
 export async function removePerson(id: unknown): Promise<PersonActionResult> {
   return setArchived(id, true);
 }

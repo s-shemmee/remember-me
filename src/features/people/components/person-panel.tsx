@@ -1,14 +1,17 @@
 "use client";
 
 import { ArrowLeftIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { pastelClasses } from "@/components/ui/chip";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
 
+import { setInMemory } from "../actions";
 import type { PersonView } from "../view";
 
 const inkText: Record<Pastel, string> = {
@@ -135,14 +138,18 @@ export function PersonPanel({
           </ul>
         ) : (
           <p className="text-14 text-sub">
-            Nothing yet. Add what they love, so gift ideas come easy.
+            {person.inMemory
+              ? "Nothing yet."
+              : "Nothing yet. Add what they love, so gift ideas come easy."}
           </p>
         )}
       </div>
 
       <div className="flex flex-col gap-2">
         <SectionLabel id={`${headingId}-wishlist`}>Their wishlist</SectionLabel>
-        {person.connected ? (
+        {person.inMemory ? (
+          <p className="text-14 text-sub">In memory. No gift ideas here.</p>
+        ) : person.connected ? (
           <p className="text-14 text-sub">
             Connected 💛 Their wishlist shows up here once sharing arrives.
           </p>
@@ -156,11 +163,57 @@ export function PersonPanel({
         )}
       </div>
 
+      <InMemorySwitch person={person} />
+
       <div className="flex flex-wrap gap-2">
         <Button variant="card2" onClick={onEdit}>
           Edit
         </Button>
       </div>
     </section>
+  );
+}
+
+/**
+ * "In memory": a quiet switch. On, every day of theirs is gentle: no
+ * "turns N", no 🎂, no celebrating, no gift actions, in the app, emails and push.
+ */
+function InMemorySwitch({ person }: { person: PersonView }) {
+  const router = useRouter();
+  const [on, setOn] = React.useState(person.inMemory);
+  const [message, setMessage] = React.useState("");
+  const id = `in-memory-${person.id}`;
+  const change = async (next: boolean) => {
+    setOn(next);
+    const result = await setInMemory(person.id, next);
+    if (!result.ok) {
+      setOn(!next);
+      setMessage(result.message);
+      return;
+    }
+    setMessage(next ? "Their days will be gentle from now on 🕊️" : "Saved");
+    router.refresh();
+  };
+  return (
+    <div className="flex flex-col gap-1.5 rounded-[20px] bg-card2 px-4 py-3.5">
+      <div className="flex items-center justify-between gap-4">
+        <label htmlFor={id} className="text-15 font-bold">
+          In memory
+        </label>
+        <Switch
+          id={id}
+          aria-describedby={`${id}-hint`}
+          checked={on}
+          onCheckedChange={(next) => void change(next)}
+        />
+      </div>
+      <p id={`${id}-hint`} className="text-13 text-sub">
+        For someone who has passed. Their days are remembered gently, with no countdowns to
+        celebrate and no gift ideas.
+      </p>
+      <p role="status" aria-live="polite" className="text-13 text-sub empty:hidden">
+        {message}
+      </p>
+    </div>
   );
 }

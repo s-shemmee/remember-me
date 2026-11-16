@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { Card } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
 import { CalendarScreen } from "@/features/calendar/calendar-screen";
 import { remindersLine } from "@/features/days/days";
 import { loadDays } from "@/features/days/load";
@@ -32,7 +32,7 @@ export default function CalendarPage() {
           <h1 className="text-34 leading-tight font-extrabold tracking-[-0.03em]">Calendar</h1>
           <p className="text-15 text-sub">Every day worth remembering, in one place</p>
         </div>
-        <ThemeToggle />
+        <SavedThemeToggle />
         <AddPersonButton />
       </div>
       <Suspense fallback={<Card aria-busy="true" className="h-[480px]" />}>

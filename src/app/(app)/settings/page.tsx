@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { Card } from "@/components/ui/card";
-import { NoorBubble } from "@/components/ui/noor-bubble";
+import { AccountCard } from "@/features/account/components/account-card";
+import { AppearanceCard } from "@/features/account/components/appearance-card";
+import { DataCard } from "@/features/account/components/data-card";
+import { reauthModeFor } from "@/features/account/reauth";
 import { InstallCard } from "@/features/notifications/components/install-card";
 import {
   type Device,
@@ -15,6 +18,7 @@ import { AppMain } from "@/features/shell/app-shell";
 import { addDays, todayIn, toIsoDate } from "@/lib/dates";
 import { getEnv } from "@/lib/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { parseThemeChoice } from "@/lib/theme";
 
 export const metadata: Metadata = { title: "Settings · Remember Me" };
 
@@ -74,7 +78,26 @@ async function Notifications() {
   );
 }
 
-/** Settings (AppSettings): Reminders, Notifications and App; the rest come in M5. */
+/** Account, Appearance and Your data need who you are and how you sign in. */
+async function AccountSections() {
+  const supabase = await createSupabaseServerClient();
+  const [{ data: userData }, { data: profile }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from("profiles").select("theme").maybeSingle(),
+  ]);
+  const user = userData?.user;
+  if (!user?.email) return null;
+  const mode = reauthModeFor((user.identities ?? []).map((i) => i.provider));
+  return (
+    <>
+      <AccountCard email={user.email} mode={mode} />
+      <AppearanceCard saved={parseThemeChoice(profile?.theme)} />
+      <DataCard email={user.email} mode={mode} />
+    </>
+  );
+}
+
+/** Settings (AppSettings): Reminders, Notifications, App, Account, Appearance, Your data, Help. */
 export default function SettingsPage() {
   return (
     <AppMain>
@@ -90,16 +113,26 @@ export default function SettingsPage() {
           <Notifications />
         </Suspense>
         <InstallCard />
+        <Suspense fallback={<Card aria-busy="true" className="h-96" />}>
+          <AccountSections />
+        </Suspense>
         <section
-          aria-labelledby="more-settings"
-          className="flex flex-col gap-4 rounded-card-lg bg-card p-6 shadow-card sm:p-8"
+          id="help"
+          aria-labelledby="help-title"
+          className="flex flex-col items-start gap-3 rounded-card-lg bg-card p-6 shadow-card sm:p-8"
         >
-          <h2 id="more-settings" className="text-22 font-extrabold tracking-[-0.02em]">
-            More settings
+          <h2 id="help-title" className="text-22 font-extrabold tracking-[-0.02em]">
+            <span aria-hidden>💬 </span>Help &amp; feedback
           </h2>
-          <NoorBubble className="[&_p]:bg-card2 [&_p]:shadow-none">
-            Privacy, appearance and your account are coming soon 💛
-          </NoorBubble>
+          <p className="text-15 text-sub">
+            A question, an idea, something not working? I read every message.
+          </p>
+          <a
+            href="mailto:hello@shemme.codes"
+            className="inline-flex min-h-11 items-center rounded-pill bg-card2 px-6 text-15 font-semibold"
+          >
+            Email hello@shemme.codes
+          </a>
         </section>
       </div>
     </AppMain>

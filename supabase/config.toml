@@ -255,6 +255,10 @@ content_path = "./supabase/templates/confirm-signup.html"
 subject = "Reset your Remember Me password"
 content_path = "./supabase/templates/reset-password.html"
 
+[auth.email.template.email_change]
+subject = "Confirm your new email for Remember Me"
+content_path = "./supabase/templates/change-email.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
@@ -455,4 +459,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-test-push]
+verify_jwt = false
+[functions.delete-account]
 verify_jwt = false

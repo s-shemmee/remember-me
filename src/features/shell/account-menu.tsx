@@ -23,6 +23,8 @@ export type Account = {
   color: Pastel;
   /** A character avatar's emoji, if they picked one. */
   character: string | null;
+  /** A signed URL for their profile photo, if they use one. */
+  photoUrl?: string | null;
   peopleCount: number;
 };
 
@@ -54,6 +56,7 @@ export function AccountMenu({
             <Avatar
               name={name}
               pastel={account.color}
+              src={account.photoUrl ?? null}
               character={account.character}
               size="sm"
               decorative
@@ -73,6 +76,7 @@ export function AccountMenu({
             <Avatar
               name={name}
               pastel={account.color}
+              src={account.photoUrl ?? null}
               character={account.character}
               size="sm"
               decorative
@@ -97,9 +101,9 @@ export function AccountMenu({
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/help">
+          <a href="mailto:hello@shemme.codes">
             <span aria-hidden>💬</span> Help &amp; feedback
-          </Link>
+          </a>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

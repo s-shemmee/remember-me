@@ -39,6 +39,7 @@ vi.mock("../actions", () => ({
 }));
 
 vi.mock("@/features/connections/actions", () => ({ createInvite: vi.fn() }));
+vi.mock("@/features/profile/actions", () => ({ saveTheme: vi.fn() }));
 
 const toast = Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() });
 vi.mock("@/components/ui/sonner", () => ({ toast }));

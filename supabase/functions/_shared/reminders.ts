@@ -44,6 +44,7 @@ type CandidateRow = {
   recurring: boolean;
   little_thing: string | null;
   wishlist_friend_id: string | null;
+  in_memory: boolean;
 };
 
 const must = <T>(
@@ -91,6 +92,7 @@ export function reminderStore(db: SupabaseClient): ReminderStore {
           littleThing: r.little_thing,
           archived: false,
           wishlistFriendId: r.wishlist_friend_id,
+          inMemory: r.in_memory,
         });
       }
       const logged = new Map<string, Set<string>>();

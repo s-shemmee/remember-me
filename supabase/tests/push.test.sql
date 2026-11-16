@@ -71,7 +71,7 @@ select throws_ok($$ select * from public.reminder_push_devices() $$, '42501', nu
 reset role;
 
 -- Push dedupe in notification_log ------------------------------------------------------------------------------
-insert into t select 'key', o.id || '|7|2026-11-13' from public.occasions o
+insert into t select 'key', o.id || '|7|2099-11-13' from public.occasions o
   where o.person_id = (select val::uuid from t where key = 'khalid');
 set local role service_role;
 select is((select count(*)::int from public.claim_reminders('00000000-0000-0000-0000-00000000a901',
@@ -89,7 +89,7 @@ select is((select string_agg(channel || ':' || key, ',' order by channel) from p
   'logged keys say which channel');
 reset role;
 select throws_ok(format($$ insert into public.notification_log (profile_id, kind, occasion_id, offset_days, occurs_on, channel, batch_id)
-  values ('00000000-0000-0000-0000-00000000a901', 'reminder', %L, 7, '2026-11-13', 'push', gen_random_uuid()) $$,
+  values ('00000000-0000-0000-0000-00000000a901', 'reminder', %L, 7, '2099-11-13', 'push', gen_random_uuid()) $$,
   split_part((select val from t where key = 'key'), '|', 1)), '23505', null,
   'the unique key refuses a second push row');
 update public.notification_log set claimed_at = now() - interval '11 minutes'

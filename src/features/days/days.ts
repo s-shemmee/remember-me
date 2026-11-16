@@ -13,7 +13,7 @@ import {
 } from "@/lib/dates";
 import type { Pastel } from "@/styles/tokens";
 
-import { type OccasionKind, occasionTitle, occasionType } from "../occasions/types";
+import { type OccasionKind, occasionTitle, occasionType, typeFor } from "../occasions/types";
 
 /**
  * Every day worth remembering, from your people and your own birthday, and
@@ -45,6 +45,8 @@ export type DaySource = {
   recurring: boolean;
   color: Pastel;
   littleThings: string[];
+  /** The person has passed: every day of theirs is gentle (people.in_memory). */
+  inMemory?: boolean;
 };
 
 /** A remembered day on a given date. */
@@ -94,11 +96,11 @@ export function dateInMonth(s: DaySource, year: number, month: number): Calendar
 }
 
 export function eventOn(s: DaySource, on: CalendarDate, today: CalendarDate): DayEvent {
-  const type = occasionType(s.kind);
+  const type = typeFor(s.kind, s.inMemory);
   const years = isOneOff(s) ? null : yearsOn(s.year, on);
   const daysUntil = daysBetween(today, on);
   const detail =
-    s.kind === "birthday" && years
+    s.kind === "birthday" && years && !s.inMemory
       ? `Turns ${years}`
       : type.countsYears && years
         ? `${years} ${years === 1 ? "year" : "years"}`
@@ -193,6 +195,8 @@ export function noorNudge(
   kind: DayKind | null;
   /** The text without the little thing, for when Noor offers a wish instead. */
   base: string;
+  /** Remembrance or "In memory": never a gift offer. */
+  gentle: boolean;
 } {
   if (!hasPeople) {
     return {
@@ -202,6 +206,7 @@ export function noorNudge(
       isYou: false,
       kind: null,
       base: "",
+      gentle: false,
     };
   }
   const next = events.find((e) => e.daysUntil < 30);
@@ -213,6 +218,7 @@ export function noorNudge(
       isYou: false,
       kind: null,
       base: "",
+      gentle: false,
     };
   }
   const s = next.source;
@@ -227,10 +233,11 @@ export function noorNudge(
       isYou: true,
       kind: null,
       base: "",
+      gentle: false,
     };
   }
   const when = next.when;
-  const type = occasionType(s.kind);
+  const type = typeFor(s.kind, s.inMemory);
   const title = s.title?.trim();
 
   // Remembrance: quiet, no little thing (it reads like a gift idea).
@@ -238,7 +245,15 @@ export function noorNudge(
     const text = title
       ? `${when.charAt(0).toUpperCase()}${when.slice(1)}: ${s.name} · ${title} ${type.emoji} A kind word can mean a lot.`
       : `${possessive(s.name)} ${type.noun} is ${when} ${type.emoji}`;
-    return { text, personId: s.personId, name: s.name, isYou: false, kind: s.kind, base: text };
+    return {
+      text,
+      personId: s.personId,
+      name: s.name,
+      isYou: false,
+      kind: s.kind,
+      base: text,
+      gentle: true,
+    };
   }
 
   let text: string;
@@ -255,7 +270,15 @@ export function noorNudge(
   const base = text;
   const thing = s.littleThings[0]?.trim();
   if (thing) text += ` Little thing: ${thing}`;
-  return { text, personId: s.personId, name: s.name, isYou: false, kind: s.kind, base };
+  return {
+    text,
+    personId: s.personId,
+    name: s.name,
+    isYou: false,
+    kind: s.kind,
+    base,
+    gentle: false,
+  };
 }
 
 /** "turns 30 in 2 days", "birthday in 2 days", "new job today"… for the Next up card. */

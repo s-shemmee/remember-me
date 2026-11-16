@@ -101,6 +101,7 @@ export type Database = {
       };
       notices: {
         Row: {
+          actor_id: string | null;
           actor_name: string;
           created_at: string;
           id: string;
@@ -111,6 +112,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          actor_id?: string | null;
           actor_name: string;
           created_at?: string;
           id?: string;
@@ -120,6 +122,7 @@ export type Database = {
           wish_id?: string | null;
         };
         Update: {
+          actor_id?: string | null;
           actor_name?: string;
           created_at?: string;
           id?: string;
@@ -129,6 +132,13 @@ export type Database = {
           wish_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "notices_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "notices_user_id_fkey";
             columns: ["user_id"];
@@ -274,6 +284,7 @@ export type Database = {
           created_at: string;
           group: Database["public"]["Enums"]["person_group"];
           id: string;
+          in_memory: boolean;
           linked_profile_id: string | null;
           little_things: string[];
           name: string;
@@ -288,6 +299,7 @@ export type Database = {
           created_at?: string;
           group?: Database["public"]["Enums"]["person_group"];
           id?: string;
+          in_memory?: boolean;
           linked_profile_id?: string | null;
           little_things?: string[];
           name: string;
@@ -301,6 +313,7 @@ export type Database = {
           created_at?: string;
           group?: Database["public"]["Enums"]["person_group"];
           id?: string;
+          in_memory?: boolean;
           linked_profile_id?: string | null;
           little_things?: string[];
           name?: string;
@@ -342,6 +355,8 @@ export type Database = {
           id: string;
           last_name: string | null;
           onboarded_at: string | null;
+          share_birthday: boolean;
+          theme: string;
           timezone: string;
         };
         ComputedFields: never;
@@ -361,6 +376,8 @@ export type Database = {
           id: string;
           last_name?: string | null;
           onboarded_at?: string | null;
+          share_birthday?: boolean;
+          theme?: string;
           timezone?: string;
         };
         Update: {
@@ -379,6 +396,8 @@ export type Database = {
           id?: string;
           last_name?: string | null;
           onboarded_at?: string | null;
+          share_birthday?: boolean;
+          theme?: string;
           timezone?: string;
         };
         Relationships: [];
@@ -610,6 +629,7 @@ export type Database = {
       allow_test: { Args: { p_channel: string; p_profile_id: string }; Returns: boolean };
       are_connected: { Args: { p_a: string; p_b: string }; Returns: boolean };
       call_edge_function: { Args: { p_name: string }; Returns: number };
+      can_view_avatar: { Args: { p_name: string }; Returns: boolean };
       can_view_wish_image: { Args: { p_name: string }; Returns: boolean };
       claim_reminders: {
         Args: { p_batch_id: string; p_channel: string; p_keys: string[]; p_profile_id: string };
@@ -673,6 +693,7 @@ export type Database = {
           avatar_character: string;
           avatar_color: string;
           avatar_kind: Database["public"]["Enums"]["avatar_kind"];
+          avatar_path: string;
           connected_at: string;
           connection_id: string;
           first_name: string;
@@ -687,6 +708,7 @@ export type Database = {
           avatar_character: string;
           avatar_color: string;
           avatar_kind: Database["public"]["Enums"]["avatar_kind"];
+          avatar_path: string;
           birthday_day: number;
           birthday_month: number;
           first_name: string;
@@ -696,6 +718,7 @@ export type Database = {
         }[];
       };
       name_for: { Args: { p_profile: string; p_viewer: string }; Returns: string };
+      prepare_account_deletion: { Args: { p_user_id: string }; Returns: undefined };
       reclaim_stuck_reminders: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -713,6 +736,7 @@ export type Database = {
           email: string;
           email_on: boolean;
           first_name: string;
+          in_memory: boolean;
           kind: string;
           little_thing: string;
           month: number;

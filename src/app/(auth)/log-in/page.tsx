@@ -14,7 +14,13 @@ async function LogInFormWithParams({ searchParams }: { searchParams: SearchParam
   const params = await searchParams;
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
   const rawNext = one(params.next);
-  return <LogInForm next={rawNext ? safeNextPath(rawNext) : undefined} error={one(params.error)} />;
+  return (
+    <LogInForm
+      next={rawNext ? safeNextPath(rawNext) : undefined}
+      error={one(params.error)}
+      deleted={one(params.deleted) === "1"}
+    />
+  );
 }
 
 export default function LogInPage({ searchParams }: { searchParams: SearchParams }) {

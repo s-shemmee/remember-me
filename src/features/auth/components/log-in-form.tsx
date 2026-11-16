@@ -20,13 +20,27 @@ const LINK_ERRORS: Record<string, string> = {
   google: "Google sign-in didn't finish. Please try again.",
 };
 
-export function LogInForm({ next, error }: { next?: string; error?: string }) {
+export function LogInForm({
+  next,
+  error,
+  deleted = false,
+}: {
+  next?: string;
+  error?: string;
+  /** After "Delete my account": a gentle goodbye. */
+  deleted?: boolean;
+}) {
   const [state, action, pending] = useActionState<AuthFormState<Fields>, FormData>(logIn, {});
   const linkError = error ? LINK_ERRORS[error] : undefined;
 
   // Blocks are direct children of AuthShell's 22px column, as in the screens.
   return (
     <>
+      {deleted && (
+        <p role="status" className="rounded-[20px] bg-card2 px-4 py-3 text-15">
+          Your account and everything in it are deleted. Take care 💛
+        </p>
+      )}
       <form action={logInWithGoogle}>
         {next && <input type="hidden" name="next" value={next} />}
         <SocialButton provider="google" />

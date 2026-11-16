@@ -28,6 +28,10 @@ export type Friend = {
   /** Days to their next birthday in your timezone; null when unknown. */
   daysUntil: number | null;
   linkedPersonId: string | null;
+  /** The linked person in your People is "In memory": no gift counting. */
+  inMemory?: boolean;
+  /** A signed URL for their photo, when they have one. */
+  photoUrl?: string | null;
   wishes: FriendWish[];
 };
 
@@ -94,7 +98,11 @@ export const GIFTS_WINDOW_DAYS = 30;
 export function giftsSorted(friends: Friend[]): { value: string; line: string } {
   const soon = sortFriends(
     friends.filter(
-      (f) => f.daysUntil !== null && f.daysUntil <= GIFTS_WINDOW_DAYS && f.wishes.length > 0,
+      (f) =>
+        f.daysUntil !== null &&
+        f.daysUntil <= GIFTS_WINDOW_DAYS &&
+        f.wishes.length > 0 &&
+        !f.inMemory,
     ),
   );
   if (!friends.length) return { value: "None yet", line: "connect with your people" };

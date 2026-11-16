@@ -5,7 +5,7 @@ import { Suspense } from "react";
 
 import { Card } from "@/components/ui/card";
 import { pastelClasses } from "@/components/ui/chip";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
 import { TruncatedName } from "@/components/ui/truncated-name";
 import {
   greeting,
@@ -87,11 +87,12 @@ async function Dashboard() {
   const gifts = giftsSorted(friends);
 
   // "Reserve it 🤫" when the next day is a connected friend's birthday and
-  // their wishlist has something free (never on a day of remembrance).
+  // their wishlist has something free. Never on a gentle day (Remembrance,
+  // "In memory"), and only if the friend shares their birthday.
   let offer: NudgeOffer | null = null;
   const friend =
-    nudge.kind === "birthday" && nudge.personId
-      ? friends.find((f) => f.linkedPersonId === nudge.personId)
+    nudge.kind === "birthday" && !nudge.gentle && nudge.personId
+      ? friends.find((f) => f.linkedPersonId === nudge.personId && f.daysUntil !== null)
       : undefined;
   const wish = friend ? pickNudgeWish(friend.wishes) : null;
   if (friend && wish) {
@@ -148,7 +149,7 @@ async function Dashboard() {
             />
           </Form>
         )}
-        <ThemeToggle />
+        <SavedThemeToggle />
         <AddPersonButton />
       </div>
 

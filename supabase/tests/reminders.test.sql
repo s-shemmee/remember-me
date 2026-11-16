@@ -1,4 +1,5 @@
 -- pgTAP: email reminders and the daily clean-up (`pnpm db:test`).
+-- Occurrence dates are far in the future: reminder_log_keys() only reads recent and upcoming ones.
 -- A (Amal) remembers Khalid; B (Badr) is another user; C (Chama) is connected to A.
 begin;
 select plan(48);
@@ -32,8 +33,8 @@ insert into t select 'sara', public.save_person(p_name => 'Sara', p_relation_kin
 reset role;
 insert into t select 'occ', o.id::text from public.occasions o where o.person_id = (select val::uuid from t where key = 'khalid');
 insert into t select 'occ_sara', o.id::text from public.occasions o where o.person_id = (select val::uuid from t where key = 'sara');
-insert into t values ('k7', (select val from t where key = 'occ') || '|7|2026-11-13'),
-                     ('k7_2027', (select val from t where key = 'occ') || '|7|2027-11-13');
+insert into t values ('k7', (select val from t where key = 'occ') || '|7|2099-11-13'),
+                     ('k7_2027', (select val from t where key = 'occ') || '|7|2100-11-13');
 
 -- Candidates -----------------------------------------------------------------------------------
 set local role service_role;
@@ -68,14 +69,14 @@ select is((select count(*)::int from public.claim_reminders(
   '00000000-0000-0000-0000-00000000b801', '33333333-3333-3333-3333-333333333333',
   array[(select val from t where key = 'k7')], 'email')), 0, 'a key for someone else''s occasion is never claimed');
 select is((select key from public.reminder_log_keys() where profile_id = '00000000-0000-0000-0000-00000000a801'
-           and key like '%2026-11-13'), (select val from t where key = 'k7'), 'logged keys come back as occasion|offset|date');
+           and key like '%2099-11-13'), (select val from t where key = 'k7'), 'logged keys come back as occasion|offset|date');
 reset role;
 select throws_ok(format($$ insert into public.notification_log (profile_id, kind, occasion_id, offset_days, occurs_on, channel, batch_id)
-  values ('00000000-0000-0000-0000-00000000a801', 'reminder', %L, 7, '2026-11-13', 'email', gen_random_uuid()) $$,
+  values ('00000000-0000-0000-0000-00000000a801', 'reminder', %L, 7, '2099-11-13', 'email', gen_random_uuid()) $$,
   (select val from t where key = 'occ')),
   '23505', null, 'the unique key (user, day, offset, occurrence, channel) refuses a duplicate');
 select lives_ok(format($$ insert into public.notification_log (profile_id, kind, occasion_id, offset_days, occurs_on, channel, batch_id)
-  values ('00000000-0000-0000-0000-00000000a801', 'reminder', %L, 7, '2026-11-13', 'push', gen_random_uuid()) $$,
+  values ('00000000-0000-0000-0000-00000000a801', 'reminder', %L, 7, '2099-11-13', 'push', gen_random_uuid()) $$,
   (select val from t where key = 'occ')), 'the same reminder on another channel is its own row');
 select throws_ok($$ insert into public.notification_log (profile_id, kind, channel) values
   ('00000000-0000-0000-0000-00000000a801', 'reminder', 'email') $$, '23514', null,
@@ -117,7 +118,7 @@ select is((select status from public.notification_log where batch_id = '22222222
   '...it''s marked failed (and stays logged, so it isn''t sent as new either)');
 insert into public.notification_log (profile_id, kind, occasion_id, offset_days, occurs_on, channel, batch_id)
   values ('00000000-0000-0000-0000-00000000a801', 'reminder', (select val::uuid from t where key = 'occ'), 1,
-          '2026-11-13', 'email', '44444444-4444-4444-4444-444444444444');
+          '2099-11-13', 'email', '44444444-4444-4444-4444-444444444444');
 set local role service_role;
 select public.release_reminders('44444444-4444-4444-4444-444444444444');
 reset role;

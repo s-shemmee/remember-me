@@ -5,7 +5,7 @@
  * the gentle wording. Pure and shared with the Edge Function (`.ts` imports).
  */
 import { countdownLabel, formatFullDate } from "../../lib/dates.ts";
-import { occasionTitle, occasionType } from "../occasions/types.ts";
+import { occasionTitle, typeFor } from "../occasions/types.ts";
 import { reminderLine } from "./copy.ts";
 import type { DueReminder } from "./due.ts";
 
@@ -20,7 +20,7 @@ export type PushPayload = {
 
 /** "Khalid's birthday is in 7 days 🎂", "It's Khalid's birthday today 🎂" (no age). */
 export function pushTitle(r: DueReminder): string {
-  const type = occasionType(r.day.kind);
+  const type = typeFor(r.day.kind, r.day.inMemory);
   if (type.gentle) return reminderLine(r).headline;
   const when = countdownLabel(r.offset);
   const name = r.day.personName;
@@ -34,7 +34,7 @@ export function pushTitle(r: DueReminder): string {
 
 /** The friend's wishlist when they're connected with free wishes, otherwise the person. */
 export function pushUrl(r: DueReminder): string {
-  if (r.day.wishlistFriendId && !occasionType(r.day.kind).gentle) {
+  if (r.day.wishlistFriendId && !typeFor(r.day.kind, r.day.inMemory).gentle) {
     return `/wishlists?tab=friends&friend=${encodeURIComponent(r.day.wishlistFriendId)}`;
   }
   return `/people?person=${encodeURIComponent(r.day.personId)}`;

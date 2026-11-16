@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { FilterChip } from "@/components/ui/chip";
 import { NoorBubble } from "@/components/ui/noor-bubble";
 import { toast } from "@/components/ui/sonner";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
 
 import { InviteLinkDialog } from "@/features/connections/components/invite-link-dialog";
 
@@ -166,7 +166,7 @@ export function PeopleScreen({ people }: { people: PersonView[] }) {
             />
           </div>
         )}
-        <ThemeToggle />
+        <SavedThemeToggle />
         <Button onClick={openAdd}>
           <PlusIcon aria-hidden /> Add someone
         </Button>

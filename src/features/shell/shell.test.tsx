@@ -82,7 +82,10 @@ describe("App shell", () => {
       "href",
       "/profile",
     );
-    expect(within(menu).getByRole("menuitem", { name: /Help/ })).toHaveAttribute("href", "/help");
+    expect(within(menu).getByRole("menuitem", { name: /Help/ })).toHaveAttribute(
+      "href",
+      "mailto:hello@shemme.codes",
+    );
 
     await userEvent.click(within(menu).getByRole("menuitem", { name: /Log out/ }));
     expect(clearOnboardingDraft).toHaveBeenCalledOnce();

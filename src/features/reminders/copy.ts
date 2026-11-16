@@ -5,7 +5,7 @@
  * Pure and shared with the Edge Function, so imports end in `.ts`.
  */
 import { countdownLabel, formatFullDate, yearsOn } from "../../lib/dates.ts";
-import { occasionTitle, occasionType } from "../occasions/types.ts";
+import { occasionTitle, typeFor } from "../occasions/types.ts";
 import type { DueReminder } from "./due.ts";
 
 export type ReminderLine = {
@@ -24,7 +24,7 @@ const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function reminderLine(r: DueReminder): ReminderLine {
   const { day, offset, occursOn } = r;
-  const type = occasionType(day.kind);
+  const type = typeFor(day.kind, day.inMemory);
   const when = countdownLabel(offset);
   const name = day.personName;
   const title = day.title?.trim() || null;

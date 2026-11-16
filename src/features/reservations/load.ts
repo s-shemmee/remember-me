@@ -2,6 +2,7 @@ import "server-only";
 
 import { characterEmoji } from "@/features/onboarding/constants";
 import { asPastel } from "@/features/people/view";
+import { AVATARS_BUCKET } from "@/features/profile/constants";
 import { WISH_IMAGES_BUCKET } from "@/features/wishes/constants";
 import { isRealDayMonth, todayIn } from "@/lib/dates";
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -30,18 +31,39 @@ const asStatus = (s: string): WishStatus => (s === "mine" || s === "taken" ? s :
 export async function loadFriends(
   supabase: Supabase,
 ): Promise<{ friends: Friend[]; notices: Notice[] }> {
-  const [{ data: profile }, { data: friends }, { data: wishes }, { data: notices }] =
-    await Promise.all([
-      supabase.from("profiles").select("timezone").maybeSingle(),
-      supabase.rpc("my_friends"),
-      supabase.rpc("friend_wishes"),
-      supabase
-        .from("notices")
-        .select("id, actor_name")
-        .is("read_at", null)
-        .order("created_at", { ascending: false })
-        .limit(10),
-    ]);
+  const [
+    { data: profile },
+    { data: friends },
+    { data: wishes },
+    { data: notices },
+    { data: gone },
+  ] = await Promise.all([
+    supabase.from("profiles").select("timezone").maybeSingle(),
+    supabase.rpc("my_friends"),
+    supabase.rpc("friend_wishes"),
+    supabase
+      .from("notices")
+      .select("id, actor_name")
+      .is("read_at", null)
+      .order("created_at", { ascending: false })
+      .limit(10),
+    // Your people marked "In memory" (RLS: your own).
+    supabase.from("people").select("id").eq("in_memory", true).is("archived_at", null),
+  ]);
+  const inMemory = new Set((gone ?? []).map((p) => p.id));
+
+  // Friends' photos: signed with your session; Storage allows it only for
+  // a connection's current avatar (can_view_avatar).
+  const avatarPaths = (friends ?? [])
+    .map((f) => f.avatar_path)
+    .filter((p): p is string => Boolean(p));
+  const avatars = new Map<string, string>();
+  if (avatarPaths.length) {
+    const { data } = await supabase.storage
+      .from(AVATARS_BUCKET)
+      .createSignedUrls(avatarPaths, 3600);
+    for (const s of data ?? []) if (s.path && s.signedUrl) avatars.set(s.path, s.signedUrl);
+  }
 
   const paths = (wishes ?? []).map((w) => w.image_path).filter((p): p is string => Boolean(p));
   const signed = new Map<string, string>();
@@ -84,6 +106,8 @@ export async function loadFriends(
           birthday,
           daysUntil: friendDaysUntil(birthday, today),
           linkedPersonId: f.linked_person_id,
+          inMemory: f.linked_person_id ? inMemory.has(f.linked_person_id) : false,
+          photoUrl: f.avatar_path ? (avatars.get(f.avatar_path) ?? null) : null,
           wishes: byOwner.get(f.profile_id) ?? [],
         };
       }),

@@ -54,6 +54,8 @@ export type ReminderDay = {
   archived: boolean;
   /** Set when the person is a connected friend with at least one free wish. */
   wishlistFriendId: string | null;
+  /** The person has passed: gentle wording everywhere (people.in_memory). */
+  inMemory?: boolean;
 };
 
 export type DueReminder = {

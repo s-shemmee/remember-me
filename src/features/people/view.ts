@@ -8,7 +8,7 @@ import {
 } from "@/lib/dates";
 import { type Pastel, pastels } from "@/styles/tokens";
 
-import { type OccasionKind, occasionType, type OtherDayKind } from "@/features/occasions/types";
+import { type OccasionKind, type OtherDayKind, typeFor } from "@/features/occasions/types";
 
 import { isRelation, type Relation, RELATION_COLORS } from "./constants";
 import type { PersonFormValues } from "./schema";
@@ -40,6 +40,7 @@ export type PersonRow = {
   little_things: string[];
   /** Set when they're one of your connections ("This is Khalid"). */
   linked_profile_id?: string | null;
+  in_memory?: boolean;
   occasions: OccasionRow[];
 };
 
@@ -67,6 +68,8 @@ export type PersonView = {
   relationLabel: string;
   /** Linked to one of your connections. */
   connected: boolean;
+  /** Has passed: every day is shown gently (people.in_memory). */
+  inMemory: boolean;
   color: Pastel;
   group: PersonRow["group"];
   littleThings: string[];
@@ -79,8 +82,8 @@ export type PersonView = {
 export const asPastel = (c: string | null | undefined): Pastel =>
   pastels.includes(c as Pastel) ? (c as Pastel) : "lilac";
 
-export function dayView(o: OccasionRow, today: CalendarDate): DayView {
-  const type = occasionType(o.kind);
+export function dayView(o: OccasionRow, today: CalendarDate, inMemory = false): DayView {
+  const type = typeFor(o.kind, inMemory);
   // Once: on its date in its year. Yearly: the next time it comes round.
   const oneOff = !o.recurring && o.year !== null;
   const on = oneOff ? { year: o.year!, month: o.month, day: o.day } : nextOccurrence(o, today);
@@ -90,7 +93,7 @@ export function dayView(o: OccasionRow, today: CalendarDate): DayView {
   // On their own profile the name is implied: "Wedding", "Anniversary".
   const label = o.title?.trim() || type.label;
   const title =
-    o.kind === "birthday" && years
+    o.kind === "birthday" && years && !inMemory
       ? `Birthday, turns ${years}`
       : type.countsYears && years
         ? `${label}, ${years} ${years === 1 ? "year" : "years"}`
@@ -112,7 +115,7 @@ export function dayView(o: OccasionRow, today: CalendarDate): DayView {
 export function personView(row: PersonRow, today: CalendarDate): PersonView {
   const relationKind: Relation = isRelation(row.relation_kind) ? row.relation_kind : "Friend";
   const days = row.occasions
-    .map((o) => dayView(o, today))
+    .map((o) => dayView(o, today, Boolean(row.in_memory)))
     // Soonest first; the birthday wins a tie.
     .sort(
       (a, b) =>
@@ -127,6 +130,7 @@ export function personView(row: PersonRow, today: CalendarDate): PersonView {
     group: row.group,
     littleThings: row.little_things,
     connected: Boolean(row.linked_profile_id),
+    inMemory: Boolean(row.in_memory),
     days,
     next: days.find((d) => Number.isFinite(d.daysUntil)) ?? null,
     form: {

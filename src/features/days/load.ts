@@ -31,7 +31,7 @@ export async function loadDays(supabase: Supabase): Promise<DaysData> {
     supabase
       .from("people")
       .select(
-        "id, name, color, little_things, occasions(id, kind, title, day, month, year, recurring)",
+        "id, name, color, little_things, in_memory, occasions(id, kind, title, day, month, year, recurring)",
       )
       .is("archived_at", null)
       .order("created_at"),
@@ -54,6 +54,7 @@ export async function loadDays(supabase: Supabase): Promise<DaysData> {
         recurring: o.recurring,
         color: asPastel(p.color),
         littleThings: p.little_things,
+        inMemory: p.in_memory,
       });
     }
   }

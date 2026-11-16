@@ -130,6 +130,16 @@ export const occasionType = (kind: string): OccasionType =>
   OCCASION_TYPES[kind as OccasionKind] ?? OCCASION_TYPES.other;
 
 /**
+ * The type as shown for a person: someone "In memory" (people.in_memory) has
+ * every day in the gentle Remembrance style: 🕊️, no "turns N", no
+ * celebrating, no gift actions. Their birthday stays "birthday" by name.
+ */
+export const typeFor = (kind: string, inMemory?: boolean | null): OccasionType => {
+  const type = occasionType(kind);
+  return inMemory ? { ...type, emoji: "🕊️", gentle: true, countsYears: false } : type;
+};
+
+/**
  * What a day is called: "Khalid's anniversary" without a title,
  * "Khalid · New job" with one.
  */
