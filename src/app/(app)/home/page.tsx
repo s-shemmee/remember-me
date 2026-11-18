@@ -22,11 +22,15 @@ import { ComingUp } from "@/features/home/coming-up";
 import { MiniMonth } from "@/features/home/mini-month";
 import { NoorNudge, type NudgeOffer } from "@/features/home/noor-nudge";
 import { AddPersonButton } from "@/features/people/components/add-person-button";
+import { HomePlanCard } from "@/features/plans/components/home-plan-card";
+import { PlansProvider } from "@/features/plans/components/plan-state";
+import { loadPlans } from "@/features/plans/load";
+import { targetFor } from "@/features/plans/steps";
 import { Notices } from "@/features/reservations/components/notices";
 import { loadFriends } from "@/features/reservations/load";
 import { giftsSorted, nudgeWishLine, pickNudgeWish } from "@/features/reservations/logic";
 import { AppMain } from "@/features/shell/app-shell";
-import { formatFullDate, toIsoDate } from "@/lib/dates";
+import { addDays, formatFullDate, toIsoDate } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
@@ -74,6 +78,8 @@ async function Dashboard() {
     loadFriends(supabase),
   ]);
   const { sources, today, firstName, peopleCount } = data;
+  // This year's plans (a day stays "upcoming" until the day after).
+  const plans = await loadPlans(supabase, { from: toIsoDate(addDays(today, -1)) });
 
   const events = upcoming(sources, today);
   const peopleEvents = events.filter((e) => !e.source.isYou);
@@ -208,25 +214,30 @@ async function Dashboard() {
         />
       </ul>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-        {peopleCount ? (
-          <ComingUp events={peopleEvents} />
-        ) : (
-          <section
-            aria-labelledby="coming-up"
-            className="flex flex-col items-start gap-4 rounded-[28px] bg-card p-6 shadow-card"
-          >
-            <h2 id="coming-up" className="text-22 font-extrabold tracking-[-0.02em]">
-              Coming up
-            </h2>
-            <p className="text-15 text-sub">
-              No one here yet. Add someone and their birthdays and special days show up here.
-            </p>
-            <AddPersonButton />
-          </section>
-        )}
-        <MiniMonth sources={sources} today={today} yourColor={you?.color ?? null} />
-      </div>
+      <PlansProvider plans={plans}>
+        <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+          {peopleCount ? (
+            <ComingUp events={peopleEvents} />
+          ) : (
+            <section
+              aria-labelledby="coming-up"
+              className="flex flex-col items-start gap-4 rounded-[28px] bg-card p-6 shadow-card"
+            >
+              <h2 id="coming-up" className="text-22 font-extrabold tracking-[-0.02em]">
+                Coming up
+              </h2>
+              <p className="text-15 text-sub">
+                No one here yet. Add someone and their birthdays and special days show up here.
+              </p>
+              <AddPersonButton />
+            </section>
+          )}
+          <div className="flex min-w-0 flex-col gap-6">
+            {next && <HomePlanCard target={targetFor(next)} />}
+            <MiniMonth sources={sources} today={today} yourColor={you?.color ?? null} />
+          </div>
+        </div>
+      </PlansProvider>
     </>
   );
 }

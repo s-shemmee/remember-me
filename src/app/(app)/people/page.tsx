@@ -4,7 +4,8 @@ import { Suspense } from "react";
 import { PeopleScreen } from "@/features/people/components/people-screen";
 import { type PersonRow, peopleView } from "@/features/people/view";
 import { AppMain } from "@/features/shell/app-shell";
-import { todayIn } from "@/lib/dates";
+import { loadPlans } from "@/features/plans/load";
+import { todayIn, toIsoDate } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "People · Remember Me" };
@@ -15,7 +16,8 @@ export const metadata: Metadata = { title: "People · Remember Me" };
  */
 async function People() {
   const supabase = await createSupabaseServerClient();
-  const [{ data: profile }, { data: rows }] = await Promise.all([
+  // Plans: this year's and past ones (they stay on the person's profile).
+  const [{ data: profile }, { data: rows }, plans] = await Promise.all([
     supabase.from("profiles").select("timezone").maybeSingle(),
     supabase
       .from("people")
@@ -24,9 +26,11 @@ async function People() {
       )
       .is("archived_at", null)
       .order("created_at"),
+    loadPlans(supabase),
   ]);
-  const people = peopleView((rows ?? []) as PersonRow[], todayIn(profile?.timezone));
-  return <PeopleScreen people={people} />;
+  const today = todayIn(profile?.timezone);
+  const people = peopleView((rows ?? []) as PersonRow[], today);
+  return <PeopleScreen people={people} plans={plans} today={toIsoDate(today)} />;
 }
 
 export default function PeoplePage() {

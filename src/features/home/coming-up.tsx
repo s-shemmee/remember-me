@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils";
 
 import type { DayEvent } from "../days/days";
 import { occasionType } from "../occasions/types";
+import { PlanDots } from "../plans/components/plan-dots";
+import { usePlans } from "../plans/components/plan-state";
+import { targetFor } from "../plans/steps";
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -36,10 +39,12 @@ function what(e: DayEvent) {
 /**
  * Home's "Coming up" (AppHome.dc.html): your people's next days, soonest
  * first, filtered by All / Birthdays / Anniversaries. Each row opens the
- * person on People. Plan dots wait for plans (M5).
+ * person on People. A day with a plan shows its dots (one per step, filled
+ * when done); a day without one shows none.
  */
 export function ComingUp({ events }: { events: DayEvent[] }) {
   const [filter, setFilter] = React.useState<Filter>("all");
+  const { plans } = usePlans();
   const shown = events.filter((e) => filter === "all" || e.source.kind === filter);
 
   return (
@@ -75,6 +80,10 @@ export function ComingUp({ events }: { events: DayEvent[] }) {
                     {what(e)} · {e.shortDate}
                   </span>
                 </span>
+                {(() => {
+                  const plan = plans.get(targetFor(e).key);
+                  return plan ? <PlanDots plan={plan} color={e.source.color} /> : null;
+                })()}
                 <span
                   className={cn(
                     "shrink-0 rounded-pill px-3 py-1.5 text-center text-13 font-bold whitespace-nowrap sm:min-w-[86px]",

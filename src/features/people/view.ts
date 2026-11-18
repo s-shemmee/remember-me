@@ -3,7 +3,9 @@ import {
   countdownLabel,
   daysBetween,
   formatLongDate,
+  formatShortDate,
   nextOccurrence,
+  toIsoDate,
   yearsOn,
 } from "@/lib/dates";
 import { type Pastel, pastels } from "@/styles/tokens";
@@ -59,6 +61,10 @@ export type DayView = {
   /** "in 2 days", "today", "in 4 months". */
   when: string;
   daysUntil: number;
+  /** The occurrence shown ("2026-11-06"): the one a plan belongs to. */
+  occursOn: string;
+  /** "Fri, 6 Nov". */
+  shortDate: string;
 };
 
 export type PersonView = {
@@ -109,6 +115,8 @@ export function dayView(o: OccasionRow, today: CalendarDate, inMemory = false): 
     when: passed ? "passed" : countdownLabel(daysUntil),
     // Passed one-off days sort last and are never "next".
     daysUntil: passed ? Number.POSITIVE_INFINITY : daysUntil,
+    occursOn: toIsoDate(on),
+    shortDate: formatShortDate(on),
   };
 }
 

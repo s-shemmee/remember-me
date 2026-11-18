@@ -2,8 +2,10 @@
  * "Download my data": everything that's yours, as JSON. Pure (tested).
  *
  * Included: profile, reminder settings, devices (labels and dates, never
- * keys), people and their days, your wishlists and wishes, and the gifts
- * YOU reserved (friend's first name, wish title, date). Never reservations
+ * keys), people and their days, your wishlists and wishes, the gifts YOU
+ * reserved (friend's first name, wish title, date), your plans, and your
+ * notes to future you (a sealed one only says when it opens: its words stay
+ * sealed until then). Never reservations
  * on your own wishes (the database never shows them to you anyway), never
  * other people's private data.
  */
@@ -19,6 +21,17 @@ export type ExportInput = {
   wishes: (Record<string, unknown> & { wishlist_id: string })[];
   /** Your reservations, with what friend_wishes() and my_friends() show you. */
   reserved: { friendFirstName: string; wishTitle: string; reservedAt: string }[];
+  /** Your plans: whose day ("Khalid", or null for yours), the date, steps and note. */
+  plans?: {
+    for: string | null;
+    occursOn: string;
+    note: string | null;
+    steps: { label: string; done: boolean }[];
+  }[];
+  /** Notes you can read (from their day on). */
+  openedNotes?: { opensOn: string; body: string; writtenAt: string }[];
+  /** A note still sealed: when it opens, never its words. */
+  sealedNote?: { opensOn: string; writtenAt: string } | null;
 };
 
 export function buildExport(input: ExportInput) {
@@ -51,6 +64,28 @@ export function buildExport(input: ExportInput) {
       wish: r.wishTitle,
       reserved_on: r.reservedAt,
     })),
+    plans: (input.plans ?? []).map((p) => ({
+      for: p.for ?? "your own birthday",
+      date: p.occursOn,
+      note: p.note,
+      steps: p.steps,
+    })),
+    notes_to_future_you: [
+      ...(input.openedNotes ?? []).map((n) => ({
+        opens_on: n.opensOn,
+        written_on: n.writtenAt,
+        note: n.body,
+      })),
+      ...(input.sealedNote
+        ? [
+            {
+              opens_on: input.sealedNote.opensOn,
+              written_on: input.sealedNote.writtenAt,
+              note: "Sealed until your birthday.",
+            },
+          ]
+        : []),
+    ],
   };
 }
 

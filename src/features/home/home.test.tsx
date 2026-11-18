@@ -1,10 +1,24 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { type DaySource, upcoming } from "../days/days";
+import { HomePlanCard } from "../plans/components/home-plan-card";
+import { PlansProvider } from "../plans/components/plan-state";
+import { type PlanView, targetFor } from "../plans/steps";
 import { ComingUp } from "./coming-up";
 import { MiniMonth } from "./mini-month";
+
+const planActions = vi.hoisted(() => ({
+  startPlan: vi.fn(),
+  tickStep: vi.fn(),
+  renameStep: vi.fn(),
+  removeStep: vi.fn(),
+  addStep: vi.fn(),
+  saveNote: vi.fn(),
+}));
+vi.mock("../plans/actions", () => planActions);
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const today = { year: 2026, month: 11, day: 4 };
 const src = (over: Partial<DaySource>): DaySource => ({
@@ -119,5 +133,77 @@ describe("Mini month", () => {
       "href",
       "/calendar",
     );
+  });
+});
+
+describe("birthday plans on Home", () => {
+  const khalid = upcoming([src({})], today)[0]!;
+  const planFor = (done: number[]): PlanView => ({
+    id: "11111111-1111-4111-8111-111111111111",
+    occasionId: "o1",
+    occursOn: "2026-11-06",
+    note: "",
+    steps: ["Gift", "Message", "Call", "Cake"].map((label, i) => ({
+      id: `2222222${i}-2222-4222-8222-222222222222`,
+      kind: (["gift", "message", "call", "cake"] as const)[i]!,
+      label,
+      position: i,
+      done: done.includes(i),
+      byReservation: false,
+    })),
+  });
+
+  it("Coming up shows a plan's dots; a day without a plan shows none", () => {
+    render(
+      <PlansProvider plans={[planFor([0])]}>
+        <ComingUp events={upcoming(people, today)} />
+      </PlansProvider>,
+    );
+    expect(screen.getAllByRole("img", { name: /^Plan \d+ of \d+ done$/ })).toHaveLength(1);
+    expect(screen.getByRole("img", { name: "Plan 1 of 4 done" })).toBeInTheDocument();
+  });
+
+  it("the plan card: ticking a suggestion starts the plan, and the dots follow", async () => {
+    planActions.startPlan.mockResolvedValue({ ok: true, plan: planFor([0]) });
+    render(
+      <PlansProvider plans={[]}>
+        <ComingUp events={[khalid]} />
+        <HomePlanCard target={targetFor(khalid)} />
+      </PlansProvider>,
+    );
+    expect(screen.getByRole("heading", { name: "Khalid's birthday plan" })).toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: /Plan/ })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Gift", pressed: false }));
+    expect(planActions.startPlan).toHaveBeenCalledWith({
+      occasionId: "o1",
+      occursOn: "2026-11-06",
+      tick: "gift",
+    });
+    expect(await screen.findByRole("button", { name: "Gift", pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Plan 1 of 4 done" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Plan their day" })).toBeInTheDocument();
+  });
+
+  it("ticking a step of an existing plan shows at once and rolls back if it fails", async () => {
+    planActions.tickStep.mockResolvedValue({
+      ok: false,
+      message: "That didn't save. Please try again.",
+    });
+    render(
+      <PlansProvider plans={[planFor([0])]}>
+        <HomePlanCard target={targetFor(khalid)} />
+      </PlansProvider>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Message", pressed: false }));
+    expect(await screen.findByText("That didn't save. Please try again.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Message", pressed: false })).toBeInTheDocument();
+  });
+
+  it("someone in memory: gentle steps, nothing celebratory", () => {
+    const grandma = upcoming([src({ name: "Grandma", inMemory: true })], today)[0]!;
+    render(<HomePlanCard target={targetFor(grandma)} />);
+    expect(screen.getByRole("button", { name: "Send a kind word" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Gift" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cake" })).not.toBeInTheDocument();
   });
 });

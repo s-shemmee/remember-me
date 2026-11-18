@@ -11,8 +11,14 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
 
+import { occasionTitle, typeFor } from "@/features/occasions/types";
+import { PlanDots } from "@/features/plans/components/plan-dots";
+import { PlanSheet } from "@/features/plans/components/plan-sheet";
+import { usePlans } from "@/features/plans/components/plan-state";
+import { pastPlans, planKey, type PlanTarget, progress, styleFor } from "@/features/plans/steps";
+
 import { setInMemory } from "../actions";
-import type { PersonView } from "../view";
+import type { DayView, PersonView } from "../view";
 
 const inkText: Record<Pastel, string> = {
   peach: "text-peach-ink",
@@ -43,9 +49,12 @@ export function PersonPanel({
   onEdit,
   onInvite,
   headingRef,
+  today,
   className,
 }: {
   person: PersonView;
+  /** Today in the user's timezone, "2026-11-17" (past plans are before it). */
+  today: string;
   onBack: () => void;
   onEdit: () => void;
   onInvite: () => void;
@@ -163,6 +172,8 @@ export function PersonPanel({
         )}
       </div>
 
+      {person.next && <PlanSection person={person} day={person.next} today={today} />}
+
       <InMemorySwitch person={person} />
 
       <div className="flex flex-wrap gap-2">
@@ -214,6 +225,98 @@ function InMemorySwitch({ person }: { person: PersonView }) {
       <p role="status" aria-live="polite" className="text-13 text-sub empty:hidden">
         {message}
       </p>
+    </div>
+  );
+}
+
+/** The plan of a person's next day: what the sheet opens. */
+export function personPlanTarget(person: PersonView, day: DayView): PlanTarget {
+  const type = typeFor(day.kind, person.inMemory);
+  const title = day.label === type.label ? null : day.label;
+  const dayTitle = occasionTitle(person.name, day.kind, title);
+  return {
+    key: planKey(day.id, day.occursOn),
+    occasionId: day.id,
+    occursOn: day.occursOn,
+    heading: day.kind === "birthday" && !day.gentle ? `${dayTitle} plan` : `Plan for ${dayTitle}`,
+    date: day.shortDate,
+    name: person.name,
+    color: person.color,
+    style: styleFor({ isYou: false, gentle: day.gentle }),
+  };
+}
+
+/**
+ * "Plan their day" for the next day, and the plans of past years (they stay
+ * here; each year starts fresh). Private: only you ever see them.
+ */
+function PlanSection({ person, day, today }: { person: PersonView; day: DayView; today: string }) {
+  const { plans } = usePlans();
+  const [open, setOpen] = React.useState(false);
+  const target = personPlanTarget(person, day);
+  const plan = plans.get(target.key) ?? null;
+  const { done, total } = progress(plan);
+  const past = pastPlans(
+    [...plans.values()],
+    person.days.map((d) => d.id),
+    today,
+  );
+  const headingId = `person-${person.id}-plan`;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <SectionLabel id={headingId}>
+        {day.gentle ? "Plan for the day" : "Plan their day"}
+      </SectionLabel>
+      <div className="flex flex-wrap items-center gap-3 rounded-[16px] bg-card2 px-3.5 py-3">
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="text-15 font-bold [overflow-wrap:anywhere]">
+            {day.label} · {day.shortDate}
+          </span>
+          <span className="text-13 text-sub">
+            {plan ? `${done} of ${total} done` : "No plan yet"}
+          </span>
+        </span>
+        {plan && <PlanDots plan={plan} color={person.color} />}
+        <Button variant="transparent" onClick={() => setOpen(true)} className="bg-card">
+          {plan ? "Open plan" : day.gentle ? "Plan the day" : "Plan their day"}
+        </Button>
+      </div>
+      {past.length > 0 && (
+        <details className="group rounded-[16px] px-1">
+          <summary className="flex min-h-11 cursor-pointer items-center text-14 font-semibold text-accent-text">
+            Past plans ({past.length})
+          </summary>
+          <ul className="flex flex-col gap-2 pb-1">
+            {past.map((p) => {
+              const pastDay = person.days.find((d) => d.id === p.occasionId);
+              const counts = progress(p);
+              return (
+                <li
+                  key={p.id}
+                  className="flex flex-col gap-0.5 rounded-[16px] bg-card2 px-3.5 py-3"
+                >
+                  <span className="text-14 font-bold">
+                    {p.occursOn.slice(0, 4)} · {pastDay?.label ?? "A day"}
+                  </span>
+                  <span className="text-13 text-sub">
+                    {counts.done} of {counts.total} done
+                    {p.steps.some((st) => st.done) &&
+                      `: ${p.steps
+                        .filter((st) => st.done)
+                        .map((st) => st.label)
+                        .join(", ")}`}
+                  </span>
+                  {p.note && (
+                    <span className="text-13 [overflow-wrap:anywhere]">&ldquo;{p.note}&rdquo;</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
+      <PlanSheet target={target} open={open} onOpenChange={setOpen} />
     </div>
   );
 }

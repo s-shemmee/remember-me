@@ -6,7 +6,7 @@
  */
 import { countdownLabel, formatFullDate } from "../../lib/dates.ts";
 import { occasionTitle, typeFor } from "../occasions/types.ts";
-import { reminderLine } from "./copy.ts";
+import { ownDayLine, reminderLine } from "./copy.ts";
 import type { DueReminder } from "./due.ts";
 
 export type PushPayload = {
@@ -20,6 +20,7 @@ export type PushPayload = {
 
 /** "Khalid's birthday is in 7 days 🎂", "It's Khalid's birthday today 🎂" (no age). */
 export function pushTitle(r: DueReminder): string {
+  if (r.day.isYou) return ownDayLine(r).headline;
   const type = typeFor(r.day.kind, r.day.inMemory);
   if (type.gentle) return reminderLine(r).headline;
   const when = countdownLabel(r.offset);
@@ -34,6 +35,8 @@ export function pushTitle(r: DueReminder): string {
 
 /** The friend's wishlist when they're connected with free wishes, otherwise the person. */
 export function pushUrl(r: DueReminder): string {
+  // Your own day: a week before, your wishlist; on the day, Celebrate Me.
+  if (r.day.isYou) return r.offset === 0 ? "/celebrate" : "/wishlists?list=birthday";
   if (r.day.wishlistFriendId && !typeFor(r.day.kind, r.day.inMemory).gentle) {
     return `/wishlists?tab=friends&friend=${encodeURIComponent(r.day.wishlistFriendId)}`;
   }
@@ -51,7 +54,8 @@ const joinNames = (names: string[]) =>
 export function pushPayload(reminders: DueReminder[], tag: string): PushPayload {
   if (reminders.length === 1) {
     const r = reminders[0]!;
-    return { title: pushTitle(r), body: formatFullDate(r.occursOn), url: pushUrl(r), tag };
+    const body = r.day.isYou ? (ownDayLine(r).detail ?? "") : formatFullDate(r.occursOn);
+    return { title: pushTitle(r), body, url: pushUrl(r), tag };
   }
   const names = [...new Set(reminders.map((r) => r.day.personName))];
   return {

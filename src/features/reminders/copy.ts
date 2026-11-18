@@ -22,7 +22,34 @@ export type ReminderLine = {
 
 const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/**
+ * Your own day ("Remind me about my own day"): a week before, "Your day is
+ * in 7 days ✨" with "Time to update your wishlist?"; on the day, "Happy
+ * birthday, Maya! 🎉" with "Today is all about you."
+ */
+export function ownDayLine(r: DueReminder): ReminderLine {
+  const name = r.day.personName.trim();
+  const date = formatFullDate(r.occursOn);
+  if (r.offset === 0) {
+    return {
+      headline: `Happy birthday${name ? `, ${name}` : ""}! 🎉`,
+      date,
+      detail: "Today is all about you.",
+      gentle: false,
+      wishlistLabel: null,
+    };
+  }
+  return {
+    headline: `Your day is ${countdownLabel(r.offset)} ✨`,
+    date,
+    detail: "Time to update your wishlist?",
+    gentle: false,
+    wishlistLabel: null,
+  };
+}
+
 export function reminderLine(r: DueReminder): ReminderLine {
+  if (r.day.isYou) return ownDayLine(r);
   const { day, offset, occursOn } = r;
   const type = typeFor(day.kind, day.inMemory);
   const when = countdownLabel(offset);
@@ -81,6 +108,7 @@ export function reminderSubject(reminders: DueReminder[]): string {
 export function reminderPreview(reminders: DueReminder[]): string {
   if (reminders.length === 1) {
     const line = reminderLine(reminders[0]!);
+    if (reminders[0]!.day.isYou) return line.detail ?? line.date;
     return line.gentle ? line.date : `${line.date}. I'll keep reminding you, gently.`;
   }
   return `${reminders.length} days to keep in mind, from Noor at Remember Me.`;

@@ -11,6 +11,8 @@ export type YourDay = {
   daysUntil: number;
   /** "Sun, 22 Nov". */
   date: string;
+  /** Your own plan for that day, once you've started one. */
+  plan?: { done: number; total: number } | null;
 };
 
 function yourDayHeadline(days: number) {
@@ -31,7 +33,12 @@ function YourDayCard({ yourDay }: { yourDay: YourDay }) {
         {yourDayHeadline(yourDay.daysUntil)}
         {yourDay.daysUntil === 0 && <span aria-hidden> 🎂</span>}
       </span>
-      <span className="text-13">{yourDay.date}</span>
+      <span className="text-13">
+        {yourDay.date}
+        {yourDay.plan && yourDay.plan.total > 0
+          ? ` · plan ${yourDay.plan.done} of ${yourDay.plan.total} ready`
+          : ""}
+      </span>
     </Link>
   );
 }

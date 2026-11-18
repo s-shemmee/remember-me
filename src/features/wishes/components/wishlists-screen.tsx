@@ -164,13 +164,28 @@ export function WishlistsScreen({
     }
     window.history.replaceState(null, "", url);
   };
-  const [listId, setListId] = React.useState(lists[0]?.id ?? "");
+  // Celebrate Me links here with ?list=birthday (or treat) and ?add=1 ("Add a wish").
+  const [listId, setListId] = React.useState(
+    () => lists.find((l) => l.kind === params.get("list"))?.id ?? lists[0]?.id ?? "",
+  );
   const [order, setOrder] = React.useState<Record<string, string[]>>({});
   const [dialog, setDialog] = React.useState<{
     key: number;
     initial: WishFormValues;
     imageUrl: string | null;
-  } | null>(null);
+  } | null>(() =>
+    params.get("add") === "1" && listId
+      ? { key: 0, initial: emptyWishForm(listId), imageUrl: null }
+      : null,
+  );
+  // "?add=1" opens the dialog once: drop it so a refresh doesn't open it again.
+  React.useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("add")) return;
+    url.searchParams.delete("add");
+    url.searchParams.delete("list");
+    window.history.replaceState(null, "", url);
+  }, []);
   const opener = React.useRef<HTMLElement | null>(null);
   const titleRef = React.useRef<HTMLHeadingElement>(null);
 

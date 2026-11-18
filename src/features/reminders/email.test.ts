@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { reminderLine, reminderPreview, reminderSubject } from "./copy";
 import type { DueReminder, ReminderDay } from "./due";
 import { EMAIL_COLORS, EMAIL_PASTELS, renderReminderEmail, renderTestEmail } from "./email";
+import { pushPayload } from "./push";
 
 const day = (extra: Partial<ReminderDay> = {}): ReminderDay => ({
   occasionId: "o1",
@@ -192,5 +193,48 @@ describe("rendered email", () => {
       expect(value(name), name).toBe(fill);
       expect(value(`${name}-ink`), `${name}-ink`).toBe(ink);
     }
+  });
+});
+
+describe("your own day", () => {
+  const mine = (offset: number) =>
+    reminder(offset, { isYou: true, occasionId: "you", personName: "Maya", year: null });
+
+  it("a week before: your day, and your wishlist", async () => {
+    expect(reminderLine(mine(7))).toMatchObject({
+      headline: "Your day is in 7 days ✨",
+      detail: "Time to update your wishlist?",
+      wishlistLabel: null,
+    });
+    const email = await renderReminderEmail({ firstName: "Maya", reminders: [mine(7)], links });
+    expect(email.subject).toBe("Your day is in 7 days ✨");
+    expect(email.html).toContain("Time to update your wishlist?");
+    expect(email.html).toContain('href="https://app.example/wishlists?list=birthday"');
+    expect(email.html).toContain("Remind me about my own day");
+    expect(email.html).toContain('href="https://app.example/unsubscribe?token=abc"');
+    // Never the "a day to keep in mind" email about your people.
+    expect(email.html).not.toContain("days to keep in mind");
+  });
+
+  it("on the day: happy birthday", async () => {
+    const email = await renderReminderEmail({ firstName: "Maya", reminders: [mine(0)], links });
+    expect(email.subject).toBe("Happy birthday, Maya! 🎉");
+    expect(email.text).toContain("Today is all about you.");
+    expect(email.html).toContain('href="https://app.example/celebrate"');
+    expect(reminderPreview([mine(0)])).toBe("Today is all about you.");
+  });
+
+  it("push: the same words, opening your wishlist or Celebrate Me", () => {
+    expect(pushPayload([mine(7)], "b1")).toEqual({
+      title: "Your day is in 7 days ✨",
+      body: "Time to update your wishlist?",
+      url: "/wishlists?list=birthday",
+      tag: "b1",
+    });
+    expect(pushPayload([mine(0)], "b2")).toMatchObject({
+      title: "Happy birthday, Maya! 🎉",
+      body: "Today is all about you.",
+      url: "/celebrate",
+    });
   });
 });

@@ -353,3 +353,41 @@ describe("a reminder run", () => {
     });
   });
 });
+
+describe("your own day", () => {
+  const me: ReminderUser = { ...user, ownDay: { day: 13, month: 11 } };
+
+  it("comes in its own email, a week before and on the morning itself, once each", async () => {
+    const { clock, resend, run } = setup([me]);
+    expect(await run()).toMatchObject({ sent: 2, failed: 0 });
+    // Never mixed in with your people's days.
+    expect(resend.delivered.map((e) => e.subject)).toEqual(["o1|7|2026-11-13", "you|7|2026-11-13"]);
+    expect(await run()).toMatchObject({ sent: 0 });
+
+    clock.now = Date.parse("2026-11-13T09:30:00Z");
+    await run();
+    expect(resend.delivered.map((e) => e.subject).slice(2)).toEqual([
+      "o1|0|2026-11-13",
+      "you|0|2026-11-13",
+    ]);
+    expect(await run()).toMatchObject({ sent: 0 });
+  });
+
+  it("is off by default: nothing about your day without the switch", async () => {
+    const { resend, run } = setup([user]);
+    await run();
+    expect(resend.delivered.map((e) => e.subject)).toEqual(["o1|7|2026-11-13"]);
+  });
+
+  it("a stuck own-day email is retried with the same key", async () => {
+    const { clock, resend, run } = setup([me], []);
+    resend.setMode("fail");
+    expect(await run()).toMatchObject({ failed: 1 });
+    resend.setMode("ok");
+    clock.now += 11 * 60_000;
+    expect(await run()).toMatchObject({ retried: 1 });
+    expect(resend.delivered).toMatchObject([
+      { subject: "you|7|2026-11-13", idempotencyKey: "batch-1" },
+    ]);
+  });
+});

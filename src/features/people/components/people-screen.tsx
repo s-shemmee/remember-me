@@ -19,6 +19,8 @@ import { filterPeople, type PersonView } from "../view";
 import { PersonCard } from "./person-card";
 import { emptyPersonForm, PersonDialog, type PersonDialogResult } from "./person-dialog";
 import { PersonPanel } from "./person-panel";
+import { PlansProvider } from "@/features/plans/components/plan-state";
+import type { PlanView } from "@/features/plans/steps";
 
 /** Below this width the profile replaces the grid instead of sitting next to it. */
 const WIDE = "(min-width: 1280px)";
@@ -31,7 +33,17 @@ const countLabel = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
  * (?person=id), so refresh and the back button work. Search and filters
  * run in the browser on the list the server sent.
  */
-export function PeopleScreen({ people }: { people: PersonView[] }) {
+export function PeopleScreen({
+  people,
+  plans = [],
+  today = "",
+}: {
+  people: PersonView[];
+  /** Your plans, this year's and past ones (private: only ever yours). */
+  plans?: PlanView[];
+  /** Today in your timezone, "2026-11-17". */
+  today?: string;
+}) {
   const router = useRouter();
   const params = useSearchParams();
   const selectedId = params.get("person");
@@ -134,7 +146,7 @@ export function PeopleScreen({ people }: { people: PersonView[] }) {
   };
 
   return (
-    <>
+    <PlansProvider plans={plans}>
       <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         <div className="flex min-w-0 flex-[1_1_240px] flex-col gap-1">
           <h1
@@ -234,6 +246,7 @@ export function PeopleScreen({ people }: { people: PersonView[] }) {
               key={panelPerson.id}
               person={panelPerson}
               headingRef={headingRef}
+              today={today}
               onBack={backToList}
               onEdit={() => openEdit(panelPerson)}
               onInvite={() => {
@@ -273,6 +286,6 @@ export function PeopleScreen({ people }: { people: PersonView[] }) {
           }}
         />
       )}
-    </>
+    </PlansProvider>
   );
 }

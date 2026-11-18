@@ -40,6 +40,39 @@ export type Database = {
           },
         ];
       };
+      future_notes: {
+        Row: {
+          body: string;
+          created_at: string;
+          id: string;
+          opens_on: string;
+          owner_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          created_at?: string;
+          id?: string;
+          opens_on: string;
+          owner_id?: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          opens_on?: string;
+          owner_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "future_notes_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       invites: {
         Row: {
           created_at: string;
@@ -338,6 +371,101 @@ export type Database = {
           },
         ];
       };
+      plan_steps: {
+        Row: {
+          created_at: string;
+          done_at: string | null;
+          id: string;
+          kind: string;
+          label: string;
+          owner_id: string;
+          plan_id: string;
+          position: number;
+          ticked_by: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          done_at?: string | null;
+          id?: string;
+          kind?: string;
+          label: string;
+          owner_id?: string;
+          plan_id: string;
+          position?: number;
+          ticked_by?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          done_at?: string | null;
+          id?: string;
+          kind?: string;
+          label?: string;
+          owner_id?: string;
+          plan_id?: string;
+          position?: number;
+          ticked_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plan_steps_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "plan_steps_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      plans: {
+        Row: {
+          created_at: string;
+          id: string;
+          note: string | null;
+          occasion_id: string | null;
+          occurs_on: string;
+          owner_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          note?: string | null;
+          occasion_id?: string | null;
+          occurs_on: string;
+          owner_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          note?: string | null;
+          occasion_id?: string | null;
+          occurs_on?: string;
+          owner_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plans_occasion_id_fkey";
+            columns: ["occasion_id"];
+            isOneToOne: false;
+            referencedRelation: "occasions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "plans_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_character: string | null;
@@ -450,6 +578,7 @@ export type Database = {
           offsets_days: number[];
           profile_id: string;
           push: boolean;
+          remind_my_day: boolean;
           remind_my_people: boolean;
           send_time: string;
           updated_at: string;
@@ -460,6 +589,7 @@ export type Database = {
           offsets_days?: number[];
           profile_id?: string;
           push?: boolean;
+          remind_my_day?: boolean;
           remind_my_people?: boolean;
           send_time?: string;
           updated_at?: string;
@@ -469,6 +599,7 @@ export type Database = {
           offsets_days?: number[];
           profile_id?: string;
           push?: boolean;
+          remind_my_day?: boolean;
           remind_my_people?: boolean;
           send_time?: string;
           updated_at?: string;
@@ -661,6 +792,10 @@ export type Database = {
         Returns: string;
       };
       create_invite: { Args: { p_person_id?: string }; Returns: string };
+      ensure_plan_for: {
+        Args: { p_occasion_id: string; p_occurs_on: string; p_owner: string; p_style: string };
+        Returns: string;
+      };
       finish_reminders: { Args: { p_batch_id: string; p_provider_id: string }; Returns: undefined };
       friend_wishes: {
         Args: Record<PropertyKey, never>;
@@ -717,7 +852,42 @@ export type Database = {
           profile_id: string;
         }[];
       };
+      my_sealed_note: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          created_at: string;
+          opens_on: string;
+        }[];
+      };
+      my_today: { Args: Record<PropertyKey, never>; Returns: string };
       name_for: { Args: { p_profile: string; p_viewer: string }; Returns: string };
+      next_occurrence: {
+        Args: { p_day: number; p_from: string; p_month: number };
+        Returns: string;
+      };
+      occurrence_in: { Args: { p_day: number; p_month: number; p_year: number }; Returns: string };
+      own_day_candidates: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          birthday_day: number;
+          birthday_month: number;
+          email: string;
+          email_on: boolean;
+          first_name: string;
+          profile_id: string;
+          push_on: boolean;
+          send_time: string;
+          timezone: string;
+        }[];
+      };
+      plan_suggestions: {
+        Args: { p_style: string };
+        Returns: {
+          kind: string;
+          label: string;
+          step_order: number;
+        }[];
+      };
       prepare_account_deletion: { Args: { p_user_id: string }; Returns: undefined };
       reclaim_stuck_reminders: {
         Args: Record<PropertyKey, never>;
@@ -797,6 +967,11 @@ export type Database = {
         Args: { p_auth: string; p_device_label: string; p_endpoint: string; p_p256dh: string };
         Returns: string;
       };
+      seal_future_note: { Args: { p_body: string }; Returns: string };
+      start_plan: { Args: { p_occasion_id: string; p_occurs_on: string }; Returns: string };
+      sync_gift_step: { Args: { p_owner: string; p_reserver: string }; Returns: undefined };
+      throw_away_future_note: { Args: Record<PropertyKey, never>; Returns: undefined };
+      today_for: { Args: { p_profile_id: string }; Returns: string };
       unlink_person: { Args: { p_person_id: string }; Returns: undefined };
       wish_is_shared: { Args: { p_wishlist_id: string }; Returns: boolean };
     };

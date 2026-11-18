@@ -26,6 +26,9 @@ export async function GET() {
     reservations,
     friendWishes,
     friends,
+    plans,
+    notes,
+    sealed,
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -33,7 +36,10 @@ export async function GET() {
         "first_name, birthday_day, birthday_month, birth_year, avatar_kind, avatar_color, avatar_character, timezone, share_birthday, theme, created_at",
       )
       .maybeSingle(),
-    supabase.from("reminder_settings").select("offsets_days, send_time, email, push").maybeSingle(),
+    supabase
+      .from("reminder_settings")
+      .select("offsets_days, send_time, email, push, remind_my_day")
+      .maybeSingle(),
     supabase.from("push_subscriptions").select("device_label, created_at, last_used_at"),
     supabase
       .from("people")
@@ -53,6 +59,13 @@ export async function GET() {
     supabase.from("reservations").select("wish_id, created_at").is("cancelled_at", null),
     supabase.rpc("friend_wishes"),
     supabase.rpc("my_friends"),
+    supabase
+      .from("plans")
+      .select("occurs_on, note, occasions(people(name)), plan_steps(label, position, done_at)")
+      .order("occurs_on"),
+    // Only notes already open are readable (RLS); a sealed one stays sealed.
+    supabase.from("future_notes").select("opens_on, body, created_at").order("opens_on"),
+    supabase.rpc("my_sealed_note"),
   ]);
 
   const wishById = new Map((friendWishes.data ?? []).map((w) => [w.id, w]));
@@ -83,6 +96,22 @@ export async function GET() {
     wishlists: wishlists.data ?? [],
     wishes: wishes.data ?? [],
     reserved,
+    plans: (plans.data ?? []).map((p) => ({
+      for: p.occasions?.people?.name ?? null,
+      occursOn: p.occurs_on,
+      note: p.note,
+      steps: [...p.plan_steps]
+        .sort((a, b) => a.position - b.position)
+        .map((st) => ({ label: st.label, done: st.done_at !== null })),
+    })),
+    openedNotes: (notes.data ?? []).map((n) => ({
+      opensOn: n.opens_on,
+      body: n.body,
+      writtenAt: n.created_at,
+    })),
+    sealedNote: sealed.data?.[0]
+      ? { opensOn: sealed.data[0].opens_on, writtenAt: sealed.data[0].created_at }
+      : null,
   });
 
   return new NextResponse(JSON.stringify(body, null, 2), {

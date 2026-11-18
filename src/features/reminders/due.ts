@@ -37,6 +37,11 @@ export type ReminderUser = {
   emailOn: boolean;
   /** Push on and at least one device. */
   pushOn: boolean;
+  /**
+   * "Remind me about my own day" is on and your birthday is set: 7 days
+   * before and on the morning itself (reminder_settings.remind_my_day).
+   */
+  ownDay?: { day: number; month: number } | null;
 };
 
 export type ReminderDay = {
@@ -56,6 +61,8 @@ export type ReminderDay = {
   wishlistFriendId: string | null;
   /** The person has passed: gentle wording everywhere (people.in_memory). */
   inMemory?: boolean;
+  /** Your own birthday (occasionId "you"), not one of your people's days. */
+  isYou?: boolean;
 };
 
 export type DueReminder = {
@@ -132,4 +139,62 @@ export function dueReminders({
   return due.sort(
     (a, b) => a.offset - b.offset || a.day.personName.localeCompare(b.day.personName),
   );
+}
+
+/** Your own day: a week before ("Time to update your wishlist?") and the morning itself. */
+export const OWN_DAY_OFFSETS = [7, 0] as const;
+export const OWN_DAY_ID = "you";
+
+/** Your own birthday as a reminder day (its log keys are "you|<offset>|<date>"). */
+export function ownDayReminderDay(user: ReminderUser): ReminderDay | null {
+  if (!user.ownDay) return null;
+  return {
+    occasionId: OWN_DAY_ID,
+    personId: "",
+    personName: user.firstName,
+    personColor: "rose",
+    kind: "birthday",
+    title: null,
+    day: user.ownDay.day,
+    month: user.ownDay.month,
+    year: null,
+    recurring: true,
+    littleThing: null,
+    archived: false,
+    wishlistFriendId: null,
+    isYou: true,
+  };
+}
+
+/**
+ * Own-day reminders due now: the same send time and channels as your other
+ * reminders, but always 7 days before and on the day (not your chosen
+ * offsets), and only with "Remind me about my own day" on. Each is sent once.
+ */
+export function dueOwnDay({
+  now,
+  user,
+  sent,
+  channel = "email",
+}: {
+  now: Date;
+  user: ReminderUser;
+  sent: ReadonlySet<string>;
+  channel?: Channel;
+}): DueReminder[] {
+  const day = ownDayReminderDay(user);
+  const on = channel === "push" ? user.pushOn : user.emailOn;
+  if (!day || !on) return [];
+  const zone = user.timezone || DEFAULT_TIMEZONE;
+  if (minutesIn(zone, now) < sendMinutes(user.sendTime)) return [];
+  const today = todayIn(zone, now);
+  const due: DueReminder[] = [];
+  for (const offset of OWN_DAY_OFFSETS) {
+    const date = addDays(today, offset);
+    if (!occursOn(day, date)) continue;
+    const key = reminderKey(OWN_DAY_ID, offset, date);
+    if (sent.has(key)) continue;
+    due.push({ key, offset, occursOn: date, day });
+  }
+  return due;
 }

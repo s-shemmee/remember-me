@@ -47,6 +47,18 @@ type CandidateRow = {
   in_memory: boolean;
 };
 
+type OwnDayRow = {
+  profile_id: string;
+  email: string;
+  first_name: string;
+  timezone: string | null;
+  send_time: string;
+  email_on: boolean;
+  push_on: boolean;
+  birthday_day: number;
+  birthday_month: number;
+};
+
 const must = <T>(
   result: { data: T | null; error: { message: string } | null },
   what: string,
@@ -58,9 +70,10 @@ const must = <T>(
 export function reminderStore(db: SupabaseClient): ReminderStore {
   return {
     async loadCandidates(): Promise<Candidates> {
-      const [rows, keys] = await Promise.all([
+      const [rows, keys, ownDays] = await Promise.all([
         db.rpc("reminder_candidates"),
         db.rpc("reminder_log_keys"),
+        db.rpc("own_day_candidates"),
       ]);
       const users = new Map<string, ReminderUser>();
       const days = new Map<string, ReminderDay[]>();
@@ -94,6 +107,28 @@ export function reminderStore(db: SupabaseClient): ReminderStore {
           wishlistFriendId: r.wishlist_friend_id,
           inMemory: r.in_memory,
         });
+      }
+      // "Remind me about my own day": the same user (or a new one with no
+      // people reminders), with their birthday.
+      for (const r of must<OwnDayRow[]>(ownDays, "own_day_candidates") ?? []) {
+        const ownDay = { day: r.birthday_day, month: r.birthday_month };
+        const user = users.get(r.profile_id);
+        if (user) {
+          user.ownDay = ownDay;
+          continue;
+        }
+        users.set(r.profile_id, {
+          profileId: r.profile_id,
+          email: r.email,
+          firstName: r.first_name,
+          timezone: r.timezone,
+          offsets: [],
+          sendTime: r.send_time,
+          emailOn: r.email_on,
+          pushOn: r.push_on && pushConfigured(),
+          ownDay,
+        });
+        days.set(r.profile_id, []);
       }
       const logged = new Map<string, Set<string>>();
       for (const k of must<{ profile_id: string; channel: Channel; key: string }[]>(

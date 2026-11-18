@@ -294,6 +294,41 @@ export function ReminderEmail({
   );
 }
 
+const OWN_DAY_REASON =
+  "You're getting this because you turned on “Remind me about my own day” in Remember Me.";
+
+/** Your own day: one short note from Noor, a week before or on the day. */
+export function OwnDayEmail({ reminder, links }: { reminder: DueReminder; links: EmailLinks }) {
+  const line = reminderLine(reminder);
+  const onTheDay = reminder.offset === 0;
+  return (
+    <Layout
+      title={line.headline}
+      preview={line.detail ?? line.date}
+      links={links}
+      reason={OWN_DAY_REASON}
+    >
+      <h1 style={{ margin: "0 0 6px", fontSize: 24, lineHeight: "30px", fontWeight: 800 }}>
+        {line.headline}
+      </h1>
+      <p style={{ margin: "0 0 4px", fontSize: 16, lineHeight: "24px" }}>{line.detail}</p>
+      <p style={{ margin: "0 0 20px", fontSize: 16, lineHeight: "24px", color: EMAIL_COLORS.sub }}>
+        {line.date}
+      </p>
+      {onTheDay ? (
+        <ButtonLink href={`${links.appUrl}/celebrate`}>Open Celebrate Me</ButtonLink>
+      ) : (
+        <ButtonLink href={`${links.appUrl}/wishlists?list=birthday`}>Update my wishlist</ButtonLink>
+      )}
+      <p style={{ margin: "20px 0 0", fontSize: 16, lineHeight: "24px" }}>
+        With love,
+        <br />
+        Noor <span aria-hidden="true">🕯️</span>
+      </p>
+    </Layout>
+  );
+}
+
 export function TestEmail({ firstName, links }: { firstName: string; links: EmailLinks }) {
   return (
     <Layout
@@ -335,7 +370,12 @@ export async function renderReminderEmail(args: {
   reminders: DueReminder[];
   links: EmailLinks;
 }): Promise<RenderedEmail> {
-  const el = <ReminderEmail {...args} />;
+  const own = args.reminders.length === 1 && args.reminders[0]!.day.isYou;
+  const el = own ? (
+    <OwnDayEmail reminder={args.reminders[0]!} links={args.links} />
+  ) : (
+    <ReminderEmail {...args} />
+  );
   return {
     subject: reminderSubject(args.reminders),
     html: await render(el),

@@ -20,8 +20,11 @@
  */
 import {
   type Channel,
+  dueOwnDay,
   dueReminders,
   type DueReminder,
+  OWN_DAY_ID,
+  ownDayReminderDay,
   type ReminderDay,
   reminderKey,
   type ReminderUser,
@@ -91,8 +94,10 @@ const CHANNELS: Channel[] = ["email", "push"];
 export type RunSummary = { sent: number; retried: number; failed: number; released: number };
 
 /** Rebuilds a stuck batch's reminders from today's data (same keys, same order). */
-function remindersForKeys(keys: string[], days: ReminderDay[]): DueReminder[] {
+function remindersForKeys(keys: string[], days: ReminderDay[], user: ReminderUser): DueReminder[] {
   const byId = new Map(days.map((d) => [d.occasionId, d]));
+  const own = ownDayReminderDay(user);
+  if (own) byId.set(OWN_DAY_ID, own);
   const out: DueReminder[] = [];
   for (const key of keys) {
     const [occasionId, offset, iso] = key.split("|");
@@ -157,7 +162,7 @@ export async function runReminders(deps: RunDeps): Promise<RunSummary> {
     const user = users.get(stuck.profileId);
     const reminders =
       user && channelOn(stuck.channel, user)
-        ? remindersForKeys(stuck.keys, candidates.days.get(user.profileId) ?? [])
+        ? remindersForKeys(stuck.keys, candidates.days.get(user.profileId) ?? [], user)
         : [];
     if (!user || !reminders.length) {
       await store.release(stuck.batchId);
@@ -170,33 +175,40 @@ export async function runReminders(deps: RunDeps): Promise<RunSummary> {
     else summary.failed += 1;
   }
 
-  // 2. Newly due, per channel.
+  // 2. Newly due, per channel: your people's days in one batch, your own
+  // day in its own (its own email or notification, never mixed in).
   for (const user of candidates.users) {
     for (const channel of CHANNELS) {
       if (!channelOn(channel, user)) continue;
-      const due = dueReminders({
-        now: deps.now,
-        user,
-        days: candidates.days.get(user.profileId) ?? [],
-        sent: candidates.logged.get(loggedKey(channel, user.profileId)) ?? new Set(),
-        channel,
-      });
-      if (!due.length) continue;
-      const batchId = deps.newId();
-      const claimed = new Set(
-        await store.claim(
-          user.profileId,
-          batchId,
-          due.map((d) => d.key),
+      const sent = candidates.logged.get(loggedKey(channel, user.profileId)) ?? new Set<string>();
+      const batches = [
+        dueReminders({
+          now: deps.now,
+          user,
+          days: candidates.days.get(user.profileId) ?? [],
+          sent,
           channel,
-        ),
-      );
-      const mine = due.filter((d) => claimed.has(d.key));
-      if (!mine.length) continue; // another run got them
-      const outcome = await deliver(channel, user, mine, batchId);
-      if (outcome === "sent") summary.sent += 1;
-      else if (outcome === "released") summary.released += 1;
-      else summary.failed += 1;
+        }),
+        dueOwnDay({ now: deps.now, user, sent, channel }),
+      ];
+      for (const due of batches) {
+        if (!due.length) continue;
+        const batchId = deps.newId();
+        const claimed = new Set(
+          await store.claim(
+            user.profileId,
+            batchId,
+            due.map((d) => d.key),
+            channel,
+          ),
+        );
+        const mine = due.filter((d) => claimed.has(d.key));
+        if (!mine.length) continue; // another run got them
+        const outcome = await deliver(channel, user, mine, batchId);
+        if (outcome === "sent") summary.sent += 1;
+        else if (outcome === "released") summary.released += 1;
+        else summary.failed += 1;
+      }
     }
   }
   return summary;

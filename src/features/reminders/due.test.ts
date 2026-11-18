@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { minutesIn } from "@/lib/dates";
 
 import {
+  dueOwnDay,
   dueReminders,
   occursOn,
   reminderKey,
@@ -207,5 +208,44 @@ describe("skips", () => {
   it("builds the log key from occasion, offset and occurrence date (with its year)", () => {
     expect(reminderKey("o1", 7, { year: 2026, month: 11, day: 13 })).toBe("o1|7|2026-11-13");
     expect(reminderKey("o1", 0, "2027-02-28")).toBe("o1|0|2027-02-28");
+  });
+});
+
+describe("your own day (Remind me about my own day)", () => {
+  const me = (extra: Partial<ReminderUser> = {}) =>
+    user({ ownDay: { day: 22, month: 11 }, offsets: [1], ...extra });
+  const own = (now: string, u: Partial<ReminderUser> = {}, sent: string[] = []) =>
+    dueOwnDay({ now: new Date(now), user: me(u), sent: new Set(sent) }).map((r) => r.key);
+
+  it("7 days before and on the morning itself, whatever offsets you chose", () => {
+    expect(own("2026-11-15T09:00:00Z")).toEqual(["you|7|2026-11-22"]);
+    expect(own("2026-11-22T09:00:00Z")).toEqual(["you|0|2026-11-22"]);
+    expect(own("2026-11-16T09:00:00Z")).toEqual([]);
+    expect(own("2026-11-21T09:00:00Z")).toEqual([]);
+  });
+
+  it("at your send time, on your own wall clock", () => {
+    expect(own("2026-11-15T08:59:00Z")).toEqual([]);
+  });
+
+  it("is off without the switch, and sent once", () => {
+    expect(own("2026-11-15T09:00:00Z", { ownDay: null })).toEqual([]);
+    expect(own("2026-11-15T09:00:00Z", {}, ["you|7|2026-11-22"])).toEqual([]);
+    expect(own("2026-11-15T09:00:00Z", { emailOn: false })).toEqual([]);
+  });
+
+  it("29 February falls on the 28th in other years", () => {
+    const leap = { ownDay: { day: 29, month: 2 } };
+    expect(own("2027-02-28T09:00:00Z", leap)).toEqual(["you|0|2027-02-28"]);
+    expect(own("2028-02-29T09:00:00Z", leap)).toEqual(["you|0|2028-02-29"]);
+  });
+
+  it("says it's you, so the wording is yours", () => {
+    const [r] = dueOwnDay({
+      now: new Date("2026-11-22T09:00:00Z"),
+      user: me(),
+      sent: new Set(),
+    });
+    expect(r?.day).toMatchObject({ isYou: true, occasionId: "you", personName: "Maya" });
   });
 });

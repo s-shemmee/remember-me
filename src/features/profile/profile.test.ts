@@ -107,6 +107,33 @@ describe("Download my data", () => {
       { wishlist_id: "l2", title: "Concert ticket" },
     ],
     reserved: [{ friendFirstName: "Sara", wishTitle: "Instax", reservedAt: "2026-11-10" }],
+    plans: [
+      {
+        for: "Khalid",
+        occursOn: "2026-11-13",
+        note: "Rooftop",
+        steps: [{ label: "Gift", done: true }],
+      },
+      { for: null, occursOn: "2026-11-22", note: null, steps: [] },
+    ],
+    openedNotes: [{ opensOn: "2025-11-22", body: "Dear me", writtenAt: "2025-01-02" }],
+    sealedNote: { opensOn: "2026-11-22", writtenAt: "2026-01-02" },
+  });
+
+  it("has my plans, and my notes: a sealed one never shows its words", () => {
+    expect(data.plans).toEqual([
+      {
+        for: "Khalid",
+        date: "2026-11-13",
+        note: "Rooftop",
+        steps: [{ label: "Gift", done: true }],
+      },
+      { for: "your own birthday", date: "2026-11-22", note: null, steps: [] },
+    ]);
+    expect(data.notes_to_future_you).toEqual([
+      { opens_on: "2025-11-22", written_on: "2025-01-02", note: "Dear me" },
+      { opens_on: "2026-11-22", written_on: "2026-01-02", note: "Sealed until your birthday." },
+    ]);
   });
 
   it("has my profile, people with their days, lists with their wishes, devices", () => {

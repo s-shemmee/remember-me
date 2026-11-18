@@ -11,7 +11,7 @@ import { ThemeSync } from "@/features/profile/components/theme-sync";
 import { AVATARS_BUCKET } from "@/features/profile/constants";
 import { AppShell } from "@/features/shell/app-shell";
 import { parseThemeChoice } from "@/lib/theme";
-import { daysBetween, formatShortDate, nextOccurrence, todayIn } from "@/lib/dates";
+import { daysBetween, formatShortDate, nextOccurrence, todayIn, toIsoDate } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 /**
@@ -51,6 +51,22 @@ async function Shell({ children }: { children: React.ReactNode }) {
       ? { day: profile.birthday_day, month: profile.birthday_month }
       : null;
   const on = birthday ? nextOccurrence(birthday, today) : null;
+  // Your own plan for that day: "plan 1 of 4 ready" on the Your day card.
+  let plan: { done: number; total: number } | null = null;
+  if (on) {
+    const { data } = await supabase
+      .from("plans")
+      .select("plan_steps(done_at)")
+      .is("occasion_id", null)
+      .eq("occurs_on", toIsoDate(on))
+      .maybeSingle();
+    if (data) {
+      plan = {
+        done: data.plan_steps.filter((s) => s.done_at !== null).length,
+        total: data.plan_steps.length,
+      };
+    }
+  }
   let photoUrl: string | null = null;
   if (profile?.avatar_kind === "photo" && profile.avatar_path) {
     const { data } = await supabase.storage
@@ -71,7 +87,7 @@ async function Shell({ children }: { children: React.ReactNode }) {
         photoUrl,
         peopleCount: count ?? 0,
       }}
-      yourDay={on ? { daysUntil: daysBetween(today, on), date: formatShortDate(on) } : null}
+      yourDay={on ? { daysUntil: daysBetween(today, on), date: formatShortDate(on), plan } : null}
     >
       <ThemeSync theme={parseThemeChoice(profile?.theme)} />
       {children}
