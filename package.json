@@ -19,7 +19,7 @@
     "db:stop": "supabase stop",
     "db:test": "supabase test db",
     "e2e": "playwright test",
-    "lighthouse": "lhci autorun"
+    "lighthouse": "node scripts/lighthouse.ts"
   },
   "dependencies": {
     "@react-email/render": "2.3.1",

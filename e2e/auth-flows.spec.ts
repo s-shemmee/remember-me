@@ -57,13 +57,18 @@ function recordActionResponses(page: Page, email: string) {
 async function signUp(page: Page, email: string) {
   await page.goto("/sign-up");
   await page.getByLabel("What should we call you?").fill("Sara");
-  await page.getByLabel("Email", { exact: true }).fill(email);
-  await page.locator("input[name=password]").fill(PASSWORD);
+  await page.getByLabel("Email", { exact: true }).filter({ visible: true }).fill(email);
+  await page.locator("input[name=password]").filter({ visible: true }).fill(PASSWORD);
   await page.getByRole("button", { name: "Create my account" }).click();
   await expect(page).toHaveURL(/\/check-email$/);
 }
 
 // getByRole skips the previous page Next keeps mounted (hidden) for Back.
+/*
+ * Production builds keep the previous page mounted but hidden (so Back is
+ * instant): opening /log-in twice leaves two forms in the DOM. Fields are
+ * filled with `filter({ visible: true })`, and getByRole skips hidden ones.
+ */
 const mainText = (page: Page) => page.getByRole("main").innerText();
 
 test("signing up twice: the same screen, a confirmation first and 'you already have an account' next", async ({
@@ -116,8 +121,8 @@ test("log in: a wrong password and an unknown email look exactly the same", asyn
 
   const attempt = async (address: string) => {
     await page.goto("/log-in");
-    await page.getByLabel("Email", { exact: true }).fill(address);
-    await page.locator("input[name=password]").fill("wrong_password_000");
+    await page.getByLabel("Email", { exact: true }).filter({ visible: true }).fill(address);
+    await page.locator("input[name=password]").filter({ visible: true }).fill("wrong_password_000");
     await page.getByRole("button", { name: "Log in" }).click();
     await expect(page.getByText("Email or password is incorrect")).toBeVisible();
     return (await mainText(page)).replaceAll(address, "EMAIL");
@@ -142,8 +147,8 @@ test("log in before confirming: 'Please confirm your email first', and Resend se
   await page.context().clearCookies();
 
   await page.goto("/log-in");
-  await page.getByLabel("Email", { exact: true }).fill(email);
-  await page.locator("input[name=password]").fill(PASSWORD);
+  await page.getByLabel("Email", { exact: true }).filter({ visible: true }).fill(email);
+  await page.locator("input[name=password]").filter({ visible: true }).fill(PASSWORD);
   await page.getByRole("button", { name: "Log in" }).click();
   await expect(page.getByText("Please confirm your email first")).toBeVisible();
   await page.getByRole("button", { name: "Resend the confirmation link" }).click();
@@ -161,7 +166,7 @@ test("forgot password: the same answer for a registered and a made-up address", 
 
   const ask = async (address: string) => {
     await page.goto("/forgot-password");
-    await page.getByLabel("Email", { exact: true }).fill(address);
+    await page.getByLabel("Email", { exact: true }).filter({ visible: true }).fill(address);
     await page.getByRole("button", { name: /Send/ }).click();
     await expect(page.getByText(/If there's an account for that email/)).toBeVisible();
     return (await mainText(page)).replaceAll(address, "EMAIL");
@@ -206,4 +211,18 @@ test("account-notice refuses any call without the server secret", async () => {
     });
     expect(res.status).toBe(401);
   }
+});
+
+test("the log-in form is in the page from the start, never swapped (autofill survives)", async ({
+  request,
+}) => {
+  // A Suspense fallback form replaced by the real one wiped typed or
+  // autofilled values. Only the URL-dependent bits stream in now.
+  for (const path of ["/log-in", "/log-in?next=/people", "/log-in?error=link"]) {
+    const html = await (await request.get(path)).text();
+    expect(html.match(/name="password"/g), path).toHaveLength(1);
+  }
+  const withNext = await (await request.get("/log-in?next=/people")).text();
+  // In both forms: Continue with Google and email.
+  expect(withNext.match(/name="next" value="\/people"/g)).toHaveLength(2);
 });

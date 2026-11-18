@@ -27,5 +27,11 @@ export const AUTH_MESSAGES = {
   weakPassword: "That password is too easy to guess. Try a longer one.",
 } as const;
 
+/** Messages for /log-in?error= after a failed email link or Google sign-in. */
+export const LINK_ERRORS: Record<string, string> = {
+  link: "That link has expired or was already used. Log in, or ask for a new one.",
+  google: "Google sign-in didn't finish. Please try again.",
+};
+
 /** How long the Resend buttons wait between sends. */
 export const RESEND_COOLDOWN_SECONDS = 60;
