@@ -33,8 +33,8 @@ export const PROTECTED_PREFIXES = [
   "/settings",
 ] as const;
 
-/** Pages signed-in people skip (they go home instead). */
-export const GUEST_ONLY_PATHS = ["/log-in", "/sign-up"] as const;
+/** Pages signed-in people skip (they go home instead): the landing page too. */
+export const GUEST_ONLY_PATHS = ["/", "/log-in", "/sign-up"] as const;
 
 const matchesPrefix = (pathname: string, prefix: string) =>
   pathname === prefix || pathname.startsWith(`${prefix}/`);

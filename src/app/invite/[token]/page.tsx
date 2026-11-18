@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { NO_INDEX } from "@/lib/seo";
 
 import { Button } from "@/components/ui/button";
 import { AuthShell } from "@/features/auth/components/auth-shell";
@@ -12,7 +13,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export const metadata: Metadata = {
   title: "You're invited · Remember Me",
   // Invite links are private: never indexed, never sent on as a referrer.
-  robots: { index: false, follow: false },
+  robots: NO_INDEX,
   referrer: "no-referrer",
 };
 

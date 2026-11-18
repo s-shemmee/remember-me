@@ -70,4 +70,10 @@ describe("decideRoute", () => {
     }
     expect(decideRoute("/", "", false)).toEqual({ action: "continue" });
   });
+
+  it("sends signed-in visitors from the landing page straight home", () => {
+    expect(decideRoute("/", "", true)).toEqual({ action: "redirect", to: HOME_PATH });
+    expect(decideRoute("/privacy", "", true)).toEqual({ action: "continue" });
+    expect(decideRoute("/terms", "", true)).toEqual({ action: "continue" });
+  });
 });

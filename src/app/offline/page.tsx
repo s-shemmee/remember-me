@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { NO_INDEX } from "@/lib/seo";
 
 import { Logo } from "@/components/ui/logo";
 import { NoorBubble } from "@/components/ui/noor-bubble";
 
 export const metadata: Metadata = {
   title: "Offline · Remember Me",
-  robots: { index: false, follow: false },
+  robots: NO_INDEX,
 };
 
 /**

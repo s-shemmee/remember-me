@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { NO_INDEX } from "@/lib/seo";
 
 import { AuthShell } from "@/features/auth/components/auth-shell";
 import { SignUpPanel, signUpPanelClass } from "@/features/auth/components/panels";
@@ -9,7 +10,7 @@ import { looksLikeUnsubscribeToken } from "@/features/reminders/unsubscribe-toke
 export const metadata: Metadata = {
   title: "Unsubscribe · Remember Me",
   // A personal link: never indexed, never sent on as a referrer.
-  robots: { index: false, follow: false },
+  robots: NO_INDEX,
   referrer: "no-referrer",
 };
 

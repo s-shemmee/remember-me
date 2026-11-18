@@ -18,7 +18,8 @@
     "db:types": "supabase gen types typescript --local --schema public > src/lib/supabase/types.ts && prettier --write src/lib/supabase/types.ts",
     "db:stop": "supabase stop",
     "db:test": "supabase test db",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@react-email/render": "2.3.1",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@lhci/cli": "0.16.1",
     "@playwright/test": "1.65.0",
     "@serwist/turbopack": "9.5.13",
     "@tailwindcss/turbopack": "^4",

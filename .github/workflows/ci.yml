@@ -129,6 +129,37 @@ jobs:
             functions.log
           if-no-files-found: warn
 
+  lighthouse:
+    # The landing page's budgets on mobile (lighthouserc.json): performance
+    # 0.9+, accessibility 1, SEO and best practices 0.95+, LCP under 2.5s, CLS
+    # under 0.1. Three runs, asserted on the median. The landing page is
+    # static and signed-out visitors never reach Supabase, so the placeholder
+    # values from src/test/fake-values.ts are enough to start the server.
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://test.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_00000000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      # The runner's Chrome; LHCI starts `pnpm start` itself.
+      - run: pnpm exec lhci autorun
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          # A dot folder: upload-artifact skips hidden files unless told.
+          include-hidden-files: true
+          if-no-files-found: warn
+
   evals:
     needs: quality
     if: github.event_name == 'pull_request'

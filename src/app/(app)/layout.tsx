@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -13,6 +14,10 @@ import { AppShell } from "@/features/shell/app-shell";
 import { parseThemeChoice } from "@/lib/theme";
 import { daysBetween, formatShortDate, nextOccurrence, todayIn, toIsoDate } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { NO_INDEX } from "@/lib/seo";
+
+/** The app is private: never in search results (robots.txt disallows it too). */
+export const metadata: Metadata = { robots: NO_INDEX };
 
 /**
  * Every app page (home, people, calendar…) needs a finished onboarding and

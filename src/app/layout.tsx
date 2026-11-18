@@ -4,6 +4,7 @@ import { Instrument_Serif, Kalam, Plus_Jakarta_Sans } from "next/font/google";
 
 import { SkipLink } from "@/components/ui/skip-link";
 import { Toaster } from "@/components/ui/sonner";
+import { siteUrl } from "@/lib/env";
 import { themeScript } from "@/lib/theme";
 
 import "./globals.css";
@@ -28,6 +29,8 @@ const kalam = Kalam({
 });
 
 export const metadata: Metadata = {
+  // Canonical and Open Graph URLs resolve against NEXT_PUBLIC_SITE_URL.
+  metadataBase: new URL(siteUrl()),
   title: "Remember Me",
   description: "Remember the people you love, and your own day too.",
   applicationName: "Remember Me",
