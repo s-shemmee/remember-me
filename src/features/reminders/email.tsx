@@ -45,6 +45,67 @@ export type EmailLinks = {
   unsubscribeUrl: string;
 };
 
+/**
+ * The logo in HTML, not an image, so it shows with images blocked: a red
+ * rounded square (square in Outlook, which is fine) with a white heart. U+FE0E
+ * keeps iPhones from turning the heart into a red emoji. Hidden from screen
+ * readers: "Remember me" follows.
+ */
+function Logo() {
+  return (
+    <table role="presentation" cellPadding={0} cellSpacing={0} border={0}>
+      <tbody>
+        <tr>
+          <td
+            aria-hidden="true"
+            data-skip-in-text="true"
+            width={28}
+            height={28}
+            align="center"
+            valign="middle"
+            // Outlook paints `bgcolor`, not CSS backgrounds (not in React's types).
+            {...({ bgcolor: EMAIL_COLORS.accent } as Record<string, string>)}
+            style={{
+              width: 28,
+              height: 28,
+              backgroundColor: EMAIL_COLORS.accent,
+              borderRadius: 8,
+              color: EMAIL_COLORS.onAccent,
+              fontSize: 16,
+              lineHeight: "28px",
+              textAlign: "center",
+              fontFamily: "Arial, Helvetica, sans-serif",
+            }}
+          >
+            {"♥︎"}
+          </td>
+          <td
+            style={{
+              paddingLeft: 10,
+              fontSize: 20,
+              lineHeight: "28px",
+              fontWeight: 800,
+              color: EMAIL_COLORS.text,
+            }}
+          >
+            Remember{" "}
+            <span
+              style={{
+                fontFamily: "Georgia, 'Times New Roman', serif",
+                fontStyle: "italic",
+                fontWeight: 400,
+                color: EMAIL_COLORS.accentText,
+              }}
+            >
+              me
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  );
+}
+
 function Layout({
   title,
   preview,
@@ -103,18 +164,8 @@ function Layout({
                 >
                   <tbody>
                     <tr>
-                      <td style={{ padding: "0 8px 20px", fontSize: 20, fontWeight: 800 }}>
-                        <span aria-hidden="true">🕯️ </span>Remember{" "}
-                        <span
-                          style={{
-                            fontFamily: "Georgia, 'Times New Roman', serif",
-                            fontStyle: "italic",
-                            fontWeight: 400,
-                            color: EMAIL_COLORS.accentText,
-                          }}
-                        >
-                          me
-                        </span>
+                      <td style={{ padding: "0 8px 20px" }}>
+                        <Logo />
                       </td>
                     </tr>
                     <tr>

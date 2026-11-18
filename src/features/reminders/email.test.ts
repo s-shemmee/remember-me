@@ -238,3 +238,24 @@ describe("your own day", () => {
     });
   });
 });
+
+describe("the logo", () => {
+  it("is HTML, not an image: a red square with a white text heart, hidden from screen readers", async () => {
+    for (const email of [
+      await renderReminderEmail({ firstName: "Maya", reminders: [reminder(7)], links }),
+      await renderTestEmail({ firstName: "Maya", links }),
+    ]) {
+      const logo = email.html.match(/<td[^>]*aria-hidden="true"[^>]*>♥︎<\/td>/)?.[0];
+      expect(logo).toBeDefined();
+      expect(logo).toContain('bgcolor="#d63b48"');
+      expect(logo).toContain("border-radius:8px");
+      expect(email.html).not.toContain("<img");
+      // The candle stays in Noor's sign-off only, and the heart stays out of the text version.
+      const body = email.html.replace(/<title>.*?<\/title>/, "");
+      expect(body.match(/🕯️/g)).toHaveLength(1);
+      expect(body).toMatch(/Noor <span aria-hidden="true">🕯️<\/span>/);
+      expect(email.text).not.toContain("♥");
+      expect(email.text).toContain("Remember me");
+    }
+  });
+});
