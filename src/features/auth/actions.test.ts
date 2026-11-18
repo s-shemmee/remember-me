@@ -57,6 +57,27 @@ vi.mock("@sentry/nextjs", () => ({
   withScope: sentry.withScope,
 }));
 
+// account-notice (server only) and Next's after(): record, don't run.
+const notices = vi.hoisted(() => ({
+  requested: [] as string[],
+  afterQueue: [] as (() => unknown)[],
+}));
+vi.mock("@/lib/account-notice", () => ({
+  requestAccountNotice: async (email: string) => {
+    notices.requested.push(email);
+  },
+}));
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  after: (fn: () => unknown) => {
+    notices.afterQueue.push(fn);
+  },
+}));
+/** Runs what after() scheduled (as Next does once the response is sent). */
+async function flushAfter() {
+  for (const fn of notices.afterQueue.splice(0)) await fn();
+}
+
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({
     auth,
@@ -95,6 +116,8 @@ const PASSWORD = FAKE_DB_PASSWORD; // any 8+ character fake
 
 beforeEach(() => {
   for (const fn of Object.values(auth)) fn.mockReset();
+  notices.requested.length = 0;
+  notices.afterQueue.length = 0;
   sentry.captureMessage.mockClear();
   for (const fn of Object.values(sentry.scope)) fn.mockClear();
   cookieJar.clear();
@@ -202,9 +225,8 @@ describe("logIn", () => {
       error: authError("invalid_credentials"),
     });
     const { state } = await run(actions.logIn({}, form(valid)));
-    expect(state?.formError).toBe(
-      "That email and password don't match. Try again, or reset your password.",
-    );
+    expect(state?.formError).toBe("Email or password is incorrect");
+    expect(state?.kind).toBe("badLogin");
     expect(state?.values).toEqual({ email: "sara@test.local" });
   });
 
@@ -213,9 +235,9 @@ describe("logIn", () => {
       data: {},
       error: authError("email_not_confirmed"),
     });
-    expect((await run(actions.logIn({}, form(valid)))).state?.formError).toMatch(
-      /confirm your email/,
-    );
+    const { state } = await run(actions.logIn({}, form(valid)));
+    expect(state?.formError).toBe("Please confirm your email first");
+    expect(state?.kind).toBe("notConfirmed");
   });
 
   it("validates before calling Supabase", async () => {
@@ -433,5 +455,123 @@ describe("auth errors", () => {
     });
     await run(actions.signUp({}, signUpForm()));
     expect(sentry.captureMessage).not.toHaveBeenCalled();
+  });
+});
+
+// --- every case, never revealing whether an email has an account -----------------
+describe("every auth case (docs/decisions.md)", () => {
+  const signUpForm = (email = "sara@test.local") =>
+    form({ firstName: "Sara", email, password: PASSWORD });
+  const existingConfirmed = { data: { user: { identities: [] }, session: null }, error: null };
+  const brandNew = {
+    data: { user: { identities: [{ id: "i1" }] }, session: null },
+    error: null,
+  };
+
+  it("sign-up: a new address, an existing one and a confirmed one all land on the same screen", async () => {
+    for (const result of [
+      brandNew,
+      existingConfirmed,
+      { data: { user: null, session: null }, error: authError("user_already_exists", 422) },
+    ]) {
+      auth.signUp.mockResolvedValue(result);
+      expect((await run(actions.signUp({}, signUpForm()))).redirect).toBe("/check-email");
+    }
+  });
+
+  it("sign-up: account-notice is asked for every sign-up, after the response", async () => {
+    auth.signUp.mockResolvedValue(brandNew);
+    await run(actions.signUp({}, signUpForm("new@test.local")));
+    auth.signUp.mockResolvedValue(existingConfirmed);
+    await run(actions.signUp({}, signUpForm("taken@test.local")));
+    // Nothing during the request: only once the response is sent.
+    expect(notices.requested).toEqual([]);
+    await flushAfter();
+    expect(notices.requested).toEqual(["new@test.local", "taken@test.local"]);
+  });
+
+  it("log in: a wrong password and an unknown email give the same message", async () => {
+    auth.signInWithPassword.mockResolvedValue({
+      data: {},
+      error: authError("invalid_credentials"),
+    });
+    const wrong = await run(
+      actions.logIn({}, form({ email: "sara@test.local", password: PASSWORD })),
+    );
+    const unknown = await run(
+      actions.logIn({}, form({ email: "nobody@test.local", password: PASSWORD })),
+    );
+    expect(wrong.state?.formError).toBe("Email or password is incorrect");
+    expect({ ...unknown.state, values: undefined }).toEqual({ ...wrong.state, values: undefined });
+  });
+
+  it("log in: rate limits", async () => {
+    auth.signInWithPassword.mockResolvedValue({
+      data: {},
+      error: authError("over_request_rate_limit", 429),
+    });
+    const { state } = await run(
+      actions.logIn({}, form({ email: "a@test.local", password: PASSWORD })),
+    );
+    expect(state?.formError).toBe("Too many tries. Please wait a minute.");
+  });
+
+  it("log in: anything else is the generic message", async () => {
+    auth.signInWithPassword.mockResolvedValue({
+      data: {},
+      error: authError("unexpected_failure", 500),
+    });
+    const { state } = await run(
+      actions.logIn({}, form({ email: "a@test.local", password: PASSWORD })),
+    );
+    expect(state?.formError).toBe("Something went wrong on our side. Please try again.");
+  });
+
+  it("Resend (check your email): the same answer for any address, then a minute's rest", async () => {
+    cookieJar.set("rm-pending-email", "sara@test.local");
+    auth.resend.mockResolvedValue({ data: {}, error: null });
+    const first = await run(actions.resendConfirmation({}, form({})));
+    expect(first.state?.notice).toBe("Sent again. It can take a minute to arrive.");
+    expect(first.state?.cooldownUntil).toBeGreaterThan(Date.now());
+    await flushAfter();
+    expect(notices.requested).toEqual(["sara@test.local"]);
+
+    const again = await run(actions.resendConfirmation({}, form({})));
+    expect(again.state?.formError).toBe("Please wait a minute before sending again.");
+    expect(auth.resend).toHaveBeenCalledOnce();
+  });
+
+  it("Resend: an already-confirmed address looks exactly like any other", async () => {
+    cookieJar.set("rm-pending-email", "taken@test.local");
+    auth.resend.mockResolvedValue({ data: {}, error: authError("email_already_confirmed", 400) });
+    const { state } = await run(actions.resendConfirmation({}, form({})));
+    expect(state?.notice).toBe("Sent again. It can take a minute to arrive.");
+  });
+
+  it("Resend from log in: the typed address, the same answer", async () => {
+    auth.resend.mockResolvedValue({ data: {}, error: null });
+    const { state } = await run(actions.resendFromLogIn({}, form({ email: "sara@test.local" })));
+    expect(auth.resend).toHaveBeenCalledWith(expect.objectContaining({ email: "sara@test.local" }));
+    expect(state?.notice).toBe("Sent again. It can take a minute to arrive.");
+  });
+
+  it("forgot password: the same notice for a real and a made-up address", async () => {
+    auth.resetPasswordForEmail.mockResolvedValue({ data: {}, error: null });
+    const real = await run(actions.requestPasswordReset({}, form({ email: "sara@test.local" })));
+    auth.resetPasswordForEmail.mockResolvedValue({
+      data: null,
+      error: authError("user_not_found", 404),
+    });
+    const fake = await run(actions.requestPasswordReset({}, form({ email: "nobody@test.local" })));
+    expect(real.state).toEqual(fake.state);
+    expect(real.state?.notice).toBe(
+      "If there's an account for that email, we've sent a link to reset your password.",
+    );
+  });
+
+  it("reset password: an expired link", async () => {
+    auth.getClaims.mockResolvedValue({ data: null, error: null });
+    const { state } = await run(actions.updatePassword({}, form({ password: PASSWORD })));
+    expect(state?.formError).toBe("This link has expired. Ask for a new one below.");
   });
 });

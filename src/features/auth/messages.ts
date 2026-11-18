@@ -1,0 +1,31 @@
+/**
+ * Every message the auth flows show (docs/decisions.md, "Auth flows: every
+ * case"). None of them says whether an email has an account: the same words
+ * for a new address and a registered one, a wrong password and an unknown
+ * email.
+ */
+export const AUTH_MESSAGES = {
+  // Everywhere
+  tooMany: "Too many tries. Please wait a minute.",
+  generic: "Something went wrong on our side. Please try again.",
+
+  // Log in
+  badLogin: "Email or password is incorrect",
+  googleHint: "Signed up with Google? Use Continue with Google",
+  notConfirmed: "Please confirm your email first",
+
+  // Check your email / Resend
+  accountHint: "Already have an account? We've emailed you a link to log in instead.",
+  resent: "Sent again. It can take a minute to arrive.",
+  resendWait: "Please wait a minute before sending again.",
+  resendNeedsEmail: "Please sign up again so we know where to send it.",
+
+  // Forgot / reset password
+  resetSent: "If there's an account for that email, we've sent a link to reset your password.",
+  linkExpired: "This link has expired. Ask for a new one below.",
+  samePassword: "That's your current password. Choose a new one.",
+  weakPassword: "That password is too easy to guess. Try a longer one.",
+} as const;
+
+/** How long the Resend buttons wait between sends. */
+export const RESEND_COOLDOWN_SECONDS = 60;

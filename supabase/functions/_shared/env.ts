@@ -1,6 +1,7 @@
 /**
  * Edge Function settings. Secrets (RESEND_API_KEY, UNSUBSCRIBE_SECRET,
- * CRON_SECRET) live only in Supabase function secrets; the Next app and
+ * CRON_SECRET, EMAIL_HASH_SECRET, ACCOUNT_NOTICE_SECRET) live in Supabase
+ * function secrets (ACCOUNT_NOTICE_SECRET also on the Vercel server); the Next app and
  * Vercel never see them. The secret key comes from Supabase's own function
  * environment.
  *
@@ -49,6 +50,10 @@ function secret(name: string, minLength = 16): string {
 
 export const cronSecret = () => secret("CRON_SECRET", 16);
 export const unsubscribeSecret = () => secret("UNSUBSCRIBE_SECRET", 32);
+/** Shared with the Next server only: the one caller account-notice accepts. */
+export const accountNoticeSecret = () => secret("ACCOUNT_NOTICE_SECRET", 32);
+/** Keys the HMAC of addresses in account_notices (never stored in plain text). */
+export const emailHashSecret = () => secret("EMAIL_HASH_SECRET", 32);
 
 /**
  * The site (links in emails and notifications): SITE_URL, e.g.

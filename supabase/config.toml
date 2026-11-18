@@ -464,5 +464,9 @@ verify_jwt = false
 
 [functions.send-test-push]
 verify_jwt = false
+
+# Checks its own secret (ACCOUNT_NOTICE_SECRET): only our Next server may call it.
+[functions.account-notice]
+verify_jwt = false
 [functions.delete-account]
 verify_jwt = false

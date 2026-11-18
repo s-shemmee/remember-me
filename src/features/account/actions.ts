@@ -2,6 +2,7 @@
 
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 
 import {
   deleteAccountSchema,
@@ -9,6 +10,7 @@ import {
   passwordChangeSchema,
   REAUTH_MESSAGE,
 } from "@/features/profile/schema";
+import { requestAccountNotice } from "@/lib/account-notice";
 import { EMAIL_NOT_SENT, isEmailSendFailure, reportAuthError } from "@/lib/auth-errors";
 import { siteOrigin } from "@/lib/site-origin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -52,21 +54,25 @@ export async function changeEmail(input: unknown): Promise<AccountResult> {
     { emailRedirectTo: `${await siteOrigin()}/auth/confirm` },
   );
   if (error) {
+    // Already someone else's: say the same as for a free address (never
+    // reveal that it's registered). Nothing changes, and that address gets
+    // the "You already have an account" email instead (account-notice).
     if (error.code === "email_exists") {
-      return {
-        ok: false,
-        message: "That email is already used by another account.",
-        field: "email",
-      };
+      const taken = parsed.data.email;
+      after(() => requestAccountNotice(taken));
+      return almostThere(parsed.data.email);
     }
     reportAuthError("change_email", error);
     return { ok: false, message: isEmailSendFailure(error) ? EMAIL_NOT_SENT : OOPS };
   }
-  return {
-    ok: true,
-    message: `Almost there. Check ${parsed.data.email} (and your current inbox) to confirm the change.`,
-  };
+  return almostThere(parsed.data.email);
 }
+
+/** The same answer for a free address and a taken one. */
+const almostThere = (email: string): AccountResult => ({
+  ok: true,
+  message: `Almost there. Check ${email} (and your current inbox) to confirm the change.`,
+});
 
 /** Change password: the current password first, then the new one (8+). */
 export async function changePassword(input: unknown): Promise<AccountResult> {

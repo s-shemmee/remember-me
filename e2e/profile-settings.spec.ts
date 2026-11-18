@@ -192,6 +192,6 @@ test("delete my account: checked again by the Edge Function, then it can't log i
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.locator("input[name=password]").fill(PASSWORD);
   await page.getByRole("button", { name: /^Log in/ }).click();
-  await expect(page.getByText(/That email and password don't match/)).toBeVisible();
+  await expect(page.getByText("Email or password is incorrect")).toBeVisible();
   await expect(page).toHaveURL(/\/log-in/);
 });

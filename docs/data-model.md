@@ -46,6 +46,8 @@ Built (M4 part 1, `…_email_reminders.sql`): plus `kind` (`reminder` | `test`),
 **future_notes**: "A note to future me". Built (M5 part 2): `id`, `owner_id`, `opens_on date` (your next birthday after the day it was written), `body` 1–2000, `created_at`, unique `(owner_id, opens_on)`. Sealed: the select policy only shows a note when `opens_on <= my_today()` (your timezone), so not even you can read it before; no updates; written only by `seal_future_note()`; thrown away with `throw_away_future_note()` (a filtered DELETE can't reach a row you can't read).
 **memories** (later: "Birthday memories" shows "Coming soon"): `id`, `profile_id`, `year`, `title`, `body`, `image_path`.
 
+**account_notices** (fix/auth-flows): `id`, `email_hash bytea` (HMAC-SHA-256 of the lowercased address with `EMAIL_HASH_SECRET`; never the address), `created_at`. RLS on, no policies: server only. `claim_account_notice(email, hash)` (service_role): true only for a confirmed account, once an hour per address, 200 a day overall; records it. `run_cleanup()` drops rows after 30 days. Tests: `supabase/tests/account_notices.test.sql`.
+
 **ai_usage**: `id`, `profile_id`, `feature`, `model`, `input_tokens`, `output_tokens`, `cost_usd numeric`, `created_at`. Used for per-user daily limits.
 **embeddings** (Phase 3): `id`, `owner_id`, `source_type enum('person','wish','memory')`, `source_id`, `content text`, `embedding vector(N)` (N = the embedding model's dimension), HNSW index.
 

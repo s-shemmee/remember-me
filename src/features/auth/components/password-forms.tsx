@@ -10,6 +10,7 @@ import { requestPasswordReset, resendConfirmation, updatePassword } from "../act
 import { PASSWORD_MIN } from "../schemas";
 import type { AuthFormState } from "../state";
 import { FormMessage } from "./auth-shell";
+import { ResendForm } from "./resend-form";
 
 export function ForgotPasswordForm() {
   const [state, action, pending] = useActionState<AuthFormState<"email">, FormData>(
@@ -63,15 +64,7 @@ export function ResetPasswordForm() {
   );
 }
 
+/** "Check your email" → send the link again (the address from sign-up). */
 export function ResendConfirmationForm() {
-  const [state, action, pending] = useActionState<AuthFormState, FormData>(resendConfirmation, {});
-
-  return (
-    <form action={action} className="grid gap-4">
-      <FormMessage error={state.formError} notice={state.notice} />
-      <Button type="submit" variant="card2" className="w-full" aria-disabled={pending || undefined}>
-        {pending ? "Sending…" : "Send the link again"}
-      </Button>
-    </form>
-  );
+  return <ResendForm action={resendConfirmation} label="Resend" />;
 }

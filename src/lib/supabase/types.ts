@@ -3,6 +3,25 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      account_notices: {
+        Row: {
+          created_at: string;
+          email_hash: string;
+          id: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          email_hash: string;
+          id?: never;
+        };
+        Update: {
+          created_at?: string;
+          email_hash?: string;
+          id?: never;
+        };
+        Relationships: [];
+      };
       connections: {
         Row: {
           created_at: string;
@@ -762,6 +781,7 @@ export type Database = {
       call_edge_function: { Args: { p_name: string }; Returns: number };
       can_view_avatar: { Args: { p_name: string }; Returns: boolean };
       can_view_wish_image: { Args: { p_name: string }; Returns: boolean };
+      claim_account_notice: { Args: { p_email: string; p_hash: string }; Returns: boolean };
       claim_reminders: {
         Args: { p_batch_id: string; p_channel: string; p_keys: string[]; p_profile_id: string };
         Returns: string[];

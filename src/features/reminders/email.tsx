@@ -38,6 +38,9 @@ const pastelOf = (c: string) =>
 
 const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
+/** Account emails (no reminders to change or unsubscribe from): a contact line instead. */
+export const CONTACT_EMAIL = "contact@shemme.codes";
+
 export type EmailLinks = {
   /** The site, from SITE_URL, e.g. https://rememberme.shemme.codes (no trailing slash). */
   appUrl: string;
@@ -106,7 +109,7 @@ function Logo() {
   );
 }
 
-function Layout({
+export function Layout({
   title,
   preview,
   children,
@@ -117,7 +120,8 @@ function Layout({
   title: string;
   preview: string;
   children: React.ReactNode;
-  links: EmailLinks;
+  /** Reminder emails: "Change reminders · Unsubscribe". Without, a contact line. */
+  links: EmailLinks | { appUrl: string; unsubscribeUrl?: undefined };
   reason: string;
 }) {
   return (
@@ -189,18 +193,33 @@ function Layout({
                         }}
                       >
                         <p style={{ margin: "0 0 8px" }}>{reason}</p>
-                        <p style={{ margin: 0 }}>
-                          <a
-                            href={`${links.appUrl}/settings#reminders`}
-                            style={{ color: EMAIL_COLORS.accentText }}
-                          >
-                            Change reminders
-                          </a>
-                          {" · "}
-                          <a href={links.unsubscribeUrl} style={{ color: EMAIL_COLORS.accentText }}>
-                            Unsubscribe
-                          </a>
-                        </p>
+                        {links.unsubscribeUrl ? (
+                          <p style={{ margin: 0 }}>
+                            <a
+                              href={`${links.appUrl}/settings#reminders`}
+                              style={{ color: EMAIL_COLORS.accentText }}
+                            >
+                              Change reminders
+                            </a>
+                            {" · "}
+                            <a
+                              href={links.unsubscribeUrl}
+                              style={{ color: EMAIL_COLORS.accentText }}
+                            >
+                              Unsubscribe
+                            </a>
+                          </p>
+                        ) : (
+                          <p style={{ margin: 0 }}>
+                            Questions?{" "}
+                            <a
+                              href={`mailto:${CONTACT_EMAIL}`}
+                              style={{ color: EMAIL_COLORS.accentText }}
+                            >
+                              {CONTACT_EMAIL}
+                            </a>
+                          </p>
+                        )}
                       </td>
                     </tr>
                   </tbody>
@@ -214,7 +233,7 @@ function Layout({
   );
 }
 
-function ButtonLink({ href, children }: { href: string; children: React.ReactNode }) {
+export function ButtonLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <a
       href={href}
@@ -235,7 +254,7 @@ function ButtonLink({ href, children }: { href: string; children: React.ReactNod
   );
 }
 
-function SecondaryLink({ href, children }: { href: string; children: React.ReactNode }) {
+export function SecondaryLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <a
       href={href}
@@ -408,7 +427,7 @@ export function TestEmail({ firstName, links }: { firstName: string; links: Emai
 export type RenderedEmail = { subject: string; html: string; text: string };
 
 /** Plain text: headings keep their case; links show their address. */
-const TEXT_OPTIONS = {
+export const TEXT_OPTIONS = {
   wordwrap: 78,
   selectors: [
     { selector: "h1", options: { uppercase: false } },
