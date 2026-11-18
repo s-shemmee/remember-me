@@ -59,4 +59,15 @@ describe("decideRoute", () => {
       expect(decideRoute(path, "", true)).toEqual({ action: "continue" });
     }
   });
+
+  it("sends an email link that fell back to the site root on to /auth/confirm", () => {
+    const search = "?token_hash=abc&type=email&next=/home";
+    for (const signedIn of [false, true]) {
+      expect(decideRoute("/", search, signedIn)).toEqual({
+        action: "redirect",
+        to: "/auth/confirm?token_hash=abc&type=email&next=/home",
+      });
+    }
+    expect(decideRoute("/", "", false)).toEqual({ action: "continue" });
+  });
 });

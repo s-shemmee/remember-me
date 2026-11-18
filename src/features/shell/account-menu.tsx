@@ -101,7 +101,7 @@ export function AccountMenu({
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <a href="mailto:hello@shemme.codes">
+          <a href="mailto:contact@shemme.codes">
             <span aria-hidden>💬</span> Help &amp; feedback
           </a>
         </DropdownMenuItem>

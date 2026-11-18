@@ -9,6 +9,7 @@ import {
   passwordChangeSchema,
   REAUTH_MESSAGE,
 } from "@/features/profile/schema";
+import { EMAIL_NOT_SENT, isEmailSendFailure, reportAuthError } from "@/lib/auth-errors";
 import { siteOrigin } from "@/lib/site-origin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -51,9 +52,15 @@ export async function changeEmail(input: unknown): Promise<AccountResult> {
     { emailRedirectTo: `${await siteOrigin()}/auth/confirm` },
   );
   if (error) {
-    return error.code === "email_exists"
-      ? { ok: false, message: "That email is already used by another account.", field: "email" }
-      : { ok: false, message: OOPS };
+    if (error.code === "email_exists") {
+      return {
+        ok: false,
+        message: "That email is already used by another account.",
+        field: "email",
+      };
+    }
+    reportAuthError("change_email", error);
+    return { ok: false, message: isEmailSendFailure(error) ? EMAIL_NOT_SENT : OOPS };
   }
   return {
     ok: true,
@@ -74,9 +81,11 @@ export async function changePassword(input: unknown): Promise<AccountResult> {
   if (auth.result !== "ok") return { ok: false, message: WRONG_PASSWORD, field: "current" };
   const { error } = await supabase.auth.updateUser({ password: parsed.data.next });
   if (error) {
-    return error.code === "same_password"
-      ? { ok: false, message: "That's your current password. Pick a new one.", field: "next" }
-      : { ok: false, message: OOPS };
+    if (error.code === "same_password") {
+      return { ok: false, message: "That's your current password. Pick a new one.", field: "next" };
+    }
+    reportAuthError("change_password", error);
+    return { ok: false, message: OOPS };
   }
   return { ok: true, message: "Password changed ✓" };
 }
@@ -112,9 +121,11 @@ export async function deleteAccount(input: unknown): Promise<AccountResult> {
   });
   if (error) {
     let code = "failed";
+    let status: number | undefined;
     if (error instanceof FunctionsHttpError) {
       const body = (await error.context.json().catch(() => ({}))) as { error?: string };
       code = body.error ?? code;
+      status = (error.context as Response).status;
     }
     switch (code) {
       case "email_mismatch":
@@ -124,6 +135,7 @@ export async function deleteAccount(input: unknown): Promise<AccountResult> {
       case "sign_in_again":
         return { ok: false, message: REAUTH_MESSAGE };
       default:
+        reportAuthError("delete_account", { code, status });
         return { ok: false, message: OOPS };
     }
   }

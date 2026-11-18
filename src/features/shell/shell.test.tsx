@@ -84,7 +84,7 @@ describe("App shell", () => {
     );
     expect(within(menu).getByRole("menuitem", { name: /Help/ })).toHaveAttribute(
       "href",
-      "mailto:hello@shemme.codes",
+      "mailto:contact@shemme.codes",
     );
 
     await userEvent.click(within(menu).getByRole("menuitem", { name: /Log out/ }));

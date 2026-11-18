@@ -259,6 +259,10 @@ content_path = "./supabase/templates/reset-password.html"
 subject = "Confirm your new email for Remember Me"
 content_path = "./supabase/templates/change-email.html"
 
+[auth.email.template.magic_link]
+subject = "Your link to log in to Remember Me"
+content_path = "./supabase/templates/magic-link.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

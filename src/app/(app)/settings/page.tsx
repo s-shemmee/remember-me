@@ -128,10 +128,10 @@ export default function SettingsPage() {
             A question, an idea, something not working? I read every message.
           </p>
           <a
-            href="mailto:hello@shemme.codes"
+            href="mailto:contact@shemme.codes"
             className="inline-flex min-h-11 items-center rounded-pill bg-card2 px-6 text-15 font-semibold"
           >
-            Email hello@shemme.codes
+            Email contact@shemme.codes
           </a>
         </section>
       </div>

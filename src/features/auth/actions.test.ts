@@ -38,6 +38,25 @@ vi.mock("next/headers", () => ({
     set: cookieSet,
   }),
 }));
+// Sentry: what would be sent, to check it never carries an email or password.
+const sentry = vi.hoisted(() => {
+  const scope = {
+    setLevel: vi.fn(),
+    setTags: vi.fn(),
+    setContext: vi.fn(),
+    setFingerprint: vi.fn(),
+  };
+  return {
+    scope,
+    captureMessage: vi.fn(),
+    withScope: vi.fn((fn: (s: typeof scope) => void) => fn(scope)),
+  };
+});
+vi.mock("@sentry/nextjs", () => ({
+  captureMessage: sentry.captureMessage,
+  withScope: sentry.withScope,
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({
     auth,
@@ -76,6 +95,8 @@ const PASSWORD = FAKE_DB_PASSWORD; // any 8+ character fake
 
 beforeEach(() => {
   for (const fn of Object.values(auth)) fn.mockReset();
+  sentry.captureMessage.mockClear();
+  for (const fn of Object.values(sentry.scope)) fn.mockClear();
   cookieJar.clear();
   cookieSet.mockClear();
   requestHeaders = new Headers({ origin: "http://localhost:3000" });
@@ -301,5 +322,116 @@ describe("logOut", () => {
     auth.signOut.mockResolvedValue({ error: null });
     expect((await run(actions.logOut())).redirect).toBe("/log-in");
     expect(auth.signOut).toHaveBeenCalledOnce();
+  });
+});
+
+// --- auth error reporting -------------------------------------------------------
+describe("auth errors", () => {
+  const EMAIL = "sara@test.local";
+  const signUpForm = () => form({ firstName: "Sara", email: EMAIL, password: PASSWORD });
+  /** Everything handed to Sentry, as one string. */
+  const sent = () =>
+    JSON.stringify([
+      sentry.captureMessage.mock.calls,
+      sentry.scope.setTags.mock.calls,
+      sentry.scope.setContext.mock.calls,
+      sentry.scope.setFingerprint.mock.calls,
+    ]);
+  const NOT_SENT = "We couldn't send your confirmation email. Please try again in a few minutes.";
+
+  it("the built-in sender refusing the address: a clear message, reported without the address", async () => {
+    auth.signUp.mockResolvedValue({
+      data: { user: null, session: null },
+      error: {
+        code: "email_address_not_authorized",
+        status: 400,
+        message: `Email address "${EMAIL}" cannot be used as it is not authorized`,
+      },
+    });
+    const { state } = await run(actions.signUp({}, signUpForm()));
+    expect(state?.formError).toBe(NOT_SENT);
+    expect(sentry.captureMessage).toHaveBeenCalledTimes(1);
+    expect(sentry.scope.setTags).toHaveBeenCalledWith({
+      auth_action: "sign_up",
+      supabase_code: "email_address_not_authorized",
+    });
+    expect(sentry.scope.setContext).toHaveBeenCalledWith("supabase_auth", { status: 400 });
+    expect(sent()).not.toContain(EMAIL);
+    expect(sent()).not.toContain(PASSWORD);
+    expect(sent()).not.toContain("cannot be used");
+  });
+
+  it("'Error sending confirmation email': the same message", async () => {
+    auth.signUp.mockResolvedValue({
+      data: { user: null, session: null },
+      error: {
+        code: "unexpected_failure",
+        status: 500,
+        message: "Error sending confirmation email",
+      },
+    });
+    const { state } = await run(actions.signUp({}, signUpForm()));
+    expect(state?.formError).toBe(NOT_SENT);
+    expect(sentry.scope.setTags).toHaveBeenCalledWith({
+      auth_action: "sign_up",
+      supabase_code: "unexpected_failure",
+    });
+  });
+
+  it("resending can fail the same way", async () => {
+    cookieJar.set("rm-pending-email", EMAIL);
+    auth.resend.mockResolvedValue({
+      data: {},
+      error: {
+        code: "unexpected_failure",
+        status: 500,
+        message: "Error sending confirmation email",
+      },
+    });
+    const { state } = await run(actions.resendConfirmation({}, form({})));
+    expect(state?.formError).toBe(NOT_SENT);
+    expect(sent()).not.toContain(EMAIL);
+  });
+
+  it("anything unexpected: the generic message, and Sentry gets the code and status only", async () => {
+    auth.signUp.mockResolvedValue({
+      data: { user: null, session: null },
+      error: { code: "unexpected_failure", status: 500, message: `Database error for ${EMAIL}` },
+    });
+    const { state } = await run(actions.signUp({}, signUpForm()));
+    expect(state?.formError).toBe("Something went wrong on our side. Please try again.");
+    expect(sentry.captureMessage).toHaveBeenCalledWith("Auth: sign_up failed (unexpected_failure)");
+    expect(sent()).not.toContain(EMAIL);
+    expect(sent()).not.toContain(PASSWORD);
+
+    sentry.captureMessage.mockClear();
+    auth.signInWithPassword.mockResolvedValue({
+      data: { user: null },
+      error: { code: undefined, status: 502, message: "Bad gateway" },
+    });
+    const login = await run(actions.logIn({}, form({ email: EMAIL, password: PASSWORD })));
+    expect(login.state?.formError).toBe("Something went wrong on our side. Please try again.");
+    expect(sentry.captureMessage).toHaveBeenCalledWith("Auth: log_in failed (unknown)");
+    expect(sentry.scope.setContext).toHaveBeenLastCalledWith("supabase_auth", { status: 502 });
+    expect(sent()).not.toContain(EMAIL);
+  });
+
+  it("expected answers (wrong password, rate limits, an existing account) aren't reported", async () => {
+    auth.signInWithPassword.mockResolvedValue({
+      data: { user: null },
+      error: authError("invalid_credentials"),
+    });
+    await run(actions.logIn({}, form({ email: EMAIL, password: PASSWORD })));
+    auth.signUp.mockResolvedValue({
+      data: { user: null, session: null },
+      error: authError("over_request_rate_limit", 429),
+    });
+    await run(actions.signUp({}, signUpForm()));
+    auth.signUp.mockResolvedValue({
+      data: { user: null, session: null },
+      error: authError("user_already_exists", 422),
+    });
+    await run(actions.signUp({}, signUpForm()));
+    expect(sentry.captureMessage).not.toHaveBeenCalled();
   });
 });

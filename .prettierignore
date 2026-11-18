@@ -7,3 +7,6 @@ next-env.d.ts
 *.md
 .github/
 pnpm-workspace.yaml
+
+# Supabase auth email templates: hand-built email HTML with Go template tags.
+supabase/templates/

@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { EMAIL_NOT_SENT, isEmailSendFailure, reportAuthError } from "@/lib/auth-errors";
 import { siteOrigin } from "@/lib/site-origin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isPushEndpoint } from "@/features/reminders/push";
@@ -19,6 +20,8 @@ import { type AuthFormState, fieldErrorsFrom } from "./state";
  * redirects on success. Rate limits come from Supabase Auth for now.
  *
  * Privacy: messages never reveal whether an email has an account.
+ * Unexpected errors go to Sentry with the Supabase code and status only
+ * (reportAuthError), never the email address or password.
  */
 
 const PENDING_EMAIL_COOKIE = "rm-pending-email";
@@ -75,9 +78,16 @@ export async function signUp(
     if (error.code === "email_address_invalid") {
       return { fieldErrors: { email: "That email doesn't look right." }, values };
     }
+    if (isEmailSendFailure(error)) {
+      reportAuthError("sign_up", error);
+      return { formError: EMAIL_NOT_SENT, values };
+    }
     // An existing account is not an error here: Supabase hides it when email
     // confirmation is on, and so do we (same "check your email" page).
-    if (error.code !== "user_already_exists") return { formError: MESSAGES.generic, values };
+    if (error.code !== "user_already_exists") {
+      reportAuthError("sign_up", error);
+      return { formError: MESSAGES.generic, values };
+    }
   }
 
   if (data.session) redirect(HOME_PATH); // Only when confirmation is off.
@@ -110,6 +120,7 @@ export async function logIn(
     if (error.code === "invalid_credentials" || error.status === 400) {
       return { formError: MESSAGES.badLogin, values };
     }
+    reportAuthError("log_in", error);
     return { formError: MESSAGES.generic, values };
   }
 
@@ -132,7 +143,10 @@ export async function logInWithGoogle(formData: FormData): Promise<void> {
       redirectTo: `${await siteOrigin()}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
-  if (error || !data.url) redirect("/log-in?error=google");
+  if (error || !data.url) {
+    reportAuthError("google_start", error ?? { code: "no_url" });
+    redirect("/log-in?error=google");
+  }
   redirect(data.url);
 }
 
@@ -153,6 +167,8 @@ export async function requestPasswordReset(
   if (error && isRateLimit(error.code, error.status)) {
     return { formError: MESSAGES.tooMany, values: input };
   }
+  // Worth knowing about (the email may not have gone out), but never shown.
+  if (error && error.code !== "user_not_found") reportAuthError("reset_password", error);
   // Same answer whether or not the account exists, and for any other error.
   return { notice: MESSAGES.resetSent };
 }
@@ -173,6 +189,7 @@ export async function updatePassword(
     if (error.code === "same_password") return { fieldErrors: { password: MESSAGES.samePassword } };
     if (error.code === "weak_password") return { fieldErrors: { password: MESSAGES.weakPassword } };
     if (isRateLimit(error.code, error.status)) return { formError: MESSAGES.tooMany };
+    reportAuthError("update_password", error);
     return { formError: MESSAGES.generic };
   }
   redirect(HOME_PATH);
@@ -192,6 +209,11 @@ export async function resendConfirmation(
     options: { emailRedirectTo: `${await siteOrigin()}/auth/confirm` },
   });
   if (error && isRateLimit(error.code, error.status)) return { formError: MESSAGES.tooMany };
+  if (error && isEmailSendFailure(error)) {
+    reportAuthError("resend_confirmation", error);
+    return { formError: EMAIL_NOT_SENT };
+  }
+  if (error) reportAuthError("resend_confirmation", error);
   return { notice: MESSAGES.resent };
 }
 

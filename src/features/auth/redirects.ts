@@ -43,6 +43,11 @@ export type RouteDecision = { action: "continue" } | { action: "redirect"; to: s
 
 /** What the proxy should do for a request, given whether someone is signed in. */
 export function decideRoute(pathname: string, search: string, signedIn: boolean): RouteDecision {
+  // An auth email link whose redirect fell back to the Site URL (no allowed
+  // redirect_to): "/?token_hash=…&type=…" is meant for /auth/confirm.
+  if (pathname === "/" && new URLSearchParams(search).has("token_hash")) {
+    return { action: "redirect", to: `/auth/confirm${search}` };
+  }
   if (!signedIn && PROTECTED_PREFIXES.some((p) => matchesPrefix(pathname, p))) {
     const next = `${pathname}${search}`;
     return { action: "redirect", to: `/log-in?next=${encodeURIComponent(next)}` };
