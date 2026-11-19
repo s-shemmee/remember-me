@@ -4,10 +4,9 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * Staging and production are two Supabase projects; the code must never
- * name one. The URL and keys come from env variables (Vercel: Production →
- * production, Preview → staging), and `supabase link` picks the project for
- * the CLI. This fails on a hard-coded project host, a project ref in a
+ * The code must never name the Supabase project (there is one, and it is
+ * production). The URL and keys come from env variables, and every CLI
+ * command names the project from the shell (`--remote=<ref>`). This fails on a hard-coded project host, a project ref in a
  * pooler or dashboard URL, or a bare ref in backticks in the docs.
  * Test fakes (test.supabase.co, project.supabase.co) are fine.
  */

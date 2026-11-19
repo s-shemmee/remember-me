@@ -35,8 +35,7 @@ export const FAKE_VAPID_PUBLIC_KEY =
   "BG_wO5SSQc4drdQ1GeaWDgqFtBppoFwygQOqK84VlMoWPE91OlW_AdxT9sCwx-7ni0DG_30lqW4igrmJzvccFEo";
 
 /**
- * The demo accounts' password for local Supabase only (`pnpm seed:demo`). On
- * staging the seed refuses it and needs SEED_DEMO_PASSWORD.
+ * The demo accounts' password (`pnpm seed:demo`, local Supabase only).
  */
 export const DEMO_LOCAL_PASSWORD = "local-only-demo-password-0000";
 

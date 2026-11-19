@@ -5,78 +5,60 @@ import { describe, expect, it } from "vitest";
 
 import { ACCOUNTS, COLORS, demoPeople, PLANS, RELATIONS, WISHES } from "../../scripts/demo/data";
 import { addDays, daysBetween, nextOccurrence } from "./dates";
-import { checkSeedTarget, demoEmail } from "./seed-guard";
+import { checkSeedTarget } from "./seed-guard";
 
 // Fake 20-letter project refs, built at runtime (the no-project-ref scan
 // rightly refuses real-looking refs written out in the repo).
-const STAGING = "s".repeat(20);
-const PRODUCTION = "p".repeat(20);
+const PROJECT = "p".repeat(20);
+const OTHER = "o".repeat(20);
 const cloud = (ref: string) => `https://${ref}.supabase.co`;
-const PASSWORD = "a-long-staging-password";
 
-describe("seed:demo guard", () => {
+describe("seed:demo guard: local Supabase only", () => {
   it("runs against local Supabase", () => {
-    for (const url of ["http://127.0.0.1:54321", "http://localhost:54321/"]) {
-      expect(checkSeedTarget({ url, stagingRef: undefined })).toMatchObject({
-        ok: true,
-        kind: "local",
-      });
+    for (const url of [
+      "http://127.0.0.1:54321",
+      "http://localhost:54321/",
+      "https://localhost:54321",
+    ]) {
+      expect(checkSeedTarget(url), url).toMatchObject({ ok: true });
     }
-  });
-
-  it("runs against the staging project named in SUPABASE_STAGING_REF, with a demo password", () => {
-    expect(
-      checkSeedTarget({ url: cloud(STAGING), stagingRef: STAGING, password: PASSWORD }),
-    ).toEqual({
+    expect(checkSeedTarget("http://127.0.0.1:54321/rest/v1")).toEqual({
       ok: true,
-      kind: "staging",
-      url: cloud(STAGING),
-      ref: STAGING,
+      url: "http://127.0.0.1:54321",
     });
   });
 
-  it("refuses production (any project that isn't the staging ref)", () => {
-    const res = checkSeedTarget({
-      url: cloud(PRODUCTION),
-      stagingRef: STAGING,
-      password: PASSWORD,
-    });
-    expect(res.ok).toBe(false);
-    expect(!res.ok && res.reason).toMatch(/isn't the staging project/);
-  });
-
-  it("refuses an unknown ref: a cloud project with no SUPABASE_STAGING_REF, or a malformed one", () => {
-    for (const stagingRef of [undefined, "", "not-a-ref"]) {
-      const res = checkSeedTarget({ url: cloud(STAGING), stagingRef, password: PASSWORD });
-      expect(res.ok).toBe(false);
-      expect(!res.ok && res.reason).toMatch(/SUPABASE_STAGING_REF isn't set/);
+  it("refuses production, and every other cloud project too (an unknown ref)", () => {
+    for (const url of [cloud(PROJECT), cloud(OTHER), `${cloud(PROJECT)}/rest/v1`]) {
+      const res = checkSeedTarget(url);
+      expect(res.ok, url).toBe(false);
+      expect(!res.ok && res.reason).toMatch(/only runs against local Supabase/);
     }
   });
 
   it("refuses a missing or invalid URL", () => {
     for (const url of [undefined, "", "   "]) {
-      const res = checkSeedTarget({ url, stagingRef: STAGING });
+      const res = checkSeedTarget(url);
       expect(!res.ok && res.reason).toMatch(/No Supabase URL/);
     }
-    expect(checkSeedTarget({ url: "not a url", stagingRef: STAGING }).ok).toBe(false);
+    expect(checkSeedTarget("not a url").ok).toBe(false);
   });
 
-  it("refuses any other host, plain http to the cloud, and staging without its own password", () => {
+  it("refuses any other host or scheme, including look-alikes", () => {
     for (const url of [
       "https://rememberme.shemme.codes",
       "https://supabase.example.com",
-      `http://${STAGING}.supabase.co`,
-      `https://${STAGING}.supabase.co.evil.example`,
+      `http://${PROJECT}.supabase.co`,
+      "http://127.0.0.1.evil.example",
+      "http://localhost.evil.example:54321",
+      "ftp://127.0.0.1",
+      "http://10.0.0.5:54321",
     ]) {
-      expect(checkSeedTarget({ url, stagingRef: STAGING, password: PASSWORD }).ok, url).toBe(false);
+      expect(checkSeedTarget(url).ok, url).toBe(false);
     }
-    expect(checkSeedTarget({ url: cloud(STAGING), stagingRef: STAGING }).ok).toBe(false);
-    expect(
-      checkSeedTarget({ url: cloud(STAGING), stagingRef: STAGING, password: "short" }).ok,
-    ).toBe(false);
   });
 
-  it("the real script refuses production before connecting to anything", () => {
+  it("the real script refuses the cloud project, or no URL, before connecting to anything", () => {
     const root = path.resolve(__dirname, "../..");
     const run = (env: Record<string, string>) =>
       spawnSync(process.execPath, ["scripts/seed-demo.ts"], {
@@ -90,26 +72,17 @@ describe("seed:demo guard", () => {
         },
         timeout: 30_000,
       });
-    const production = run({
-      SUPABASE_URL: cloud(PRODUCTION),
-      SUPABASE_STAGING_REF: STAGING,
-      SEED_DEMO_PASSWORD: PASSWORD,
-    });
+    const production = run({ SUPABASE_URL: cloud(PROJECT) });
     expect(production.status).toBe(1);
-    expect(production.stderr).toMatch(/seed:demo refused: .*isn't the staging project/);
+    expect(production.stderr).toMatch(/seed:demo refused: .*only runs against local Supabase/);
+    // The old staging switch does nothing any more.
+    const withRef = run({ SUPABASE_URL: cloud(PROJECT), SUPABASE_STAGING_REF: PROJECT });
+    expect(withRef.status).toBe(1);
 
     const missing = run({});
     expect(missing.status).toBe(1);
     expect(missing.stderr).toMatch(/seed:demo refused: No Supabase URL/);
   }, 60_000);
-
-  it("demo emails come from a pattern with {name}", () => {
-    expect(demoEmail("demo.{name}@remember-me.test", "Maya")).toBe(
-      "demo.maya@remember-me.test",
-    );
-    expect(demoEmail("me+{name}@gmail.com", "Badr")).toBe("me+badr@gmail.com");
-    expect(() => demoEmail("demo@remember-me.test", "Badr")).toThrow(/\{name\}/);
-  });
 });
 
 describe("demo data", () => {

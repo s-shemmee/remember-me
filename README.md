@@ -41,11 +41,18 @@ Local email never leaves your machine: sign up with any address, then open Mailp
 
 | | Supabase | Used by |
 |---|---|---|
-| Local | Docker (`pnpm db:start`) | day-to-day development and tests |
-| Staging | the first cloud project (`eu-west-1`) | Vercel Preview deployments, testing in the cloud |
+| Local (staging) | Docker (`pnpm db:start`) | day-to-day development, tests, demo data |
 | Hosted deployment | Maintainer-managed; environment details omitted. |
 
-Nothing in the code names a project: the URL and keys come from environment variables (Vercel: Production → production, Preview → staging). Migrations are written and tested locally, run in CI, then reach staging and production with `[maintainer-only command omitted]` (owner only, once CI is green; every command names its project, see [docs/launch.md](docs/launch.md#which-project-does-a-command-hit)). Setting up production: [docs/launch.md](docs/launch.md).
+Use a separate local Supabase project for development and tests. Do not point automated tests at hosted data.
+
+Migrations are created and tested locally and in CI. Hosted deployment details are maintainer-managed.
+
+```bash
+[Specific hosted-operation commands redacted.]
+```
+
+See the self-hosting guide for local environment setup.
 
 ## Scripts
 
@@ -59,11 +66,14 @@ Nothing in the code names a project: the URL and keys come from environment vari
 | `pnpm format` / `pnpm format:check` | Prettier |
 | `pnpm db:start` / `pnpm db:stop` | Start / stop local Supabase (Docker) |
 | `pnpm db:reset` | Rebuild the local database from migrations (no data) |
-| `pnpm seed:demo` | Demo accounts and data, local or staging only (see below) |
+| `pnpm seed:demo` | Demo accounts and data, local Supabase only (see below) |
+| Hosted backup operations | Omitted from public history. |
 | `pnpm db:test` | pgTAP tests in `supabase/tests` against the local database |
 | `pnpm db:types` | Regenerate `src/lib/supabase/types.ts` from the local database |
 
 `pnpm lint`, `pnpm format:check`, `pnpm typecheck` and `pnpm test` must pass before any commit (`pnpm format` fixes formatting); `pnpm db:test` too when `supabase/` changed.
+
+[Maintainer-only backup instructions omitted.]
 
 ### Demo data (`pnpm seed:demo`)
 
@@ -74,22 +84,14 @@ Four demo accounts, all connected to each other, with realistic fictional data:
 
 Every date is relative to today (Africa/Casablanca). Re-running deletes the previous demo accounts first (only accounts the seed created, marked `demo_seed` by the admin API) and starts clean.
 
-**Local** (Docker running):
+With Docker running:
 
 ```bash
 pnpm db:start
 pnpm seed:demo
 ```
 
-It reads the local keys from `supabase status` and prints the four addresses. The password is `local-only-demo-password-0000` (local only).
-
-**Staging** (never production): name the staging project explicitly, and give a password and keys:
-
-```bash
-SUPABASE_URL=https://<staging ref>.supabase.co SUPABASE_STAGING_REF=<staging ref> SUPABASE_SECRET_KEY=<staging secret key> SUPABASE_PUBLISHABLE_KEY=<staging publishable key> SEED_DEMO_PASSWORD=<12+ characters> SEED_DEMO_EMAIL='you+demo-{name}@gmail.com' pnpm seed:demo
-```
-
-`SEED_DEMO_EMAIL` (default `demo.{name}@remember-me.test`) sets the addresses; on staging, use plus-addresses of an inbox you read, so the demo reminder emails land somewhere instead of bouncing.
+It reads the local keys from `supabase status` and prints the four addresses (`demo.<name>@remember-me.test`). The password is `local-only-demo-password-0000`.
 
 The seed guard permits local Supabase URLs only and refuses remote targets before writes.
 

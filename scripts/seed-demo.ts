@@ -1,10 +1,9 @@
 /**
- * pnpm seed:demo: demo accounts with realistic data, for local Supabase or
- * staging. Never production (src/lib/seed-guard.ts; docs/launch.md).
+ * pnpm seed:demo: demo accounts with realistic data, in local Supabase only.
+ * The one cloud project is production and is never seeded: every cloud URL
+ * is refused before anything is written (src/lib/seed-guard.ts).
  *
- *   Local:   pnpm db:start && pnpm seed:demo
- *   Staging: SUPABASE_URL=https://<staging ref>.supabase.co SUPABASE_STAGING_REF=<staging ref> \
- *            SUPABASE_SECRET_KEY=… SUPABASE_PUBLISHABLE_KEY=… SEED_DEMO_PASSWORD=… pnpm seed:demo
+ *   pnpm db:start && pnpm seed:demo
  *
  * Four accounts (Maya, the main one, plus Amina, Badr and Sara), all
  * connected. Maya has 26 people, days over the next 60 days, wishes on
@@ -14,7 +13,7 @@
  *
  * Re-running deletes the previous demo accounts first (only users the admin
  * API marked `demo_seed`), so it always starts clean. Secrets are read from
- * the environment (or, locally, from `supabase status`) and never printed.
+ * `supabase status` and never printed.
  */
 import { spawnSync } from "node:child_process";
 
@@ -27,7 +26,7 @@ import {
   toIsoDate,
   type CalendarDate,
 } from "../src/lib/dates.ts";
-import { checkSeedTarget, demoEmail } from "../src/lib/seed-guard.ts";
+import { checkSeedTarget } from "../src/lib/seed-guard.ts";
 import type { Database } from "../src/lib/supabase/types.ts";
 import { DEMO_LOCAL_PASSWORD } from "../src/test/fake-values.ts";
 import {
@@ -43,7 +42,7 @@ import { giftPng } from "./demo/gift-png.ts";
 
 type Client = SupabaseClient<Database>;
 const AUTH = { auth: { persistSession: false, autoRefreshToken: false } };
-const DEFAULT_EMAIL = "demo.{name}@remember-me.test";
+const EMAIL = (name: string) => `demo.${name.toLowerCase()}@remember-me.test`;
 
 function fail(message: string): never {
   console.error(`\nseed:demo refused: ${message}\n`);
@@ -76,33 +75,19 @@ function localKeys(): { secret: string; publishable: string } {
 }
 
 async function main() {
-  // 1. Where: local or staging, nothing else.
-  const target = checkSeedTarget({
-    url: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
-    stagingRef: process.env.SUPABASE_STAGING_REF,
-    password: process.env.SEED_DEMO_PASSWORD,
-  });
+  // 1. Where: local Supabase, nothing else.
+  const target = checkSeedTarget(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL);
   if (!target.ok) fail(target.reason);
 
-  const keys =
-    target.kind === "local" && !process.env.SUPABASE_SECRET_KEY
-      ? localKeys()
-      : {
-          secret:
-            process.env.SUPABASE_SECRET_KEY ??
-            fail("Set SUPABASE_SECRET_KEY for the staging project."),
-          publishable:
-            process.env.SUPABASE_PUBLISHABLE_KEY ||
-            process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-            fail("Set SUPABASE_PUBLISHABLE_KEY for the staging project."),
-        };
-  const password = process.env.SEED_DEMO_PASSWORD || DEMO_LOCAL_PASSWORD;
-  const emailPattern = process.env.SEED_DEMO_EMAIL || DEFAULT_EMAIL;
-  const emails = Object.fromEntries(
-    ACCOUNTS.map((a) => [a.key, demoEmail(emailPattern, a.firstName)]),
-  ) as Record<AccountKey, string>;
+  // The keys always come from the local stack, never from the environment.
+  const keys = localKeys();
+  const password = DEMO_LOCAL_PASSWORD;
+  const emails = Object.fromEntries(ACCOUNTS.map((a) => [a.key, EMAIL(a.firstName)])) as Record<
+    AccountKey,
+    string
+  >;
 
-  console.log(`Seeding demo data into ${target.kind} Supabase (${target.url}).`);
+  console.log(`Seeding demo data into local Supabase (${target.url}).`);
   const admin: Client = createClient<Database>(target.url, keys.secret, AUTH);
 
   // 2. Reset: delete the previous demo accounts (and only those).
@@ -112,7 +97,7 @@ async function main() {
     for (const u of users) {
       const isDemo = u.app_metadata?.demo_seed === true;
       if (!isDemo && u.email && wanted.has(u.email)) {
-        fail(`${u.email} belongs to a real account. Choose another SEED_DEMO_EMAIL.`);
+        fail(`${u.email} belongs to an account the seed didn't create. Remove it first.`);
       }
       if (!isDemo) continue;
       must(await admin.rpc("prepare_account_deletion", { p_user_id: u.id }), "prepare deletion");
@@ -311,11 +296,7 @@ async function main() {
   console.log(`\nDone. ${people.length} people, ${wishIds.length} wishes, ${PLANS.length} plans.`);
   console.log("Log in as:");
   for (const a of ACCOUNTS) console.log(`  ${a.firstName.padEnd(8)} ${emails[a.key]}`);
-  console.log(
-    target.kind === "local"
-      ? `Password: ${DEMO_LOCAL_PASSWORD} (local only)`
-      : "Password: the SEED_DEMO_PASSWORD you set.",
-  );
+  console.log(`Password: ${DEMO_LOCAL_PASSWORD} (local only)`);
 }
 
 main().catch((error: unknown) => {

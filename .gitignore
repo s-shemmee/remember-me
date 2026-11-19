@@ -21,3 +21,7 @@ yarn-error.log*
 # Sentry Config File
 .env.sentry-build-plugin
 .lighthouseci/
+
+# Database backups (pnpm db:backup writes them outside the repo; never commit one)
+remember-me-[0-9]*/
+*.dump.sql

@@ -21,7 +21,8 @@
     "e2e": "playwright test",
     "lighthouse": "node scripts/lighthouse.ts",
     "email:logo": "node scripts/email-logo.ts",
-    "seed:demo": "node --env-file-if-exists=.env.local scripts/seed-demo.ts"
+    "seed:demo": "node --env-file-if-exists=.env.local scripts/seed-demo.ts",
+    "db:backup": "node --env-file-if-exists=.env.local scripts/db-backup.ts"
   },
   "dependencies": {
     "@react-email/render": "2.3.1",
