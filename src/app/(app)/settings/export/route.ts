@@ -29,6 +29,7 @@ export async function GET() {
     plans,
     notes,
     sealed,
+    connections,
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -66,6 +67,8 @@ export async function GET() {
     // Only notes already open are readable (RLS); a sealed one stays sealed.
     supabase.from("future_notes").select("opens_on, body, created_at").order("opens_on"),
     supabase.rpc("my_sealed_note"),
+    // First names only, never their email, birth year or timezone.
+    supabase.rpc("my_connections"),
   ]);
 
   const wishById = new Map((friendWishes.data ?? []).map((w) => [w.id, w]));
@@ -112,6 +115,11 @@ export async function GET() {
     sealedNote: sealed.data?.[0]
       ? { opensOn: sealed.data[0].opens_on, writtenAt: sealed.data[0].created_at }
       : null,
+    connections: (connections.data ?? []).map((c) => ({
+      firstName: c.first_name,
+      connectedAt: c.connected_at,
+      yourPerson: c.linked_person_name ?? null,
+    })),
   });
 
   return new NextResponse(JSON.stringify(body, null, 2), {

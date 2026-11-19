@@ -32,6 +32,14 @@ describe("Sentry in the browser", () => {
     expect(names).not.toContain("Replay");
     expect(options).not.toHaveProperty("replaysSessionSampleRate");
     expect(options).not.toHaveProperty("replaysOnErrorSampleRate");
+    // No personal data (the Privacy Policy says so).
+    expect(options.dataCollection).toMatchObject({
+      userInfo: false,
+      cookies: false,
+      httpHeaders: false,
+      httpBodies: [],
+      urlQueryParams: false,
+    });
 
     // Nothing is fetched later either: not on interaction, not after a wait.
     for (const type of ["pointerdown", "keydown", "scroll"]) window.dispatchEvent(new Event(type));
@@ -39,6 +47,13 @@ describe("Sentry in the browser", () => {
     expect(sentry.lazyLoadIntegration).not.toHaveBeenCalled();
     expect(sentry.addIntegration).not.toHaveBeenCalled();
     expect(sentry.replayIntegration).not.toHaveBeenCalled();
+  });
+
+  it("every Sentry config sends no personal data", () => {
+    const root = path.resolve(__dirname, "..");
+    for (const file of ["src/instrumentation-client.ts", "sentry.server.config.ts", "sentry.edge.config.ts"]) {
+      expect(readFileSync(path.join(root, file), "utf8"), file).toMatch(/dataCollection: SENTRY_DATA_COLLECTION/);
+    }
   });
 
   it("no Sentry config anywhere mentions a Replay API", () => {

@@ -169,7 +169,7 @@ async function auditPage(page: Page, where: string): Promise<Finding[]> {
   return findings;
 }
 
-const SIGNED_OUT = ["/", "/log-in", "/sign-up", "/forgot-password"];
+const SIGNED_OUT = ["/", "/log-in", "/sign-up", "/forgot-password", "/privacy", "/terms"];
 const SIGNED_IN = ["/home", "/people", "/calendar", "/wishlists", "/celebrate", "/profile", "/settings"];
 
 for (const theme of ["light", "dark"] as const) {

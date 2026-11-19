@@ -12,6 +12,7 @@ import { SocialButton } from "@/components/ui/social-button";
 import { logIn, logInWithGoogle, resendFromLogIn } from "../actions";
 import { AUTH_MESSAGES, LINK_ERRORS } from "../messages";
 import type { AuthFormState } from "../state";
+import { ConsentNote } from "./consent-note";
 import { AuthSwitch, FormMessage, OrDivider } from "./auth-shell";
 import { ResendForm } from "./resend-form";
 
@@ -63,6 +64,7 @@ export function LogInForm({
         {hiddenNext}
         <SocialButton provider="google" />
       </form>
+      <ConsentNote newWithGoogle />
 
       <OrDivider />
 

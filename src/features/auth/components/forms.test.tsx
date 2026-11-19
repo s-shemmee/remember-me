@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -37,11 +37,23 @@ describe("SignUpForm", () => {
       "type",
       "submit",
     );
-    expect(screen.getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
-    expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(
-      "href",
-      "/privacy",
-    );
+  });
+
+  it("consent: under Google and under Create my account, with links, and no checkbox", () => {
+    render(<SignUpForm />);
+    const notes = screen.getAllByText(/By creating an account, you agree to our/);
+    expect(notes).toHaveLength(2);
+    // Each note follows the button it's about.
+    const google = screen.getByRole("button", { name: "Continue with Google" });
+    const create = screen.getByRole("button", { name: "Create my account" });
+    expect(google.compareDocumentPosition(notes[0]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(create.compareDocumentPosition(notes[1]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    for (const note of notes) {
+      expect(note).toHaveTextContent("By creating an account, you agree to our Terms and Privacy Policy.");
+      expect(within(note).getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
+      expect(within(note).getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "/privacy");
+    }
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
   it("ticks the 8-character check live, and says so to screen readers", async () => {
@@ -87,6 +99,16 @@ describe("SignUpForm", () => {
 });
 
 describe("LogInForm", () => {
+  it("Google on log in can create an account, so it carries the consent too", () => {
+    render(<LogInForm />);
+    const note = screen.getByText(/New here\? Continuing with Google creates an account/);
+    expect(note).toHaveTextContent(
+      "New here? Continuing with Google creates an account, and you agree to our Terms and Privacy Policy.",
+    );
+    expect(within(note).getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
+    expect(within(note).getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "/privacy");
+  });
+
   it("story: email, password with a Forgot password link, and a way to sign up", () => {
     render(<LogInForm />);
     expect(screen.getByLabelText("Password")).toHaveAttribute("autocomplete", "current-password");

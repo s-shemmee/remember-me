@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { logInWithGoogle, signUp } from "../actions";
 import { PASSWORD_MIN } from "../schemas";
 import type { AuthFormState } from "../state";
 import { AuthSwitch, FormMessage, OrDivider } from "./auth-shell";
+import { ConsentNote } from "./consent-note";
 
 type Fields = "firstName" | "email" | "password";
 
@@ -24,6 +24,7 @@ export function SignUpForm() {
       <form action={logInWithGoogle}>
         <SocialButton provider="google" />
       </form>
+      <ConsentNote />
 
       <OrDivider />
 
@@ -63,19 +64,8 @@ export function SignUpForm() {
         <Button type="submit" size="lg" className="w-full" aria-disabled={pending || undefined}>
           {pending ? "Creating your account…" : "Create my account"}
         </Button>
+        <ConsentNote />
       </form>
-
-      <p className="text-center text-13 leading-normal text-balance text-sub">
-        By continuing you agree to our{" "}
-        <Link href="/terms" className="text-text underline">
-          Terms
-        </Link>{" "}
-        and{" "}
-        <Link href="/privacy" className="text-text underline">
-          Privacy Policy
-        </Link>
-        . No ads, ever.
-      </p>
 
       <AuthSwitch question="Already have an account?" href="/log-in">
         Log in

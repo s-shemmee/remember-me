@@ -39,7 +39,11 @@ export function robotsFor(siteUrl: string): MetadataRoute.Robots {
   };
 }
 
-/** Only public pages. Privacy and Terms join when they're real (M6 part 2). */
+/** Only public pages: the landing page and the legal pages. */
 export function sitemapFor(siteUrl: string): MetadataRoute.Sitemap {
-  return [{ url: `${siteUrl}/`, changeFrequency: "monthly", priority: 1 }];
+  return [
+    { url: `${siteUrl}/`, changeFrequency: "monthly", priority: 1 },
+    { url: `${siteUrl}/privacy`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${siteUrl}/terms`, changeFrequency: "yearly", priority: 0.3 },
+  ];
 }

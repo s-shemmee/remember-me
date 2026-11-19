@@ -48,7 +48,7 @@ Built (M4 part 1, `…_email_reminders.sql`): plus `kind` (`reminder` | `test`),
 
 **account_notices** (fix/auth-flows): `id`, `email_hash bytea` (HMAC-SHA-256 of the lowercased address with `EMAIL_HASH_SECRET`; never the address), `created_at`. RLS on, no policies: server only. `claim_account_notice(email, hash)` (service_role): true only for a confirmed account, once an hour per address, 200 a day overall; records it. `run_cleanup()` drops rows after 30 days. Tests: `supabase/tests/account_notices.test.sql`.
 
-**ai_usage**: `id`, `profile_id`, `feature`, `model`, `input_tokens`, `output_tokens`, `cost_usd numeric`, `created_at`. Used for per-user daily limits.
+**ai_usage** (planned with the AI phases, not built): `id`, `profile_id`, `feature`, `model`, `input_tokens`, `output_tokens`, `cost_usd numeric`, `created_at`. Used for per-user daily limits.
 **embeddings** (Phase 3): `id`, `owner_id`, `source_type enum('person','wish','memory')`, `source_id`, `content text`, `embedding vector(N)` (N = the embedding model's dimension), HNSW index.
 
 ## RLS rules (write a test for each)
@@ -77,7 +77,7 @@ Built (M3 part 1): `wish-images`, private, 2 MB, JPEG/PNG/WebP. Policies on `sto
 - `pg_cron` daily at 02:30 UTC → Edge Function `daily-cleanup` → `run_cleanup()` (people archived > 30 days, final cancelled reservations, wishes removed > 30 days, invites past expiry, log rows > 400 days), then the deleted wishes' photos via the Storage API.
 - Edge Functions `send-test-email` and `send-test-push` (the user's own token; 3 an hour each, `allow_test(profile, channel)`) and `unsubscribe` (signed token; RFC 8058 one-click).
 - Push (M4 part 2): `reminder_candidates()` also returns push-only users with `email_on` / `push_on`; `reminder_push_devices()` lists devices of users with push on (server only); `claim_reminders(…, channel)`, `reminder_log_keys()` and `reclaim_stuck_reminders()` are per channel. `save_push_subscription(endpoint, p256dh, auth, label)` (signed-in user; moves a shared device to its new owner; turns push on).
-- Edge Function `link-preview`: fetches a product URL server side (SSRF-safe), extracts title/price/image.
+- Edge Function `link-preview`: **not built** (deferred: SSRF risk). Wishes take a link as typed; nothing fetches it.
 - Own day (M5 part 2): `own_day_candidates()` (server only) lists users with `remind_my_day` on and a birthday; `send-reminders` sends "Your day is in 7 days ✨" and "Happy birthday, Maya! 🎉" in their own batch (never mixed with your people's days).
 - Later: remind connected people about your day ("Remind my people", shown as Coming soon in Celebrate Me).
 

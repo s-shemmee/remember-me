@@ -42,9 +42,10 @@ Local email never leaves your machine: sign up with any address, then open Mailp
 | | Supabase | Used by |
 |---|---|---|
 | Local | Docker (`pnpm db:start`) | day-to-day development and tests |
-| Cloud project | `[project reference removed]` | Vercel previews and production |
+| Staging | the first cloud project (`eu-west-1`) | Vercel Preview deployments, testing in the cloud |
+| Hosted deployment | Maintainer-managed; environment details omitted. |
 
-Migrations are written and tested locally, run in CI, and reach the cloud with `[maintainer-only command omitted]` (owner only, once CI is green).
+Nothing in the code names a project: the URL and keys come from environment variables (Vercel: Production → production, Preview → staging). Migrations are written and tested locally, run in CI, then reach staging and production with `[maintainer-only command omitted]` (owner only, once CI is green; `supabase link` picks the project). Setting up production: [docs/launch.md](docs/launch.md).
 
 ## Scripts
 

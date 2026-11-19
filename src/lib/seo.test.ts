@@ -21,11 +21,25 @@ describe("robots.txt and sitemap.xml", () => {
     expect(PRIVATE_PATHS).not.toContain("/sign-up");
   });
 
-  it("lists only public pages, with absolute URLs", () => {
+  it("lists only public pages, with absolute URLs: the landing page and the legal pages", () => {
     expect(sitemapFor("https://rememberme.shemme.codes").map((e) => e.url)).toEqual([
       "https://rememberme.shemme.codes/",
+      "https://rememberme.shemme.codes/privacy",
+      "https://rememberme.shemme.codes/terms",
     ]);
   });
+
+  it("the legal pages are indexable and not disallowed", async () => {
+    for (const load of [
+      () => import("@/app/(marketing)/privacy/page"),
+      () => import("@/app/(marketing)/terms/page"),
+    ]) {
+      const { metadata } = (await load()) as { metadata?: { robots?: unknown } };
+      expect(metadata?.robots).toBeUndefined();
+    }
+    expect(PRIVATE_PATHS).not.toContain("/privacy");
+    expect(PRIVATE_PATHS).not.toContain("/terms");
+  }, 60_000);
 });
 
 /**

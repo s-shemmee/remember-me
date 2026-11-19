@@ -6,11 +6,12 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 import { CONTACT_EMAIL } from "../content";
 
+/** Absolute ("/#…") so the header and footer also work on /privacy and /terms. */
 const SECTIONS = [
-  { href: "#features", label: "Features" },
-  { href: "#how", label: "How it works" },
-  { href: "#noor", label: "Meet Noor" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/#features", label: "Features" },
+  { href: "/#how", label: "How it works" },
+  { href: "/#noor", label: "Meet Noor" },
+  { href: "/#faq", label: "FAQ" },
 ] as const;
 
 /** Sticky glass header (S1Hero): logo, section links, theme, Log in, Sign up. */

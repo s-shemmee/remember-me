@@ -3,6 +3,23 @@
  * Pure (no Sentry import), so they're unit-tested.
  */
 
+/**
+ * What Sentry may collect: no personal data (the Privacy Policy says so).
+ * Sentry 11 collects user details, cookies, headers, bodies and query
+ * strings by default; every config passes this instead. Errors keep the
+ * page, browser and stack trace (no local variables).
+ */
+export const SENTRY_DATA_COLLECTION = {
+  userInfo: false,
+  cookies: false,
+  httpHeaders: false,
+  /** No request or response bodies (an empty list turns them all off). */
+  httpBodies: [] as never[],
+  urlQueryParams: false,
+  databaseQueryData: false,
+  stackFrameVariables: false,
+};
+
 /** Tag on reports from src/lib/auth-errors.ts. */
 export const AUTH_ACTION_TAG = "auth_action";
 

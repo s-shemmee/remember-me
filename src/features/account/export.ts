@@ -32,6 +32,8 @@ export type ExportInput = {
   openedNotes?: { opensOn: string; body: string; writtenAt: string }[];
   /** A note still sealed: when it opens, never its words. */
   sealedNote?: { opensOn: string; writtenAt: string } | null;
+  /** Your connections: their first name only, and which of your people they are. */
+  connections?: { firstName: string; connectedAt: string; yourPerson: string | null }[];
 };
 
 export function buildExport(input: ExportInput) {
@@ -58,6 +60,11 @@ export function buildExport(input: ExportInput) {
       wishes: input.wishes
         .filter((w) => w.wishlist_id === list.id)
         .map(({ wishlist_id: _list, ...wish }) => wish),
+    })),
+    connections: (input.connections ?? []).map((c) => ({
+      first_name: c.firstName,
+      connected_on: c.connectedAt,
+      in_your_people_as: c.yourPerson,
     })),
     gifts_you_reserved: input.reserved.map((r) => ({
       for: r.friendFirstName,
