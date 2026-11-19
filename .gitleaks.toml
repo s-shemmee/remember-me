@@ -18,6 +18,7 @@ regexes = [
   '''^local-only-unsubscribe-secret-0{10}$''',
   '''^local-only-account-notice-secret-0{10}$''',
   '''^local-only-email-hash-secret-0{12}$''',
+  '''^local-only-demo-password-0{4}$''',
   '''^(AQEB){10}AQE$''',
   '''^BG_wO5SSQc4drdQ1GeaWDgqFtBppoFwygQOqK84VlMoWPE91OlW_AdxT9sCwx-7ni0DG_30lqW4igrmJzvccFEo$''',
 ]

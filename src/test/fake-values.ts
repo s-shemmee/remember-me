@@ -34,6 +34,12 @@ export const FAKE_VAPID_PRIVATE_KEY = "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBA
 export const FAKE_VAPID_PUBLIC_KEY =
   "BG_wO5SSQc4drdQ1GeaWDgqFtBppoFwygQOqK84VlMoWPE91OlW_AdxT9sCwx-7ni0DG_30lqW4igrmJzvccFEo";
 
+/**
+ * The demo accounts' password for local Supabase only (`pnpm seed:demo`). On
+ * staging the seed refuses it and needs SEED_DEMO_PASSWORD.
+ */
+export const DEMO_LOCAL_PASSWORD = "local-only-demo-password-0000";
+
 /** A valid env for parseEnv() and anything that needs one. */
 export const fakeEnv = {
   NEXT_PUBLIC_SUPABASE_URL: FAKE_SUPABASE_URL,
