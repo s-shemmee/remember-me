@@ -30,21 +30,20 @@ const sections: LegalSection[] = [
         <p>Only what the app needs to work. Specifically:</p>
         <LegalList>
           <li>
-            <strong>Your account:</strong> your email, your password (stored only as a secure
-            hash, so we never see it) or your Google sign-in, your first name, your birthday (day
-            and month, and the year if you add it), your look (initials and colour, a character, or
-            a photo), your time zone, your theme, and whether your connections can see your
-            birthday.
+            <strong>Your account:</strong> your email, your password (stored only as a secure hash,
+            so we never see it) or your Google sign-in, your first name, your birthday (day and
+            month, and the year if you add it), your look (initials and colour, a character, or a
+            photo), your time zone, your theme, and whether your connections can see your birthday.
           </li>
           <li>
             <strong>The people and days you add:</strong> names, how you know them, a colour,
-            &ldquo;little things&rdquo; they love, whether they&apos;re &ldquo;In memory&rdquo;,
-            and their days (birthdays, anniversaries, graduations, work milestones, remembrance
-            days and others).
+            &ldquo;little things&rdquo; they love, whether they&apos;re &ldquo;In memory&rdquo;, and
+            their days (birthdays, anniversaries, graduations, work milestones, remembrance days and
+            others).
           </li>
           <li>
-            <strong>Wishes:</strong> each wish&apos;s title, link, price, note, how much you want it,
-            and a photo if you add one.
+            <strong>Wishes:</strong> each wish&apos;s title, link, price, note, how much you want
+            it, and a photo if you add one.
           </li>
           <li>
             <strong>Connections and invites:</strong> who you&apos;re connected with, and the invite
@@ -69,9 +68,9 @@ const sections: LegalSection[] = [
             wish you&apos;d reserved&rdquo;.
           </li>
           <li>
-            <strong>Sign-up notices:</strong> if someone tries to sign up with an email that
-            already has an account, we email that address (at most once an hour). To do that, we keep
-            a scrambled fingerprint of the address (not the address) for 30 days.
+            <strong>Sign-up notices:</strong> if someone tries to sign up with an email that already
+            has an account, we email that address (at most once an hour). To do that, we keep a
+            scrambled fingerprint of the address (not the address) for 30 days.
           </li>
         </LegalList>
         <p>
@@ -92,7 +91,9 @@ const sections: LegalSection[] = [
           name, birthday and the little things they love. We treat that with care.
         </p>
         <LegalList>
-          <li>It&apos;s private to you. Nobody else can see your people, not even your connections.</li>
+          <li>
+            It&apos;s private to you. Nobody else can see your people, not even your connections.
+          </li>
           <li>We never share it, sell it, or use it for marketing or ads.</li>
           <li>
             The people you add aren&apos;t told and get nothing from us, unless you send them an
@@ -151,25 +152,23 @@ const sections: LegalSection[] = [
             (eu-west-1).
           </li>
           <li>
-            <strong>Sentry</strong>: tells us when something breaks, with technical details like
-            the page, browser and error. No session recordings, and no name or email. Germany
-            (EU).
+            <strong>Sentry</strong>: tells us when something breaks, with technical details like the
+            page, browser and error. No session recordings, and no name or email. Germany (EU).
           </li>
           <li>
             <strong>Google</strong>: only if you choose &ldquo;Continue with Google&rdquo;. Google
             tells us your name and email.
           </li>
           <li>
-            <strong>Your browser&apos;s push service</strong> (Google, Mozilla, Apple or
-            Microsoft): delivers push notifications if you turn them on. Each message is encrypted
-            so only your device can read it.
+            <strong>Your browser&apos;s push service</strong> (Google, Mozilla, Apple or Microsoft):
+            delivers push notifications if you turn them on. Each message is encrypted so only your
+            device can read it.
           </li>
         </LegalList>
         <p>
-          Some of these companies are based in the United States; each protects data under its
-          own data protection terms. Our hosting and database
-          providers also keep short-lived technical logs (which can include your IP address) to
-          keep the service running and secure.
+          Some of these companies are based in the United States; each protects data under its own
+          data protection terms. Our hosting and database providers also keep short-lived technical
+          logs (which can include your IP address) to keep the service running and secure.
         </p>
       </>
     ),
@@ -202,8 +201,8 @@ const sections: LegalSection[] = [
             <strong>
               <code>rm-resend-at</code>
             </strong>{" "}
-            show which address to check after signing up, and pace the Resend button (30 minutes
-            and 1 minute).
+            show which address to check after signing up, and pace the Resend button (30 minutes and
+            1 minute).
           </li>
           <li>
             <strong>On your device only:</strong> your theme (<code>rm-theme</code>,{" "}
@@ -294,8 +293,8 @@ const sections: LegalSection[] = [
     title: "Contact",
     body: (
       <p>
-        Remember Me is an independent project made in Marrakech, Morocco. Questions about your
-        data: <LegalLink href={CONTACT_MAILTO}>{CONTACT_EMAIL}</LegalLink>.
+        Remember Me is an independent project made in Marrakech, Morocco. Questions about your data:{" "}
+        <LegalLink href={CONTACT_MAILTO}>{CONTACT_EMAIL}</LegalLink>.
       </p>
     ),
   },

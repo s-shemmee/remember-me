@@ -25,7 +25,14 @@ const PAGES = [
   {
     path: "/terms",
     heading: /Terms of\s+use/,
-    sections: ["The service", "Who can use it", "Your content", "Be kind", "Leaving", "No guarantees"],
+    sections: [
+      "The service",
+      "Who can use it",
+      "Your content",
+      "Be kind",
+      "Leaving",
+      "No guarantees",
+    ],
   },
 ] as const;
 
@@ -47,7 +54,11 @@ for (const p of PAGES) {
     }
     // An in-page link lands on its section.
     await toc.getByRole("link", { name: p.sections[1] }).click();
-    await expect(page).toHaveURL(new RegExp(`#${await m.getByRole("heading", { level: 2, name: p.sections[1] }).getAttribute("id")}$`));
+    await expect(page).toHaveURL(
+      new RegExp(
+        `#${await m.getByRole("heading", { level: 2, name: p.sections[1] }).getAttribute("id")}$`,
+      ),
+    );
     await expect(m.getByRole("link", { name: "contact@shemme.codes" }).first()).toHaveAttribute(
       "href",
       "mailto:contact@shemme.codes",
@@ -63,29 +74,44 @@ for (const p of PAGES) {
 test("the privacy policy names the real regions and promises no tracking", async ({ page }) => {
   await page.goto("/privacy");
   const m = await main(page);
-  for (const text of ["Ireland (eu-west-1)", "Dublin, Ireland", "Germany", "No tracking, no analytics, no ads."]) {
+  for (const text of [
+    "Ireland (eu-west-1)",
+    "Dublin, Ireland",
+    "Germany",
+    "No tracking, no analytics, no ads.",
+  ]) {
     await expect(m.getByText(text, { exact: false }).first()).toBeVisible();
   }
   await expect(m.getByText(/link preview/i)).toHaveCount(0);
 });
 
-test("linked from the landing footer, sign-up, log-in, and the sitemap", async ({ page, request }) => {
+test("linked from the landing footer, sign-up, log-in, and the sitemap", async ({
+  page,
+  request,
+}) => {
   await page.goto("/");
   const footer = page.getByRole("navigation", { name: "Footer" });
   await footer.getByRole("link", { name: "Privacy" }).click();
   await expect(page).toHaveURL(/\/privacy$/);
-  await page.getByRole("navigation", { name: "Footer" }).getByRole("link", { name: "Terms" }).click();
+  await page
+    .getByRole("navigation", { name: "Footer" })
+    .getByRole("link", { name: "Terms" })
+    .click();
   await expect(page).toHaveURL(/\/terms$/);
 
   await page.goto("/sign-up");
-  const consent = page.getByText("By creating an account, you agree to our").filter({ visible: true });
+  const consent = page
+    .getByText("By creating an account, you agree to our")
+    .filter({ visible: true });
   await expect(consent).toHaveCount(2);
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   await consent.first().getByRole("link", { name: "Privacy Policy" }).click();
   await expect(page).toHaveURL(/\/privacy$/);
 
   await page.goto("/log-in");
-  const google = page.getByText(/New here\? Continuing with Google creates an account/).filter({ visible: true });
+  const google = page
+    .getByText(/New here\? Continuing with Google creates an account/)
+    .filter({ visible: true });
   await google.getByRole("link", { name: "Terms" }).click();
   await expect(page).toHaveURL(/\/terms$/);
 
@@ -104,7 +130,9 @@ for (const theme of ["light", "dark"] as const) {
         await page.goto(p.path);
         await expectAccessible(page, `${p.path} ${width} ${theme}`);
         // No sideways scrolling.
-        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+          width,
+        );
       }
     });
   }

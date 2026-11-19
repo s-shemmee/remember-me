@@ -319,7 +319,7 @@ export function WishlistsScreen({
                 <button
                   type="button"
                   onClick={() => open(emptyWishForm(list.id), null)}
-                  className="flex h-full min-h-[200px] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-card border-2 border-dashed border-line p-4 text-sub hover-tint"
+                  className="flex h-full min-h-[200px] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-card border-2 border-dashed border-line hover-tint p-4 text-sub"
                 >
                   <PlusIcon aria-hidden className="size-6" />
                   <span className="text-15 font-bold text-text">Add a wish</span>

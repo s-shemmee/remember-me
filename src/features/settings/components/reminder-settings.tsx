@@ -83,7 +83,7 @@ export function ReminderSettings({ initial, email }: { initial: Settings; email:
               type="button"
               aria-pressed={value.offsets.includes(o.days)}
               onClick={() => toggle(o.days)}
-              className="hover-tint inline-flex min-h-11 cursor-pointer items-center rounded-pill bg-card2 px-4 text-15 font-semibold text-text transition-colors duration-200 ease-soft aria-pressed:bg-text aria-pressed:text-bg"
+              className="inline-flex min-h-11 cursor-pointer items-center rounded-pill bg-card2 hover-tint px-4 text-15 font-semibold text-text transition-colors duration-200 ease-soft aria-pressed:bg-text aria-pressed:text-bg"
             >
               {o.label}
             </button>

@@ -191,7 +191,7 @@ export function FriendsWishlists({
                     aria-pressed={on}
                     onClick={() => onFriendChange(f.profileId)}
                     className={cn(
-                      "hover-tint flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-[20px] px-3 py-2.5 text-left",
+                      "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-[20px] hover-tint px-3 py-2.5 text-left",
                       on && "bg-card shadow-card",
                     )}
                   >

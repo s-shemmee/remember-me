@@ -351,7 +351,7 @@ export function CalendarScreen({
                   <button
                     type="button"
                     onClick={() => go(e.on, { push: true })}
-                    className="flex min-h-11 w-full min-w-0 cursor-pointer items-center gap-3 rounded-[12px] py-2 text-left hover-tint"
+                    className="flex min-h-11 w-full min-w-0 cursor-pointer items-center gap-3 rounded-[12px] hover-tint py-2 text-left"
                   >
                     <span aria-hidden className="flex w-11 shrink-0 flex-col items-center">
                       <span className="text-[11px] font-bold text-sub">

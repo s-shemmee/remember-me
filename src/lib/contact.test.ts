@@ -13,7 +13,16 @@ import { CONTACT_EMAIL, CONTACT_MAILTO } from "./contact";
  */
 const ROOT = path.resolve(__dirname, "../..");
 const ALLOWED = new Set([CONTACT_EMAIL, "noor@mail.shemme.codes"]);
-const PLACES = ["src", "supabase/templates", "supabase/functions", "docs", "e2e", "README.md", ".env.example", "AGENTS.md"];
+const PLACES = [
+  "src",
+  "supabase/templates",
+  "supabase/functions",
+  "docs",
+  "e2e",
+  "README.md",
+  ".env.example",
+  "AGENTS.md",
+];
 const ADDRESS = /[a-z0-9._%+-]+@(?:[a-z0-9-]+\.)*shemme\.codes|hello@[a-z0-9.-]+/gi;
 
 function files(p: string): string[] {
@@ -21,7 +30,11 @@ function files(p: string): string[] {
   if (!existsSync(full)) return [];
   if (statSync(full).isFile()) return [full];
   return readdirSync(full, { withFileTypes: true }).flatMap((d) =>
-    d.isDirectory() ? files(path.join(p, d.name)) : /\.(tsx?|html|md|sql|toml)$/.test(d.name) || d.name.startsWith(".env") ? [path.join(full, d.name)] : [],
+    d.isDirectory()
+      ? files(path.join(p, d.name))
+      : /\.(tsx?|html|md|sql|toml)$/.test(d.name) || d.name.startsWith(".env")
+        ? [path.join(full, d.name)]
+        : [],
   );
 }
 

@@ -248,7 +248,7 @@ describe("your own day", () => {
 });
 
 describe("the logo", () => {
-  it("is our mark as an image inside a red cell (still red with images blocked), alt=\"\"", async () => {
+  it('is our mark as an image inside a red cell (still red with images blocked), alt=""', async () => {
     for (const email of [
       await renderReminderEmail({ firstName: "Maya", reminders: [reminder(7)], links }),
       await renderTestEmail({ firstName: "Maya", links }),

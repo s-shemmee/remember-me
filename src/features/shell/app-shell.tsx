@@ -28,7 +28,7 @@ function YourDayCard({ yourDay }: { yourDay: YourDay }) {
   return (
     <Link
       href="/celebrate"
-      className="hover-tint mt-[18px] flex flex-col gap-2 rounded-[20px] bg-lilac p-4 text-lilac-ink transition-transform duration-200 ease-soft hover:-translate-y-px motion-reduce:hover:translate-y-0"
+      className="mt-[18px] flex flex-col gap-2 rounded-[20px] bg-lilac hover-tint p-4 text-lilac-ink transition-transform duration-200 ease-soft hover:-translate-y-px motion-reduce:hover:translate-y-0"
     >
       <span className="text-12 font-bold tracking-[.05em]">YOUR DAY</span>
       <span className="text-[28px] leading-none font-extrabold tracking-[-0.03em]">

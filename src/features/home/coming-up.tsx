@@ -71,7 +71,7 @@ export function ComingUp({ events }: { events: DayEvent[] }) {
             <li key={e.key}>
               <Link
                 href={`/people?person=${e.source.personId}`}
-                className="flex min-w-0 items-center gap-3.5 rounded-[18px] p-3 transition-colors duration-200 ease-soft hover-tint"
+                className="flex min-w-0 items-center gap-3.5 rounded-[18px] hover-tint p-3 transition-colors duration-200 ease-soft"
               >
                 <Avatar name={e.source.name} pastel={e.source.color} decorative />
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">

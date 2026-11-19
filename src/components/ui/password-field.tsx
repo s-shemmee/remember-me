@@ -65,7 +65,7 @@ function PasswordField({
           aria-label={shown ? "Hide password" : "Show password"}
           aria-pressed={shown}
           aria-controls={inputId}
-          className="absolute top-1/2 right-1 grid size-11 -translate-y-1/2 cursor-pointer place-items-center rounded-pill text-sub transition-colors duration-200 ease-soft hover-tint hover:text-text"
+          className="absolute top-1/2 right-1 grid size-11 -translate-y-1/2 cursor-pointer place-items-center rounded-pill hover-tint text-sub transition-colors duration-200 ease-soft hover:text-text"
         >
           {shown ? (
             <EyeOffIcon className="size-5" aria-hidden />

@@ -28,7 +28,9 @@ describe("Sentry in the browser", () => {
 
     expect(sentry.init).toHaveBeenCalledOnce();
     const options = sentry.init.mock.calls[0]![0] as Record<string, unknown>;
-    const names = ((options.integrations as { name?: string }[] | undefined) ?? []).map((i) => i.name);
+    const names = ((options.integrations as { name?: string }[] | undefined) ?? []).map(
+      (i) => i.name,
+    );
     expect(names).not.toContain("Replay");
     expect(options).not.toHaveProperty("replaysSessionSampleRate");
     expect(options).not.toHaveProperty("replaysOnErrorSampleRate");
@@ -51,8 +53,14 @@ describe("Sentry in the browser", () => {
 
   it("every Sentry config sends no personal data", () => {
     const root = path.resolve(__dirname, "..");
-    for (const file of ["src/instrumentation-client.ts", "sentry.server.config.ts", "sentry.edge.config.ts"]) {
-      expect(readFileSync(path.join(root, file), "utf8"), file).toMatch(/dataCollection: SENTRY_DATA_COLLECTION/);
+    for (const file of [
+      "src/instrumentation-client.ts",
+      "sentry.server.config.ts",
+      "sentry.edge.config.ts",
+    ]) {
+      expect(readFileSync(path.join(root, file), "utf8"), file).toMatch(
+        /dataCollection: SENTRY_DATA_COLLECTION/,
+      );
     }
   });
 
@@ -66,7 +74,9 @@ describe("Sentry in the browser", () => {
       "next.config.ts",
     ]) {
       const code = readFileSync(path.join(root, file), "utf8");
-      expect(code, file).not.toMatch(/replayIntegration|lazyLoadIntegration|replaysSessionSampleRate|replaysOnErrorSampleRate/);
+      expect(code, file).not.toMatch(
+        /replayIntegration|lazyLoadIntegration|replaysSessionSampleRate|replaysOnErrorSampleRate/,
+      );
     }
   });
 });

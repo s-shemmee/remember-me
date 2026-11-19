@@ -81,7 +81,7 @@ export function ReminderStack() {
         <button
           type="button"
           onClick={next}
-          className="hover-tint inline-flex min-h-11 items-center rounded-pill bg-glass px-4 text-14 font-semibold text-text transition-transform duration-200 ease-soft hover:-translate-y-px active:scale-[.97]"
+          className="inline-flex min-h-11 items-center rounded-pill bg-glass hover-tint px-4 text-14 font-semibold text-text transition-transform duration-200 ease-soft hover:-translate-y-px active:scale-[.97]"
         >
           Next reminder
         </button>
@@ -120,7 +120,7 @@ export function PlanDemo() {
               aria-label={step.label}
               onClick={() => setDone((d) => d.map((v, j) => (j === i ? !v : v)))}
               className={cn(
-                "hover-tint grid size-[60px] place-items-center rounded-full text-[26px] transition-[background-color,box-shadow,transform] duration-200 ease-soft hover:-translate-y-px active:scale-[.97]",
+                "grid size-[60px] place-items-center rounded-full hover-tint text-[26px] transition-[background-color,box-shadow,transform] duration-200 ease-soft hover:-translate-y-px active:scale-[.97]",
                 done[i]
                   ? "bg-card shadow-[0_8px_18px_rgba(91,63,181,.22)]"
                   : "bg-card/40 shadow-[inset_0_0_0_2px_var(--lilac-ink)]",

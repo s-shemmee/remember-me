@@ -26,7 +26,9 @@ const CASES = [
 const MIN_GAP = 12;
 
 async function pixel(page: Page, x: number, y: number): Promise<number[]> {
-  const png = await page.screenshot({ clip: { x: Math.round(x), y: Math.round(y), width: 1, height: 1 } });
+  const png = await page.screenshot({
+    clip: { x: Math.round(x), y: Math.round(y), width: 1, height: 1 },
+  });
   return page.evaluate(async (b64) => {
     const img = new Image();
     img.src = `data:image/png;base64,${b64}`;
@@ -119,7 +121,14 @@ for (const theme of ["light", "dark"] as const) {
     await page.setViewportSize({ width: 1400, height: 900 });
     await page.goto("/log-in");
     await page.addStyleTag({ content: "*,*::before,*::after{transition:none!important}" });
-    const cells = [] as { id: string; surface: string; variant: string; size: string; state: string; className: string }[];
+    const cells = [] as {
+      id: string;
+      surface: string;
+      variant: string;
+      size: string;
+      state: string;
+      className: string;
+    }[];
     for (const surface of SURFACES)
       for (const variant of VARIANTS)
         for (const size of SIZES)
@@ -140,8 +149,10 @@ for (const theme of ["light", "dark"] as const) {
         const board = document.createElement("div");
         board.id = "matrix";
         board.className = "bg-bg text-text";
-        board.style.cssText = "position:absolute;inset:0 auto auto 0;z-index:9999;width:1400px;padding:16px;font-size:12px";
-        const plus = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>';
+        board.style.cssText =
+          "position:absolute;inset:0 auto auto 0;z-index:9999;width:1400px;padding:16px;font-size:12px";
+        const plus =
+          '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>';
         let row: HTMLDivElement | null = null;
         let section: HTMLDivElement | null = null;
         cells.forEach((c, i) => {
@@ -153,7 +164,8 @@ for (const theme of ["light", "dark"] as const) {
           }
           if (i % states.length === 0) {
             row = document.createElement("div");
-            row.style.cssText = "display:grid;grid-template-columns:150px repeat(6,1fr);gap:12px;align-items:center;margin-bottom:8px";
+            row.style.cssText =
+              "display:grid;grid-template-columns:150px repeat(6,1fr);gap:12px;align-items:center;margin-bottom:8px";
             row.innerHTML = `<span>${c.variant} · ${c.size}</span>`;
             section!.append(row);
           }
@@ -182,7 +194,10 @@ for (const theme of ["light", "dark"] as const) {
     const { root } = await cdp.send("DOM.getDocument", { depth: -1 });
     for (const c of cells) {
       if (!["hover", "focus-visible", "active"].includes(c.state)) continue;
-      const { nodeId } = await cdp.send("DOM.querySelector", { nodeId: root.nodeId, selector: `#${c.id}` });
+      const { nodeId } = await cdp.send("DOM.querySelector", {
+        nodeId: root.nodeId,
+        selector: `#${c.id}`,
+      });
       const forced = c.state === "focus-visible" ? ["focus", "focus-visible"] : [c.state];
       await cdp.send("CSS.forcePseudoState", { nodeId, forcedPseudoClasses: forced });
     }
@@ -218,7 +233,11 @@ for (const theme of ["light", "dark"] as const) {
           h: el.offsetHeight,
           contrast: ratio(parse(cs.color), bg),
           bgImage: cs.backgroundImage,
-          outline: { style: cs.outlineStyle, width: parseFloat(cs.outlineWidth), contrast: ratio(parse(cs.outlineColor), surface) },
+          outline: {
+            style: cs.outlineStyle,
+            width: parseFloat(cs.outlineWidth),
+            contrast: ratio(parse(cs.outlineColor), surface),
+          },
           scale: cs.scale,
           opacity: Number(cs.opacity),
           pointer: cs.pointerEvents,
@@ -229,23 +248,31 @@ for (const theme of ["light", "dark"] as const) {
     const problems: string[] = [];
     for (const r of results) {
       const at = `${r.surface} / ${r.variant} · ${r.size} / ${r.state}`;
-      if (r.h < 44 || r.w < 44) problems.push(`${at}: ${Math.round(r.w)}×${Math.round(r.h)} is under 44px`);
-      if (r.size === "icon" && Math.round(r.w) !== Math.round(r.h)) problems.push(`${at}: icon not square`);
+      if (r.h < 44 || r.w < 44)
+        problems.push(`${at}: ${Math.round(r.w)}×${Math.round(r.h)} is under 44px`);
+      if (r.size === "icon" && Math.round(r.w) !== Math.round(r.h))
+        problems.push(`${at}: icon not square`);
       if (r.state === "disabled" || r.state === "loading") {
         if (r.opacity > 0.6) problems.push(`${at}: not dimmed`);
         if (r.pointer !== "none") problems.push(`${at}: still clickable`);
         continue;
       }
       if (r.contrast < 4.5) problems.push(`${at}: text contrast ${r.contrast.toFixed(2)}`);
-      if (r.state === "hover" && !r.bgImage.includes("gradient")) problems.push(`${at}: no hover tint`);
+      if (r.state === "hover" && !r.bgImage.includes("gradient"))
+        problems.push(`${at}: no hover tint`);
       if (r.state === "focus-visible") {
-        if (r.outline.style === "none" || r.outline.width < 2) problems.push(`${at}: no focus ring`);
-        else if (r.outline.contrast < 3) problems.push(`${at}: focus ring ${r.outline.contrast.toFixed(2)}:1`);
+        if (r.outline.style === "none" || r.outline.width < 2)
+          problems.push(`${at}: no focus ring`);
+        else if (r.outline.contrast < 3)
+          problems.push(`${at}: focus ring ${r.outline.contrast.toFixed(2)}:1`);
       }
-      if (r.state === "active" && !r.scale.startsWith("0.97")) problems.push(`${at}: no pressed state`);
+      if (r.state === "active" && !r.scale.startsWith("0.97"))
+        problems.push(`${at}: no pressed state`);
     }
 
-    const shot = await page.locator("#matrix").screenshot({ path: testInfo.outputPath(`button-matrix-${theme}.png`) });
+    const shot = await page
+      .locator("#matrix")
+      .screenshot({ path: testInfo.outputPath(`button-matrix-${theme}.png`) });
     await testInfo.attach(`button-matrix-${theme}`, { body: shot, contentType: "image/png" });
     expect(problems).toEqual([]);
   });

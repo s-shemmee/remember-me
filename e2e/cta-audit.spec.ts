@@ -51,7 +51,13 @@ function snapshot(selector: string) {
       surface,
       gradient,
       tint: cs.backgroundImage.includes("gradient"),
-      look: [cs.color, cs.boxShadow, cs.borderColor, cs.textDecorationLine, cs.backgroundColor].join("|"),
+      look: [
+        cs.color,
+        cs.boxShadow,
+        cs.borderColor,
+        cs.textDecorationLine,
+        cs.backgroundColor,
+      ].join("|"),
     };
   });
   void selector;
@@ -64,13 +70,27 @@ async function auditPage(page: Page, where: string): Promise<Finding[]> {
   // Keyboard modality, so programmatic focus shows :focus-visible.
   await page.keyboard.press("Shift");
   const controls = await page.evaluate((selector) => {
-    const out: { i: string; label: string; w: number; h: number; ring: boolean; disabled: boolean; button: boolean }[] = [];
+    const out: {
+      i: string;
+      label: string;
+      w: number;
+      h: number;
+      ring: boolean;
+      disabled: boolean;
+      button: boolean;
+    }[] = [];
     let n = 0;
     for (const e of document.querySelectorAll<HTMLElement>(selector)) {
       const r = e.getBoundingClientRect();
       const cs = getComputedStyle(e);
       // Visually hidden until focused (the skip link): checked by its own test.
-      if (r.width <= 2 || r.height <= 2 || cs.visibility === "hidden" || e.closest("[aria-hidden=true],[inert]")) continue;
+      if (
+        r.width <= 2 ||
+        r.height <= 2 ||
+        cs.visibility === "hidden" ||
+        e.closest("[aria-hidden=true],[inert]")
+      )
+        continue;
       if (e instanceof HTMLInputElement) continue;
       const i = String(n++);
       e.dataset.audit = i;
@@ -128,7 +148,8 @@ async function auditPage(page: Page, where: string): Promise<Finding[]> {
   const findings: Finding[] = [];
   const name = (c: (typeof controls)[number]) => `${where} · "${c.label}"`;
   for (const c of controls) {
-    if (c.w < 43.5 || c.h < 43.5) findings.push(`${name(c)}: ${Math.round(c.w)}×${Math.round(c.h)} under 44px`);
+    if (c.w < 43.5 || c.h < 43.5)
+      findings.push(`${name(c)}: ${Math.round(c.w)}×${Math.round(c.h)} under 44px`);
     if (!c.disabled && !c.ring) findings.push(`${name(c)}: no focus ring`);
   }
 
@@ -139,7 +160,10 @@ async function auditPage(page: Page, where: string): Promise<Finding[]> {
   await cdp.send("DOM.enable");
   await cdp.send("CSS.enable");
   const { root } = await cdp.send("DOM.getDocument", { depth: -1 });
-  const { nodeIds } = await cdp.send("DOM.querySelectorAll", { nodeId: root.nodeId, selector: "[data-audit]" });
+  const { nodeIds } = await cdp.send("DOM.querySelectorAll", {
+    nodeId: root.nodeId,
+    selector: "[data-audit]",
+  });
   const ids = new Map<string, number>();
   for (const nodeId of nodeIds) {
     const { attributes } = await cdp.send("DOM.getAttributes", { nodeId });
@@ -153,7 +177,8 @@ async function auditPage(page: Page, where: string): Promise<Finding[]> {
   const after = new Map((await page.evaluate(snapshot, "")).map((b) => [b.i, b]));
   await cdp.detach();
 
-  const gap = (a: number[], b: number[]) => a.slice(0, 3).reduce((s, v, k) => s + Math.abs(v - b[k]!), 0);
+  const gap = (a: number[], b: number[]) =>
+    a.slice(0, 3).reduce((s, v, k) => s + Math.abs(v - b[k]!), 0);
   for (const c of controls) {
     const b = before.get(c.i);
     if (!b || !c.button) continue;
@@ -162,15 +187,30 @@ async function auditPage(page: Page, where: string): Promise<Finding[]> {
     if (c.disabled) continue;
     const a = after.get(c.i);
     if (!a) continue;
-    if (a.tint === b.tint && a.look === b.look && gap(a.bg, b.bg) < 12) findings.push(`${name(c)}: hover shows no change`);
-    if (b.ownBg && gap(b.bg, b.surface) >= 12 && !a.gradient && !a.tint && gap(a.bg, a.surface) < 12)
+    if (a.tint === b.tint && a.look === b.look && gap(a.bg, b.bg) < 12)
+      findings.push(`${name(c)}: hover shows no change`);
+    if (
+      b.ownBg &&
+      gap(b.bg, b.surface) >= 12 &&
+      !a.gradient &&
+      !a.tint &&
+      gap(a.bg, a.surface) < 12
+    )
       findings.push(`${name(c)}: hover matches the surface`);
   }
   return findings;
 }
 
 const SIGNED_OUT = ["/", "/log-in", "/sign-up", "/forgot-password", "/privacy", "/terms"];
-const SIGNED_IN = ["/home", "/people", "/calendar", "/wishlists", "/celebrate", "/profile", "/settings"];
+const SIGNED_IN = [
+  "/home",
+  "/people",
+  "/calendar",
+  "/wishlists",
+  "/celebrate",
+  "/profile",
+  "/settings",
+];
 
 for (const theme of ["light", "dark"] as const) {
   test(`CTA audit: landing, auth and app pages (${theme})`, async ({ page }) => {
@@ -188,7 +228,11 @@ for (const theme of ["light", "dark"] as const) {
 
     await signUpAndOnboard(page, "Maya");
     await page.goto("/people");
-    await page.getByRole("button", { name: "Add someone" }).filter({ visible: true }).first().click();
+    await page
+      .getByRole("button", { name: "Add someone" })
+      .filter({ visible: true })
+      .first()
+      .click();
     const dialog = page.getByRole("dialog", { name: "Add someone" });
     await dialog.getByLabel("Their name").fill("Khalid");
     const bday = dialog.getByRole("group", { name: "Their birthday" });

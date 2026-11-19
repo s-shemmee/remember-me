@@ -30,7 +30,9 @@ describe("Download my data", () => {
         },
       ],
       sealedNote: { opensOn: "2027-05-20", writtenAt: "2026-11-19T09:00:00.000Z" },
-      connections: [{ firstName: "Amina", connectedAt: "2026-11-10T12:00:00.000Z", yourPerson: "Amina" }],
+      connections: [
+        { firstName: "Amina", connectedAt: "2026-11-10T12:00:00.000Z", yourPerson: "Amina" },
+      ],
     });
 
     expect(out.plans).toEqual([
@@ -47,9 +49,17 @@ describe("Download my data", () => {
     expect(out.connections).toEqual([
       { first_name: "Amina", connected_on: "2026-11-10T12:00:00.000Z", in_your_people_as: "Amina" },
     ]);
-    expect(Object.keys(out.connections[0]!)).toEqual(["first_name", "connected_on", "in_your_people_as"]);
+    expect(Object.keys(out.connections[0]!)).toEqual([
+      "first_name",
+      "connected_on",
+      "in_your_people_as",
+    ]);
     expect(out.notes_to_future_you).toEqual([
-      { opens_on: "2027-05-20", written_on: "2026-11-19T09:00:00.000Z", note: "Sealed until your birthday." },
+      {
+        opens_on: "2027-05-20",
+        written_on: "2026-11-19T09:00:00.000Z",
+        note: "Sealed until your birthday.",
+      },
     ]);
   });
 

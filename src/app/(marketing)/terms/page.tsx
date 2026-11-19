@@ -26,8 +26,8 @@ const sections: LegalSection[] = [
     body: (
       <p>
         Remember Me helps you remember the people you love: their days, their wishes, and your own
-        day too. It&apos;s free, with no ads. We may add, change or retire features as it grows,
-        and we&apos;ll tell you before anything important changes.
+        day too. It&apos;s free, with no ads. We may add, change or retire features as it grows, and
+        we&apos;ll tell you before anything important changes.
       </p>
     ),
   },
@@ -38,7 +38,9 @@ const sections: LegalSection[] = [
       <LegalList>
         <li>You must be 16 or older.</li>
         <li>One account per person, with an email address you can reach.</li>
-        <li>Keep your password to yourself; you&apos;re responsible for what happens in your account.</li>
+        <li>
+          Keep your password to yourself; you&apos;re responsible for what happens in your account.
+        </li>
       </LegalList>
     ),
   },
@@ -56,7 +58,10 @@ const sections: LegalSection[] = [
           When you add someone else&apos;s details, add only what they&apos;d be happy for a friend
           to remember, and keep it personal: Remember Me isn&apos;t for business contacts or
           marketing lists. Our{" "}
-          <Link href="/privacy" className="font-semibold text-accent-text underline underline-offset-2">
+          <Link
+            href="/privacy"
+            className="font-semibold text-accent-text underline underline-offset-2"
+          >
             Privacy Policy
           </Link>{" "}
           explains how we look after it.
@@ -79,8 +84,8 @@ const sections: LegalSection[] = [
           <li>add anything illegal, hateful, or that isn&apos;t yours to share;</li>
           <li>pretend to be someone else;</li>
           <li>
-            try to get into other people&apos;s data, break or overload the service, or copy it
-            with bots.
+            try to get into other people&apos;s data, break or overload the service, or copy it with
+            bots.
           </li>
         </LegalList>
         <p>
@@ -120,8 +125,8 @@ const sections: LegalSection[] = [
       <>
         <p>
           We work hard to make Remember Me reliable, but it&apos;s provided &ldquo;as is&rdquo;,
-          without any warranty. Reminders can be late or missed (an email filter, a phone that&apos;s
-          off), so please don&apos;t rely on it alone for anything critical.
+          without any warranty. Reminders can be late or missed (an email filter, a phone
+          that&apos;s off), so please don&apos;t rely on it alone for anything critical.
         </p>
         <p>
           As far as the law allows, we&apos;re not responsible for indirect losses, or for a
@@ -163,7 +168,10 @@ export default function TermsPage() {
         <p>
           The simple rules for using Remember Me. By creating an account, you agree to them and to
           our{" "}
-          <Link href="/privacy" className="font-semibold text-accent-text underline underline-offset-2">
+          <Link
+            href="/privacy"
+            className="font-semibold text-accent-text underline underline-offset-2"
+          >
             Privacy Policy
           </Link>
           .

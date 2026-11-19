@@ -114,7 +114,7 @@ export function FutureNoteCard({
           ) : (
             <Button
               variant="transparent"
-              className="self-start bg-card/60 text-butter-ink hover-tint"
+              className="self-start bg-card/60 hover-tint text-butter-ink"
               onClick={() => {
                 setConfirming(true);
                 requestAnimationFrame(() => keepRef.current?.focus());

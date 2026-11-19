@@ -63,7 +63,7 @@ Nothing in the code names a project: the URL and keys come from environment vari
 | `pnpm db:test` | pgTAP tests in `supabase/tests` against the local database |
 | `pnpm db:types` | Regenerate `src/lib/supabase/types.ts` from the local database |
 
-`pnpm lint`, `pnpm typecheck` and `pnpm test` must pass before any commit; `pnpm db:test` too when `supabase/` changed.
+`pnpm lint`, `pnpm format:check`, `pnpm typecheck` and `pnpm test` must pass before any commit (`pnpm format` fixes formatting); `pnpm db:test` too when `supabase/` changed.
 
 ### Demo data (`pnpm seed:demo`)
 

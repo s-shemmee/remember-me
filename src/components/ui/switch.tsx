@@ -18,7 +18,7 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        "peer hover-tint relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-pill",
+        "peer relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-pill hover-tint",
         "transition-colors duration-200 ease-soft",
         "before:absolute before:-inset-x-1 before:-inset-y-2 before:content-['']",
         "data-checked:bg-accent",

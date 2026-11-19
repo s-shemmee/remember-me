@@ -31,6 +31,8 @@ describe("hover rule", () => {
 
   it("hover-tint is a 9% text-colour overlay", () => {
     const css = readFileSync(path.join(SRC, "app/globals.css"), "utf8");
-    expect(css).toMatch(/@utility hover-tint[\s\S]*?color-mix\(in srgb, var\(--text\) 9%, transparent\)/);
+    expect(css).toMatch(
+      /@utility hover-tint[\s\S]*?color-mix\(in srgb, var\(--text\) 9%, transparent\)/,
+    );
   });
 });

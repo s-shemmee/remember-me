@@ -38,7 +38,13 @@ async function heartBox(page: Page, file: string) {
             y1 = Math.max(y1, y);
           }
         }
-      return { w: c.width, h: c.height, cx: (x0 + x1 + 1) / 2, cy: (y0 + y1 + 1) / 2, found: x1 >= 0 };
+      return {
+        w: c.width,
+        h: c.height,
+        cx: (x0 + x1 + 1) / 2,
+        cy: (y0 + y1 + 1) / 2,
+        found: x1 >= 0,
+      };
     },
     { b64, type },
   );
@@ -82,8 +88,14 @@ for (const theme of ["light", "dark"] as const) {
         square.locator("svg path").boundingBox(),
       ]);
       const where = `${path} at ${width}`;
-      expect(Math.abs(s!.x + s!.width / 2 - (h!.x + h!.width / 2)), `${where} x`).toBeLessThanOrEqual(0.5);
-      expect(Math.abs(s!.y + s!.height / 2 - (h!.y + h!.height / 2)), `${where} y`).toBeLessThanOrEqual(0.5);
+      expect(
+        Math.abs(s!.x + s!.width / 2 - (h!.x + h!.width / 2)),
+        `${where} x`,
+      ).toBeLessThanOrEqual(0.5);
+      expect(
+        Math.abs(s!.y + s!.height / 2 - (h!.y + h!.height / 2)),
+        `${where} y`,
+      ).toBeLessThanOrEqual(0.5);
       // Square and heart contrast (light: red/white, dark: pink/ink).
       const [bg, fill] = await Promise.all([
         square.evaluate((el) => getComputedStyle(el).backgroundColor),
@@ -110,10 +122,16 @@ test("emails use the real logo image, served without a session", async ({ page, 
 
   let html = "";
   for (let i = 0; i < 30 && !html; i++) {
-    const search = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`);
+    const search = await fetch(
+      `${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`,
+    );
     const { messages = [] } = (await search.json()) as { messages?: { ID: string }[] };
     if (messages[0]) {
-      html = ((await (await fetch(`${MAILPIT}/api/v1/message/${messages[0].ID}`)).json()) as { HTML: string }).HTML;
+      html = (
+        (await (await fetch(`${MAILPIT}/api/v1/message/${messages[0].ID}`)).json()) as {
+          HTML: string;
+        }
+      ).HTML;
     } else {
       await new Promise((r) => setTimeout(r, 1000));
     }
@@ -129,5 +147,10 @@ test("emails use the real logo image, served without a session", async ({ page, 
   // Seen as an inbox would show it.
   await page.setContent(html);
   await expect(page.locator("img[alt='']").first()).toHaveJSProperty("complete", true);
-  expect(await page.locator("img[alt='']").first().evaluate((i: HTMLImageElement) => i.naturalWidth)).toBe(56);
+  expect(
+    await page
+      .locator("img[alt='']")
+      .first()
+      .evaluate((i: HTMLImageElement) => i.naturalWidth),
+  ).toBe(56);
 });

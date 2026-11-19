@@ -27,6 +27,7 @@ jobs:
         with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - run: pnpm format:check
       - run: pnpm typecheck
       - run: pnpm test --coverage
       # No SENTRY_AUTH_TOKEN here on purpose: next.config.ts skips the

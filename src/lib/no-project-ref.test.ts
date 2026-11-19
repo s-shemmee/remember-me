@@ -45,7 +45,9 @@ function files(p: string): string[] {
   if (statSync(full).isFile()) return [full];
   return readdirSync(full, { withFileTypes: true }).flatMap((d) => {
     if (d.isDirectory()) return SKIP_DIRS.has(d.name) ? [] : files(path.join(p, d.name));
-    return /\.(tsx?|mjs|js|json|toml|sql|html|md|ya?ml|env)$/.test(d.name) ? [path.join(full, d.name)] : [];
+    return /\.(tsx?|mjs|js|json|toml|sql|html|md|ya?ml|env)$/.test(d.name)
+      ? [path.join(full, d.name)]
+      : [];
   });
 }
 

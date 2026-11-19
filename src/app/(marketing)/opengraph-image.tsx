@@ -48,10 +48,7 @@ export default async function OpengraphImage() {
             }}
           >
             <svg width="32" height="32" viewBox={HEART_VIEWBOX}>
-              <path
-                fill="#ffffff"
-                d={HEART_PATH}
-              />
+              <path fill="#ffffff" d={HEART_PATH} />
             </svg>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", fontSize: 40 }}>

@@ -53,7 +53,10 @@ export function LegalPage({
             <div className="flex flex-col gap-3 text-17 leading-relaxed">{intro}</div>
           </header>
 
-          <nav aria-labelledby="on-this-page" className="rounded-card bg-card p-5 shadow-card sm:p-6">
+          <nav
+            aria-labelledby="on-this-page"
+            className="rounded-card bg-card p-5 shadow-card sm:p-6"
+          >
             <h2 id="on-this-page" className="mb-2 text-15 font-bold text-sub">
               On this page
             </h2>
@@ -62,7 +65,7 @@ export function LegalPage({
                 <li key={s.id}>
                   <a
                     href={`#${s.id}`}
-                    className="hover-tint -mx-2 flex min-h-11 items-center rounded-item px-2 text-15 font-semibold text-accent-text underline-offset-2 hover:underline"
+                    className="-mx-2 flex min-h-11 items-center rounded-item hover-tint px-2 text-15 font-semibold text-accent-text underline-offset-2 hover:underline"
                   >
                     {s.title}
                   </a>

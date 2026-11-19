@@ -9,7 +9,6 @@ import { EXTENSION_URLS, SENTRY_DATA_COLLECTION, scrubAuthEvent } from "@/lib/se
 Sentry.init({
   dsn: "https://30c8ce5e6c1ca778145af4673c48275a@o4512376138891264.ingest.de.sentry.io/4512376148262992",
 
-
   // Errors thrown by browser extensions aren't ours.
   denyUrls: EXTENSION_URLS,
 

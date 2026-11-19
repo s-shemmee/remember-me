@@ -562,10 +562,8 @@ function OtherDayRow({
                   requestAnimationFrame(() => titleRef.current?.focus());
                 }}
                 className={cn(
-                  "hover-tint min-h-11 cursor-pointer rounded-pill px-3.5 text-14 font-semibold transition-colors duration-200 ease-soft",
-                  value.title.trim() === chip.title
-                    ? "bg-text text-bg"
-                    : "bg-card text-text",
+                  "min-h-11 cursor-pointer rounded-pill hover-tint px-3.5 text-14 font-semibold transition-colors duration-200 ease-soft",
+                  value.title.trim() === chip.title ? "bg-text text-bg" : "bg-card text-text",
                 )}
               >
                 {chip.title}
