@@ -45,7 +45,7 @@ Local email never leaves your machine: sign up with any address, then open Mailp
 | Staging | the first cloud project (`eu-west-1`) | Vercel Preview deployments, testing in the cloud |
 | Hosted deployment | Maintainer-managed; environment details omitted. |
 
-Nothing in the code names a project: the URL and keys come from environment variables (Vercel: Production → production, Preview → staging). Migrations are written and tested locally, run in CI, then reach staging and production with `[maintainer-only command omitted]` (owner only, once CI is green; `supabase link` picks the project). Setting up production: [docs/launch.md](docs/launch.md).
+Nothing in the code names a project: the URL and keys come from environment variables (Vercel: Production → production, Preview → staging). Migrations are written and tested locally, run in CI, then reach staging and production with `[maintainer-only command omitted]` (owner only, once CI is green; every command names its project, see [docs/launch.md](docs/launch.md#which-project-does-a-command-hit)). Setting up production: [docs/launch.md](docs/launch.md).
 
 ## Scripts
 
