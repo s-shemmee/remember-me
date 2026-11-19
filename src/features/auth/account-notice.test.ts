@@ -60,8 +60,10 @@ describe("the account-exists email", () => {
     expect(email.html).toContain("mailto:contact@shemme.codes");
     expect(email.html).not.toContain("Unsubscribe");
     expect(email.text).toContain("You already have an account");
-    // The HTML logo, not an image.
-    expect(email.html).not.toContain("<img");
+    // The only image is the logo (no tracking pixels), alt="" in a red cell.
+    expect(email.html.match(/<img[^>]*>/g)).toEqual([
+      expect.stringMatching(/src="[^"]*\/email\/logo\.png"[^>]*alt=""/),
+    ]);
   });
 });
 

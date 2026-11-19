@@ -3,6 +3,8 @@ import path from "node:path";
 
 import { ImageResponse } from "next/og";
 
+import { HEART_PATH, HEART_VIEWBOX, LOGO_RED } from "@/lib/logo-mark";
+
 /**
  * The branded share image (Open Graph and Twitter), made at build time:
  * the logo, the headline with its serif accent, and Noor. Light theme
@@ -39,16 +41,16 @@ export default async function OpengraphImage() {
               width: 64,
               height: 64,
               borderRadius: 18,
-              background: "#d63b48",
+              background: LOGO_RED,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <svg width="34" height="34" viewBox="0 0 24 24">
+            <svg width="32" height="32" viewBox={HEART_VIEWBOX}>
               <path
                 fill="#ffffff"
-                d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.7 3.2 5 6.8 5c2 0 3.5 1.1 5.2 3 1.7-1.9 3.2-3 5.2-3 3.6 0 5.6 3.7 4.3 6.8C19.5 16.4 12 21 12 21z"
+                d={HEART_PATH}
               />
             </svg>
           </div>

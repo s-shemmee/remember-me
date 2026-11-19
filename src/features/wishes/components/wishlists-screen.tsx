@@ -83,7 +83,7 @@ function WishCard({
           <Button
             variant="transparent"
             size="icon"
-            className="absolute top-6 right-6 bg-card shadow-card hover:bg-card2"
+            className="absolute top-6 right-6 bg-card shadow-card"
             aria-label={`Options for ${wish.title}`}
           >
             <EllipsisIcon aria-hidden />
@@ -319,7 +319,7 @@ export function WishlistsScreen({
                 <button
                   type="button"
                   onClick={() => open(emptyWishForm(list.id), null)}
-                  className="flex h-full min-h-[200px] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-card border-2 border-dashed border-line p-4 text-sub hover:bg-card2"
+                  className="flex h-full min-h-[200px] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-card border-2 border-dashed border-line p-4 text-sub hover-tint"
                 >
                   <PlusIcon aria-hidden className="size-6" />
                   <span className="text-15 font-bold text-text">Add a wish</span>

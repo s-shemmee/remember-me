@@ -32,7 +32,7 @@ export default function CalendarPage() {
           <h1 className="text-34 leading-tight font-extrabold tracking-[-0.03em]">Calendar</h1>
           <p className="text-15 text-sub">Every day worth remembering, in one place</p>
         </div>
-        <SavedThemeToggle />
+        <SavedThemeToggle className="hidden lg:inline-flex" />
         <AddPersonButton />
       </div>
       <Suspense fallback={<Card aria-busy="true" className="h-[480px]" />}>

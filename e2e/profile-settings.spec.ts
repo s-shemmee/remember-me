@@ -95,7 +95,7 @@ test("profile photo without location data, and birthday sharing on and off", asy
   expect(stored.length).toBeGreaterThan(0);
   expect(hasMetadata(stored)).toBe(false);
 
-  // B sees A's birthday (22 November, from onboarding)...
+  // B sees A's birthday (from onboarding)...
   await pageB.goto("/wishlists?tab=friends");
   const picker = pageB.getByRole("group", { name: "Friends" });
   await expect(picker.getByRole("button", { name: /Amina/ })).toContainText(

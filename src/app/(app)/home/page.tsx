@@ -114,8 +114,11 @@ async function Dashboard() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1">
+      {/* Phones and tablets: greeting + date, then search and a round "+".
+          Desktop (lg): search, the theme toggle and "Add someone" stay together,
+          next to the greeting (or just under it when the screen is narrow). */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-4">
+        <div className="flex min-w-0 flex-col gap-1 lg:flex-[1_1_320px]">
           <h1 className="text-34 leading-tight font-extrabold tracking-[-0.03em]">
             {greet.text}
             {firstName && (
@@ -132,31 +135,33 @@ async function Dashboard() {
             {formatFullDate(today)} · {weekSummary(events)}
           </p>
         </div>
-        {peopleCount > 0 && (
-          <Form
-            action="/people"
-            role="search"
-            className="relative min-w-0 flex-[1_1_220px] sm:max-w-[280px]"
-          >
-            <label htmlFor="home-search" className="sr-only">
-              Search people
-            </label>
-            <SearchIcon
-              aria-hidden
-              className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-sub"
-            />
-            <input
-              id="home-search"
-              name="q"
-              type="search"
-              placeholder="Search people…"
-              autoComplete="off"
-              className="min-h-11 w-full rounded-pill border-[1.5px] border-line bg-card pr-4 pl-11 text-15 text-text placeholder:text-sub focus:border-accent focus:outline-none"
-            />
-          </Form>
-        )}
-        <SavedThemeToggle />
-        <AddPersonButton />
+        <div className="flex items-center gap-3 lg:ml-auto lg:gap-4">
+          {peopleCount > 0 && (
+            <Form
+              action="/people"
+              role="search"
+              className="relative min-w-0 flex-1 lg:w-[280px] lg:flex-none"
+            >
+              <label htmlFor="home-search" className="sr-only">
+                Search people
+              </label>
+              <SearchIcon
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-sub"
+              />
+              <input
+                id="home-search"
+                name="q"
+                type="search"
+                placeholder="Search people…"
+                autoComplete="off"
+                className="min-h-11 w-full rounded-pill border-[1.5px] border-line bg-card pr-4 pl-11 text-15 text-text placeholder:text-sub focus:border-accent focus:outline-none"
+              />
+            </Form>
+          )}
+          <SavedThemeToggle className="hidden lg:inline-flex" />
+          <AddPersonButton compact className="ml-auto lg:ml-0" />
+        </div>
       </div>
 
       <NoorNudge

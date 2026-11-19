@@ -408,3 +408,18 @@
   content-visibility: auto;
   contain-intrinsic-size: auto 900px;
 }
+
+/*
+ * Button hover: a tint of the text colour laid over the button's own
+ * background (a gradient layer, so background-color and shadows are kept).
+ * It darkens in light and lightens in dark, on any variant and any surface,
+ * so a hovered button never matches the card behind it.
+ */
+@utility hover-tint {
+  &:hover {
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--text) 9%, transparent),
+      color-mix(in srgb, var(--text) 9%, transparent)
+    );
+  }
+}

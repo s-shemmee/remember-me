@@ -49,12 +49,14 @@ export type EmailLinks = {
 };
 
 /**
- * The logo in HTML, not an image, so it shows with images blocked: a red
- * rounded square (square in Outlook, which is fine) with a white heart. U+FE0E
- * keeps iPhones from turning the heart into a red emoji. Hidden from screen
- * readers: "Remember me" follows.
+ * The logo: our mark as an image (public/email/logo.png, 2×, from
+ * `pnpm email:logo`) inside a red cell of the same size, so the red square
+ * still shows when images are blocked (square in Outlook, which is fine).
+ * alt="": "Remember me" follows.
  */
-function Logo() {
+export const EMAIL_LOGO_PATH = "/email/logo.png";
+
+function Logo({ appUrl }: { appUrl: string }) {
   return (
     <table role="presentation" cellPadding={0} cellSpacing={0} border={0}>
       <tbody>
@@ -73,14 +75,18 @@ function Logo() {
               height: 28,
               backgroundColor: EMAIL_COLORS.accent,
               borderRadius: 8,
-              color: EMAIL_COLORS.onAccent,
-              fontSize: 16,
-              lineHeight: "28px",
-              textAlign: "center",
-              fontFamily: "Arial, Helvetica, sans-serif",
+              lineHeight: 0,
             }}
           >
-            {"♥︎"}
+            {/* An email, not a Next page: a plain <img> is right here. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${appUrl}${EMAIL_LOGO_PATH}`}
+              width={28}
+              height={28}
+              alt=""
+              style={{ display: "block", width: 28, height: 28, border: 0, borderRadius: 8 }}
+            />
           </td>
           <td
             style={{
@@ -169,7 +175,7 @@ export function Layout({
                   <tbody>
                     <tr>
                       <td style={{ padding: "0 8px 20px" }}>
-                        <Logo />
+                        <Logo appUrl={links.appUrl} />
                       </td>
                     </tr>
                     <tr>

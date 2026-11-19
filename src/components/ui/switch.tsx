@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
  * Switch, from the Settings and Celebrate screens: 48×28, 22px knob,
  * accent when on. Off adds a 1.5px `sub` outline so the control meets 3:1
  * against the page (the line-coloured track alone is about 1.3:1).
- * The touch area is enlarged to 44px tall without changing the look.
+ * The touch area is enlarged to 44px tall without changing the look; hover
+ * tints the track (`hover-tint`), like every other control.
  * Always give it a label (aria-label or a <label htmlFor>).
  */
 function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimitive.Root>) {
@@ -17,7 +18,7 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        "peer relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-pill",
+        "peer hover-tint relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-pill",
         "transition-colors duration-200 ease-soft",
         "before:absolute before:-inset-x-1 before:-inset-y-2 before:content-['']",
         "data-checked:bg-accent",

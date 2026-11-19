@@ -105,7 +105,7 @@ function StepRow({
         role="checkbox"
         aria-checked={step.done}
         onClick={() => void toggle(step)}
-        className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-[16px] p-2.5 text-left transition-colors duration-200 ease-soft hover:bg-card2"
+        className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-[16px] p-2.5 text-left transition-colors duration-200 ease-soft hover-tint"
       >
         <span
           aria-hidden

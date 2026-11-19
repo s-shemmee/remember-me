@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { PasswordField } from "@/components/ui/password-field";
 
+import { forgetThemeUser } from "@/lib/theme";
+
 import { type AccountResult, changeEmail, changePassword, logOutEverywhere } from "../actions";
 
 type Mode = "password" | "recent-sign-in";
@@ -153,6 +155,7 @@ export function AccountCard({ email, mode }: { email: string; mode: Mode }) {
           disabled={busy !== ""}
           onClick={() => {
             setBusy("everywhere");
+            forgetThemeUser();
             void logOutEverywhere();
           }}
         >

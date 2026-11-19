@@ -258,7 +258,8 @@ export function CalendarScreen({
                       className={cn(
                         "h-14 cursor-pointer rounded-[12px] p-1 align-top sm:h-[92px] sm:rounded-[16px] sm:p-2",
                         "focus:outline-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid",
-                        list.length && !past ? "bg-card2" : "hover:bg-card2",
+                        "hover-tint",
+                        list.length && !past && "bg-card2",
                         sel && "ring-2 ring-accent ring-inset",
                       )}
                     >
@@ -350,7 +351,7 @@ export function CalendarScreen({
                   <button
                     type="button"
                     onClick={() => go(e.on, { push: true })}
-                    className="flex min-h-11 w-full min-w-0 cursor-pointer items-center gap-3 rounded-[12px] py-2 text-left hover:bg-card2"
+                    className="flex min-h-11 w-full min-w-0 cursor-pointer items-center gap-3 rounded-[12px] py-2 text-left hover-tint"
                   >
                     <span aria-hidden className="flex w-11 shrink-0 flex-col items-center">
                       <span className="text-[11px] font-bold text-sub">

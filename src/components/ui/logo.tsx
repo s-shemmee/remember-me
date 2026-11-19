@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { HEART_PATH, HEART_VIEWBOX } from "@/lib/logo-mark";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,8 +26,8 @@ function Logo({
   const content = (
     <>
       <span aria-hidden className="grid size-8 place-items-center rounded-chip bg-accent">
-        <svg viewBox="0 0 24 24" className="size-4 fill-on-accent">
-          <path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.7 3.2 5 6.8 5c2 0 3.5 1.1 5.2 3 1.7-1.9 3.2-3 5.2-3 3.6 0 5.6 3.7 4.3 6.8C19.5 16.4 12 21 12 21z" />
+        <svg viewBox={HEART_VIEWBOX} className="size-4 fill-on-accent">
+          <path d={HEART_PATH} />
         </svg>
       </span>
       <span aria-hidden>

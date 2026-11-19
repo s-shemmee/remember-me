@@ -94,7 +94,7 @@ async function Shell({ children }: { children: React.ReactNode }) {
       }}
       yourDay={on ? { daysUntil: daysBetween(today, on), date: formatShortDate(on), plan } : null}
     >
-      <ThemeSync theme={parseThemeChoice(profile?.theme)} />
+      <ThemeSync theme={parseThemeChoice(profile?.theme)} userId={userId} />
       {children}
     </AppShell>
   );

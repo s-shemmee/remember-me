@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 
-import { getThemeChoice, THEME_CHANGE_EVENT, type ThemeChoice } from "./theme";
+import { DEFAULT_THEME, getThemeChoice, THEME_CHANGE_EVENT, type ThemeChoice } from "./theme";
 
 function subscribeToDarkClass(onChange: () => void): () => void {
   const observer = new MutationObserver(onChange);
@@ -28,7 +28,7 @@ function subscribeToChoice(onChange: () => void): () => void {
   };
 }
 
-/** The saved choice ("system" on the server and before hydration). */
+/** The saved choice (the default, light, on the server and before hydration). */
 export function useThemeChoice(): ThemeChoice {
-  return useSyncExternalStore(subscribeToChoice, getThemeChoice, () => "system");
+  return useSyncExternalStore(subscribeToChoice, getThemeChoice, () => DEFAULT_THEME);
 }

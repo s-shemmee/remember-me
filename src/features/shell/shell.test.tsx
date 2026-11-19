@@ -12,6 +12,8 @@ vi.mock("@/features/onboarding/store", () => ({
   clearOnboardingDraft: () => clearOnboardingDraft(),
 }));
 
+vi.mock("@/features/profile/actions", () => ({ saveTheme: vi.fn() }));
+
 const { AppShell } = await import("./app-shell");
 
 const account = { firstName: "Maya", color: "rose" as const, character: null, peopleCount: 7 };
@@ -77,7 +79,11 @@ describe("App shell", () => {
       within(menu)
         .getAllByRole("menuitem")
         .map((i) => i.textContent?.trim()),
-    ).toEqual(["👤 My profile", "⚙️ Settings", "💬 Help & feedback", "↪ Log out"]);
+    ).toEqual(["My profile", "Settings", "Help & feedback", "Log out"]);
+    // Same icon set as the sidebar (lucide SVGs), no emoji.
+    for (const item of within(menu).getAllByRole("menuitem")) {
+      expect(item.querySelector("svg[aria-hidden]")).not.toBeNull();
+    }
     expect(within(menu).getByRole("menuitem", { name: /My profile/ })).toHaveAttribute(
       "href",
       "/profile",
@@ -89,6 +95,7 @@ describe("App shell", () => {
 
     await userEvent.click(within(menu).getByRole("menuitem", { name: /Log out/ }));
     expect(clearOnboardingDraft).toHaveBeenCalledOnce();
+    expect(localStorage.getItem("rm-theme-user")).toBeNull();
     expect(logOut).toHaveBeenCalledOnce();
   });
 
@@ -101,5 +108,16 @@ describe("App shell", () => {
     expect(screen.getByText("1 person")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Account menu for Maya" }));
     expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
+
+  it("the phone and tablet top bar has the theme toggle next to the avatar", () => {
+    render(
+      <AppShell account={account} yourDay={null}>
+        x
+      </AppShell>,
+    );
+    const avatar = screen.getByRole("button", { name: "Account menu for Maya" });
+    const bar = avatar.closest("div")!;
+    expect(within(bar).getByRole("button", { name: /theme|dark|light/i })).toBeInTheDocument();
   });
 });

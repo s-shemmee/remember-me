@@ -2,17 +2,17 @@
 
 import * as React from "react";
 
-import { getThemeChoice, setThemeChoice, type ThemeChoice } from "@/lib/theme";
+import { syncProfileTheme, type ThemeChoice } from "@/lib/theme";
 
 /**
- * Keeps this device in step with the theme saved on your profile (set in
- * Settings → Appearance on any device). The head script already applied
- * this device's last choice before paint, so a change here is rare: only
- * the first visit on a new device, or after changing it elsewhere.
+ * The profile's theme (Settings → Appearance, or the toggle on another
+ * device) replaces this device's choice only on a new device or right after
+ * logging in. After that the device's own choice wins: a page render that
+ * still carries an older profile value can't flip the theme back.
  */
-export function ThemeSync({ theme }: { theme: ThemeChoice }) {
+export function ThemeSync({ theme, userId }: { theme: ThemeChoice; userId: string }) {
   React.useEffect(() => {
-    if (getThemeChoice() !== theme) setThemeChoice(theme);
-  }, [theme]);
+    syncProfileTheme(theme, userId);
+  }, [theme, userId]);
   return null;
 }

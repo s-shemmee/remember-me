@@ -178,7 +178,7 @@ export function PeopleScreen({
             />
           </div>
         )}
-        <SavedThemeToggle />
+        <SavedThemeToggle className="hidden lg:inline-flex" />
         <Button onClick={openAdd}>
           <PlusIcon aria-hidden /> Add someone
         </Button>

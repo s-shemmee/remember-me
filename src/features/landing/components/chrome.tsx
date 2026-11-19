@@ -30,7 +30,7 @@ export function LandingHeader() {
               <li key={s.href}>
                 <a
                   href={s.href}
-                  className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-15 font-medium text-sub transition-colors duration-200 ease-soft hover:bg-card2 hover:text-text"
+                  className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-15 font-medium text-sub transition-colors duration-200 ease-soft hover-tint hover:text-text"
                 >
                   {s.label}
                 </a>

@@ -32,7 +32,7 @@ function ChoiceItem({
     <RadioGroupPrimitive.Item
       data-slot="choice-item"
       className={cn(
-        "cursor-pointer transition-[background-color,color,box-shadow,transform] duration-200 ease-soft",
+        "hover-tint cursor-pointer transition-[background-color,color,box-shadow,transform] duration-200 ease-soft",
         "disabled:pointer-events-none disabled:opacity-50",
         className,
       )}

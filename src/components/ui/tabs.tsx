@@ -31,7 +31,7 @@ const segmentedTrackClass =
 const segmentedOptionClass = cn(
   "inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-pill px-[18px] text-15 font-bold whitespace-nowrap text-text",
   "transition-[background-color,box-shadow] duration-200 ease-soft",
-  "hover:bg-card/60 data-active:bg-card data-active:shadow-card aria-pressed:bg-card aria-pressed:shadow-card",
+  "hover-tint data-active:bg-card data-active:shadow-card aria-pressed:bg-card aria-pressed:shadow-card",
   "disabled:pointer-events-none disabled:opacity-50",
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
 );

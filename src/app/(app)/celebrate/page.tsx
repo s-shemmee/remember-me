@@ -62,7 +62,7 @@ async function Celebrate() {
             Your day matters too. Plan it, treat yourself, keep the memories.
           </p>
         </div>
-        <SavedThemeToggle />
+        <SavedThemeToggle className="hidden lg:inline-flex" />
         <Button asChild>
           <Link href="/wishlists?list=birthday">My wishlist</Link>
         </Button>

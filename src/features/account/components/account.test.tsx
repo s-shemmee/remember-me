@@ -90,9 +90,9 @@ describe("Settings → Account", () => {
 describe("Settings → Appearance", () => {
   it("Light, Dark or System: applied at once, kept on this device and saved", async () => {
     saveTheme.mockResolvedValue({ ok: true });
-    render(<AppearanceCard saved="system" />);
+    render(<AppearanceCard saved="light" />);
     const group = screen.getByRole("radiogroup", { name: "Theme" });
-    expect(screen.getByRole("radio", { name: "System" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "Light" })).toBeChecked();
     await userEvent.click(screen.getByRole("radio", { name: "Dark" }));
     expect(document.documentElement.classList.contains("dark")).toBe(true);
     expect(localStorage.getItem("rm-theme")).toBe("dark");

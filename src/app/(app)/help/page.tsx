@@ -1,15 +1,10 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { ComingSoon } from "@/features/shell/coming-soon";
-
-export const metadata: Metadata = { title: "Help & feedback · Remember Me" };
-
-// Placeholder until the help page exists.
+/**
+ * An old placeholder from the first app shell. Help & feedback has lived in
+ * Settings (and the account menu, as a mailto link) since M5 part 1, so this
+ * address just goes there.
+ */
 export default function Page() {
-  return (
-    <ComingSoon
-      title="Help & feedback"
-      line="A proper help page is coming soon. I'd love to hear what you think 💬"
-    />
-  );
+  redirect("/settings#help");
 }

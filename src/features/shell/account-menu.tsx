@@ -1,6 +1,6 @@
 "use client";
 
-import { EllipsisIcon } from "lucide-react";
+import { EllipsisIcon, LifeBuoyIcon, LogOutIcon, SettingsIcon, UserRoundIcon } from "lucide-react";
 import Link from "next/link";
 import { useTransition } from "react";
 
@@ -15,6 +15,7 @@ import {
 import { logOut } from "@/features/auth/actions";
 import { unsubscribeThisDevice } from "@/features/notifications/browser";
 import { clearOnboardingDraft } from "@/features/onboarding/store";
+import { forgetThemeUser } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
 
@@ -51,7 +52,7 @@ export function AccountMenu({
         {variant === "chip" ? (
           <button
             type="button"
-            className="flex w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-[16px] bg-card px-3 py-2.5 text-left transition-colors duration-200 ease-soft hover:bg-card2"
+            className="flex w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-[16px] bg-card px-3 py-2.5 text-left transition-colors duration-200 ease-soft hover-tint"
           >
             <Avatar
               name={name}
@@ -71,7 +72,7 @@ export function AccountMenu({
         ) : (
           <button
             type="button"
-            className="grid size-11 cursor-pointer place-items-center rounded-pill"
+            className="hover-tint grid size-11 cursor-pointer place-items-center rounded-pill"
           >
             <Avatar
               name={name}
@@ -92,17 +93,17 @@ export function AccountMenu({
       >
         <DropdownMenuItem asChild>
           <Link href="/profile">
-            <span aria-hidden>👤</span> My profile
+            <UserRoundIcon aria-hidden className="size-5" /> My profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/settings">
-            <span aria-hidden>⚙️</span> Settings
+            <SettingsIcon aria-hidden className="size-5" /> Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <a href="mailto:contact@shemme.codes">
-            <span aria-hidden>💬</span> Help &amp; feedback
+            <LifeBuoyIcon aria-hidden className="size-5" /> Help &amp; feedback
           </a>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -111,6 +112,8 @@ export function AccountMenu({
           disabled={pending}
           onSelect={() => {
             clearOnboardingDraft();
+            // The next person to log in here starts with their own theme.
+            forgetThemeUser();
             // On a shared device, the next person never gets your reminders:
             // this device's push subscription goes before you're signed out.
             startTransition(async () => {
@@ -119,7 +122,7 @@ export function AccountMenu({
             });
           }}
         >
-          <span aria-hidden>↪</span> Log out
+          <LogOutIcon aria-hidden className="size-5" /> Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

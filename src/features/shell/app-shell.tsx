@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 
+import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
+
 import { type Account, AccountMenu } from "./account-menu";
 import { SidebarNav, SidebarSettingsLink, TabBar } from "./nav";
 
@@ -73,9 +75,13 @@ export function AppShell({
         </div>
       </aside>
 
+      {/* Phones and tablets: logo on the left, theme toggle and account on the right. */}
       <header className="flex items-center justify-between gap-3 px-4 pt-3 sm:px-8 lg:hidden">
         <Logo href="/home" label="Remember me, home" />
-        <AccountMenu account={account} variant="avatar" />
+        <div className="flex items-center gap-2">
+          <SavedThemeToggle />
+          <AccountMenu account={account} variant="avatar" />
+        </div>
       </header>
 
       {/* Room at the bottom for the tab bar on phones. */}

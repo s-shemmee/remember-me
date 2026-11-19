@@ -4,7 +4,15 @@ import { describe, expect, it } from "vitest";
 
 import { reminderLine, reminderPreview, reminderSubject } from "./copy";
 import type { DueReminder, ReminderDay } from "./due";
-import { EMAIL_COLORS, EMAIL_PASTELS, renderReminderEmail, renderTestEmail } from "./email";
+import { renderAccountExistsEmail } from "../auth/account-exists-email";
+
+import {
+  EMAIL_COLORS,
+  EMAIL_LOGO_PATH,
+  EMAIL_PASTELS,
+  renderReminderEmail,
+  renderTestEmail,
+} from "./email";
 import { pushPayload } from "./push";
 
 const day = (extra: Partial<ReminderDay> = {}): ReminderDay => ({
@@ -240,22 +248,43 @@ describe("your own day", () => {
 });
 
 describe("the logo", () => {
-  it("is HTML, not an image: a red square with a white text heart, hidden from screen readers", async () => {
+  it("is our mark as an image inside a red cell (still red with images blocked), alt=\"\"", async () => {
     for (const email of [
       await renderReminderEmail({ firstName: "Maya", reminders: [reminder(7)], links }),
       await renderTestEmail({ firstName: "Maya", links }),
+      await renderAccountExistsEmail(links.appUrl),
     ]) {
-      const logo = email.html.match(/<td[^>]*aria-hidden="true"[^>]*>♥︎<\/td>/)?.[0];
-      expect(logo).toBeDefined();
-      expect(logo).toContain('bgcolor="#d63b48"');
-      expect(logo).toContain("border-radius:8px");
-      expect(email.html).not.toContain("<img");
-      // The candle stays in Noor's sign-off only, and the heart stays out of the text version.
+      const cell = email.html.match(/<td[^>]*aria-hidden="true"[^>]*><img[^>]*><\/td>/)?.[0];
+      expect(cell).toBeDefined();
+      expect(cell).toContain('bgcolor="#d63b48"');
+      expect(cell).toContain("border-radius:8px");
+      expect(cell).toContain(`src="${links.appUrl}${EMAIL_LOGO_PATH}"`);
+      expect(cell).toContain('alt=""');
+      expect(cell).toMatch(/width="28"[^>]*height="28"/);
+      expect(email.html).not.toContain("♥");
+      // The candle stays in Noor's sign-off only, and the logo stays out of the text version.
       const body = email.html.replace(/<title>.*?<\/title>/, "");
-      expect(body.match(/🕯️/g)).toHaveLength(1);
-      expect(body).toMatch(/Noor <span aria-hidden="true">🕯️<\/span>/);
-      expect(email.text).not.toContain("♥");
+      expect(body.match(/🕯️/g)?.length ?? 0).toBeLessThanOrEqual(1);
+      expect(email.text).not.toContain("logo.png");
       expect(email.text).toContain("Remember me");
     }
+  });
+
+  it("the auth templates use the same image, from the Site URL", () => {
+    for (const name of ["confirm-signup", "magic-link", "reset-password", "change-email"]) {
+      const html = readFileSync(`supabase/templates/${name}.html`, "utf8");
+      const cell = html.match(/<td[^>]*aria-hidden="true"[^>]*><img[^>]*><\/td>/)?.[0];
+      expect(cell, name).toBeDefined();
+      expect(cell).toContain('bgcolor="#d63b48"');
+      expect(cell).toContain('src="{{ .SiteURL }}/email/logo.png"');
+      expect(cell).toContain('alt=""');
+      expect(html, name).not.toMatch(/&#9829;|♥/);
+    }
+  });
+
+  it("the PNG is the 2× mark: 56×56", () => {
+    const png = readFileSync(`public${EMAIL_LOGO_PATH}`);
+    expect(png.subarray(1, 4).toString()).toBe("PNG");
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([56, 56]);
   });
 });

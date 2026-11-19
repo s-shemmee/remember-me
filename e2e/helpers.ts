@@ -50,9 +50,26 @@ export async function confirmationLink(email: string): Promise<string> {
   throw new Error(`No confirmation email for ${email} in Mailpit`);
 }
 
-/** A new, confirmed and onboarded account (no first person), signed in on `page`. */
-/** Signs up, confirms and onboards a new user; returns their email address. */
-export async function signUpAndOnboard(page: Page, firstName: string): Promise<string> {
+/**
+ * About half a year from today: the test user's own birthday by default.
+ * A fixed date (it used to be 22 November) turns "soon" once a year, and then
+ * Noor talks about your own day instead of the person a test just added.
+ */
+export function farBirthday(now = new Date()): { day: string; month: string } {
+  const d = new Date(now.getTime() + 182 * 86_400_000);
+  return { day: String(d.getUTCDate()), month: String(d.getUTCMonth() + 1) };
+}
+
+/**
+ * Signs up, confirms and onboards a new user (no first person), signed in on
+ * `page`; returns their email address. Their birthday is `farBirthday()`
+ * unless a test needs a given date.
+ */
+export async function signUpAndOnboard(
+  page: Page,
+  firstName: string,
+  birthday: { day: string; month: string } = farBirthday(),
+): Promise<string> {
   const email = `e2e.${firstName.toLowerCase()}.${Date.now()}@test.local`;
   await page.goto("/sign-up");
   await page.getByLabel("What should we call you?").fill(firstName);
@@ -63,8 +80,8 @@ export async function signUpAndOnboard(page: Page, firstName: string): Promise<s
   await page.goto(await confirmationLink(email));
   await expect(page).toHaveURL(/\/onboarding$/);
 
-  await page.getByRole("combobox", { name: "Day" }).selectOption("22");
-  await page.getByRole("combobox", { name: "Month" }).selectOption("11");
+  await page.getByRole("combobox", { name: "Day" }).selectOption(birthday.day);
+  await page.getByRole("combobox", { name: "Month" }).selectOption(birthday.month);
   await page.getByRole("button", { name: /^Continue/ }).click();
   await page.getByRole("button", { name: "Skip for now" }).click();
   await page.getByRole("button", { name: "Skip for now" }).click();

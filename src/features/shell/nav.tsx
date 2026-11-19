@@ -28,7 +28,7 @@ const isCurrent = (pathname: string, href: string) =>
 const navItemClass = (current: boolean) =>
   cn(
     "flex min-h-11 items-center gap-3 rounded-item px-3.5 text-15 font-semibold transition-colors duration-200 ease-soft",
-    current ? "bg-card text-text shadow-card" : "text-sub hover:bg-card2 hover:text-text",
+    current ? "bg-card text-text shadow-card" : "text-sub hover-tint hover:text-text",
   );
 
 /** Sidebar links: the five sections. The current page is marked aria-current. */

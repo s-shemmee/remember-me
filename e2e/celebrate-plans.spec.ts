@@ -162,7 +162,8 @@ test("reserving a friend's gift ticks Gift in my plan for them", async ({ browse
 
 test("Celebrate Me: a sealed note, and own-day reminders by email", async ({ page }) => {
   test.setTimeout(300_000);
-  const email = await signUpAndOnboard(page, "Maya");
+  // The reminder runs below use a fixed clock around 22 November 2030.
+  const email = await signUpAndOnboard(page, "Maya", { day: "22", month: "11" });
 
   await page.goto("/celebrate");
   await expect(page.getByRole("heading", { level: 1, name: "Celebrate Me" })).toBeVisible();

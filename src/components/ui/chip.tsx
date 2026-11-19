@@ -67,7 +67,8 @@ function FilterChip({
       className={cn(
         chipVariants({ size: "lg" }),
         "cursor-pointer transition-colors duration-200 ease-soft",
-        selected ? "bg-text text-bg" : "bg-card2 text-text hover:bg-line",
+        "hover-tint",
+        selected ? "bg-text text-bg" : "bg-card2 text-text",
         "disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
