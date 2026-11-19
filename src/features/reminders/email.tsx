@@ -52,7 +52,7 @@ export type EmailLinks = {
 
 /**
  * The logo: our mark as an image (public/email/logo.png, 2×, from
- * `pnpm email:logo`) inside a red cell of the same size, so the red square
+ * `pnpm icons`) inside a red cell of the same size, so the red square
  * still shows when images are blocked (square in Outlook, which is fine).
  * alt="": "Remember me" follows.
  */

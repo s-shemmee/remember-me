@@ -2,71 +2,91 @@ import { readFileSync } from "node:fs";
 
 import { expect, type Page, test } from "@playwright/test";
 
+import {
+  FAVICON_FILE,
+  FAVICON_SIZES,
+  faviconSpec,
+  ICON_SVG_FILE,
+  iconSvg,
+  PNG_ICONS,
+  readIco,
+} from "../scripts/icons/specs";
 import { PASSWORD } from "./helpers";
 
 /**
  * The logo is the same mark everywhere: the in-app Logo (sidebar, phone
- * header, landing, auth, offline), the PWA icons, the favicon and the email
- * PNG. The heart is centred in its square (within half a pixel), light and
- * dark, and emails use the real image.
+ * header, landing, auth, offline), the tab icon and favicon, the Apple touch
+ * and PWA icons and the email PNG. Every icon file matches a fresh render of
+ * its spec (scripts/icons/specs.ts); the heart is centred in the in-app logo
+ * (within half a pixel), light and dark; emails use the real image.
  */
 const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
 
-/** The white heart's box in an image, measured in the browser. */
-async function heartBox(page: Page, file: string) {
-  const type = file.endsWith(".ico") ? "image/x-icon" : "image/png";
-  const b64 = readFileSync(file).toString("base64");
+/**
+ * How far a committed icon is from a fresh render of its spec: the mean
+ * difference per RGBA channel (0 = identical, 255 = opposite). Both are drawn
+ * into same-size canvases in the browser.
+ */
+async function distance(page: Page, svg: string, size: number, png: Uint8Array) {
   return page.evaluate(
-    async ({ b64, type }) => {
-      const img = new Image();
-      img.src = `data:${type};base64,${b64}`;
-      await img.decode();
-      const c = document.createElement("canvas");
-      c.width = img.naturalWidth;
-      c.height = img.naturalHeight;
-      const ctx = c.getContext("2d")!;
-      ctx.drawImage(img, 0, 0);
-      const d = ctx.getImageData(0, 0, c.width, c.height).data;
-      let [x0, x1, y0, y1] = [Infinity, -1, Infinity, -1];
-      for (let y = 0; y < c.height; y++)
-        for (let x = 0; x < c.width; x++) {
-          const i = (y * c.width + x) * 4;
-          if (d[i + 3]! > 128 && d[i]! > 230 && d[i + 1]! > 230 && d[i + 2]! > 230) {
-            x0 = Math.min(x0, x);
-            x1 = Math.max(x1, x);
-            y0 = Math.min(y0, y);
-            y1 = Math.max(y1, y);
-          }
-        }
-      return {
-        w: c.width,
-        h: c.height,
-        cx: (x0 + x1 + 1) / 2,
-        cy: (y0 + y1 + 1) / 2,
-        found: x1 >= 0,
+    async ({ svg, size, b64 }) => {
+      const draw = async (src: string) => {
+        const img = new Image();
+        img.src = src;
+        await img.decode();
+        const c = document.createElement("canvas");
+        c.width = c.height = size;
+        const ctx = c.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, size, size);
+        return { data: ctx.getImageData(0, 0, size, size).data, w: img.naturalWidth };
       };
+      const want = await draw(`data:image/svg+xml;base64,${btoa(svg)}`);
+      const got = await draw(`data:image/png;base64,${b64}`);
+      if (got.w !== size) return 255;
+      let sum = 0;
+      for (let i = 0; i < want.data.length; i++) sum += Math.abs(want.data[i]! - got.data[i]!);
+      return sum / want.data.length;
     },
-    { b64, type },
+    { svg, size, b64: Buffer.from(png).toString("base64") },
   );
 }
 
-test("every icon file has the heart centred", async ({ page }) => {
+test("every icon file is our mark, pixel for pixel (none from the Next.js template)", async ({
+  page,
+}) => {
   await page.goto("/log-in");
-  for (const file of [
-    "src/app/favicon.ico",
-    "public/apple-touch-icon.png",
-    "public/icons/icon-192.png",
-    "public/icons/icon-512.png",
-    "public/icons/maskable-192.png",
-    "public/icons/maskable-512.png",
-    "public/icons/badge-96.png",
-    "public/email/logo.png",
-  ]) {
-    const box = await heartBox(page, file);
-    expect(box.found, file).toBe(true);
-    expect(Math.abs(box.cx - box.w / 2), `${file} x`).toBeLessThanOrEqual(1);
-    expect(Math.abs(box.cy - box.h / 2), `${file} y`).toBeLessThanOrEqual(1);
+  const checks = [
+    ...PNG_ICONS.map((spec) => ({ spec, png: new Uint8Array(readFileSync(spec.file)) })),
+    ...readIco(new Uint8Array(readFileSync(FAVICON_FILE))).map((frame) => {
+      expect(frame.png, `${FAVICON_FILE} ${frame.size}px is a PNG frame`).toBe(true);
+      return { spec: faviconSpec(frame.size), png: frame.data };
+    }),
+  ];
+  expect(checks.length).toBe(PNG_ICONS.length + FAVICON_SIZES.length);
+  for (const { spec, png } of checks) {
+    const d = await distance(page, iconSvg(spec.shape, spec.heart, spec.size), spec.size, png);
+    expect(d, `${spec.file} differs from the mark by ${d.toFixed(2)}`).toBeLessThan(2);
   }
+});
+
+test("the site serves our tab icon, favicon and Apple touch icon", async ({ page, request }) => {
+  await page.goto("/");
+  const links = await page.evaluate(() =>
+    [
+      ...document.querySelectorAll<HTMLLinkElement>("link[rel~=icon], link[rel=apple-touch-icon]"),
+    ].map((l) => ({ rel: l.rel, href: new URL(l.href).pathname, type: l.type })),
+  );
+  expect(links).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ rel: "icon", href: "/icon.svg", type: "image/svg+xml" }),
+      expect.objectContaining({ rel: "icon", href: "/favicon.ico" }),
+      expect.objectContaining({ rel: "apple-touch-icon", href: "/apple-touch-icon.png" }),
+    ]),
+  );
+  const svg = await (await request.get("/icon.svg")).text();
+  expect(svg).toBe(readFileSync(ICON_SVG_FILE, "utf8"));
+  const ico = await (await request.get("/favicon.ico")).body();
+  expect(Buffer.compare(ico, readFileSync(FAVICON_FILE))).toBe(0);
 });
 
 for (const theme of ["light", "dark"] as const) {

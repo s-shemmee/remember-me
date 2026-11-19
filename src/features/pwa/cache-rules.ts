@@ -17,6 +17,7 @@ const STATIC_FILES = new Set([
   OFFLINE_PATH,
   "/manifest.webmanifest",
   "/favicon.ico",
+  "/icon.svg",
   "/apple-touch-icon.png",
 ]);
 const NEVER_PREFIXES = ["/api/", "/auth/", "/serwist/", "/_next/image", "/_next/data/"];

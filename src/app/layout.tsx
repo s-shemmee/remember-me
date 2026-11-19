@@ -35,7 +35,13 @@ export const metadata: Metadata = {
   description: "Remember the people you love, and your own day too.",
   applicationName: "Remember Me",
   appleWebApp: { capable: true, title: "Remember Me", statusBarStyle: "default" },
-  icons: { apple: "/apple-touch-icon.png" },
+  // Setting `icons` here replaces Next's file-based <link> for src/app/icon.svg, so
+  // it's listed explicitly (favicon.ico is still linked by Next). All icons come
+  // from `pnpm icons`; e2e/logo.spec.ts checks the links and the pixels.
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 /** The browser bar follows the page colour in light and dark (the manifest can't). */

@@ -1,8 +1,9 @@
 /**
  * The Remember Me mark: a white heart in a rounded accent square. One source
- * for every place the logo is drawn (the Logo component, the OG image, the
- * email PNG from scripts/email-logo.ts). The PWA icons and favicon were drawn
- * from the same heart and are checked for centring in e2e/logo.spec.ts.
+ * for every place the logo is drawn: the Logo component, the OG image, and
+ * every icon file (the tab icon, favicon, Apple touch and PWA icons, the
+ * email logo), which `pnpm icons` renders from scripts/icons/specs.ts.
+ * e2e/logo.spec.ts compares each committed icon with a fresh render.
  *
  * Plain constants, no imports: scripts run this file with Node directly.
  */

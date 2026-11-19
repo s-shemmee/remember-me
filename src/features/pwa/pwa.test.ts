@@ -23,6 +23,7 @@ describe("what the service worker may cache", () => {
       "/offline",
       "/apple-touch-icon.png",
       "/favicon.ico",
+      "/icon.svg",
     ]) {
       expect(check(path), path).toBe(true);
     }
