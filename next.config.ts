@@ -46,8 +46,14 @@ export default withSentryConfig(nextConfig, {
   // Better stack traces (slightly slower builds)
   widenClientFileUpload: true,
 
-  // Smaller browser bundle: no Sentry debug logging in production builds.
-  bundleSizeOptimizations: { excludeDebugStatements: true },
+  // Smaller browser bundle: no Sentry debug logging, and no Session Replay
+  // code paths (we don't use Replay at all).
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeReplayIframe: true,
+    excludeReplayShadowDom: true,
+    excludeReplayWorker: true,
+  },
 
   // Send browser errors through our own domain so ad blockers don't drop them.
   // Keep "/monitoring" out of the middleware/proxy matcher when we add auth.

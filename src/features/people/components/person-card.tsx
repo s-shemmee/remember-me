@@ -28,7 +28,7 @@ export function PersonCard({
       className={cn(
         // A compact row in a narrow list (phones), the design's tall card from 30rem.
         "flex h-full min-w-0 items-center gap-3.5 rounded-card bg-card p-4 shadow-card @[30rem]:flex-col @[30rem]:items-start @[30rem]:gap-2.5 @[30rem]:p-[18px]",
-        "transition-[transform,box-shadow] duration-200 ease-soft hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
+        "hover-tint transition-[transform,box-shadow] duration-200 ease-soft hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
         current === "page" && "ring-[2.5px] ring-accent",
         current === "implicit" && "xl:ring-[2.5px] xl:ring-accent",
       )}

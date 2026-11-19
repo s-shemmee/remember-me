@@ -9,6 +9,8 @@ import { render } from "@react-email/render";
 import type * as React from "react";
 
 import type { DueReminder } from "./due.ts";
+import { CONTACT_EMAIL } from "../../lib/contact.ts";
+
 import { reminderLine, reminderPreview, reminderSubject } from "./copy.ts";
 
 /** The light theme (src/app/globals.css); a test keeps these in step. */
@@ -39,7 +41,7 @@ const pastelOf = (c: string) =>
 const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 /** Account emails (no reminders to change or unsubscribe from): a contact line instead. */
-export const CONTACT_EMAIL = "contact@shemme.codes";
+export { CONTACT_EMAIL };
 
 export type EmailLinks = {
   /** The site, from SITE_URL, e.g. https://rememberme.shemme.codes (no trailing slash). */

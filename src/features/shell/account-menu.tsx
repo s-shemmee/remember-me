@@ -15,6 +15,7 @@ import {
 import { logOut } from "@/features/auth/actions";
 import { unsubscribeThisDevice } from "@/features/notifications/browser";
 import { clearOnboardingDraft } from "@/features/onboarding/store";
+import { CONTACT_MAILTO } from "@/lib/contact";
 import { forgetThemeUser } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
@@ -102,7 +103,7 @@ export function AccountMenu({
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <a href="mailto:contact@shemme.codes">
+          <a href={CONTACT_MAILTO}>
             <LifeBuoyIcon aria-hidden className="size-5" /> Help &amp; feedback
           </a>
         </DropdownMenuItem>

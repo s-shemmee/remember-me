@@ -56,7 +56,7 @@ export const FAQ: Faq[] = [
   },
 ];
 
-export const CONTACT_EMAIL = "contact@shemme.codes";
+export { CONTACT_EMAIL } from "@/lib/contact";
 
 /** Example reminders for the card stack (feature 01). */
 export const DEMO_REMINDERS = [

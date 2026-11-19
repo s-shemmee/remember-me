@@ -16,6 +16,8 @@ import { DEFAULT_REMINDER_OFFSETS } from "@/features/onboarding/constants";
 import { ReminderSettings } from "@/features/settings/components/reminder-settings";
 import { AppMain } from "@/features/shell/app-shell";
 import { addDays, todayIn, toIsoDate } from "@/lib/dates";
+import { Button } from "@/components/ui/button";
+import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/contact";
 import { getEnv } from "@/lib/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { parseThemeChoice } from "@/lib/theme";
@@ -127,12 +129,9 @@ export default function SettingsPage() {
           <p className="text-15 text-sub">
             A question, an idea, something not working? I read every message.
           </p>
-          <a
-            href="mailto:contact@shemme.codes"
-            className="inline-flex min-h-11 items-center rounded-pill bg-card2 px-6 text-15 font-semibold"
-          >
-            Email contact@shemme.codes
-          </a>
+          <Button asChild variant="card2" className="self-start">
+            <a href={CONTACT_MAILTO}>Email {CONTACT_EMAIL}</a>
+          </Button>
         </section>
       </div>
     </AppMain>

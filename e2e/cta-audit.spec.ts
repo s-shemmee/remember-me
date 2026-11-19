@@ -13,7 +13,7 @@ import { expectAccessible, signUpAndOnboard } from "./helpers";
  * The matrix of every variant and state is in e2e/ui-buttons.spec.ts.
  */
 const CONTROLS =
-  "button, a[data-slot=button], [role=button], [role=switch], [role=tab], [role=radio], [role=menuitem], summary";
+  "button, a[data-slot=button], a[class*=rounded-pill], a[class*=bg-], [role=button], [role=switch], [role=tab], [role=radio], [role=menuitem], summary";
 
 type Finding = string;
 
@@ -69,7 +69,8 @@ async function auditPage(page: Page, where: string): Promise<Finding[]> {
     for (const e of document.querySelectorAll<HTMLElement>(selector)) {
       const r = e.getBoundingClientRect();
       const cs = getComputedStyle(e);
-      if (!r.width || !r.height || cs.visibility === "hidden" || e.closest("[aria-hidden=true],[inert]")) continue;
+      // Visually hidden until focused (the skip link): checked by its own test.
+      if (r.width <= 2 || r.height <= 2 || cs.visibility === "hidden" || e.closest("[aria-hidden=true],[inert]")) continue;
       if (e instanceof HTMLInputElement) continue;
       const i = String(n++);
       e.dataset.audit = i;

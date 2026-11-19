@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { NO_INDEX } from "@/lib/seo";
 
+import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { NoorBubble } from "@/components/ui/noor-bubble";
 
@@ -31,12 +32,10 @@ export default function OfflinePage() {
         <p className="text-15 text-sub">
           Your people and wishlists aren&apos;t kept on this device, so they need a connection.
         </p>
-        <a
-          href="/home"
-          className="inline-flex min-h-11 items-center rounded-pill bg-accent px-6 text-15 font-semibold text-on-accent"
-        >
-          Try again
-        </a>
+        {/* A full page load, not a client navigation: that's the retry. */}
+        <Button asChild>
+          <a href="/home">Try again</a>
+        </Button>
       </div>
     </main>
   );

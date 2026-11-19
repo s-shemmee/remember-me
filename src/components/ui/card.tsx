@@ -25,7 +25,7 @@ function Card<T extends React.ElementType = "div">({
       className={cn(
         "rounded-card bg-card p-5 text-text shadow-card sm:p-6",
         interactive &&
-          "transition-transform duration-200 ease-soft focus-within:-translate-y-0.5 hover:-translate-y-0.5",
+          "hover-tint transition-transform duration-200 ease-soft focus-within:-translate-y-0.5 hover:-translate-y-0.5",
         className,
       )}
       {...props}
