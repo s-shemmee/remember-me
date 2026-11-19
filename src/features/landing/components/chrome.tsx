@@ -105,7 +105,7 @@ export function LandingFooter() {
       <div className="mx-auto flex max-w-[1200px] flex-wrap justify-between gap-2 border-t border-line px-4 pt-5 pb-7 text-13 text-sub sm:px-8">
         <span>© 2026 Remember Me</span>
         <span>
-          Made with <span aria-label="love">🤍</span> in Marrakech
+          Made with <span aria-label="love">🤍</span>
         </span>
       </div>
     </footer>

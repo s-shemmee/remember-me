@@ -293,7 +293,8 @@ const sections: LegalSection[] = [
     title: "Contact",
     body: (
       <p>
-        Remember Me is an independent project made in Marrakech, Morocco. Questions about your data:{" "}
+        Remember Me is a small, independent project, made so the people you love are never
+        forgotten. Questions about your data:{" "}
         <LegalLink href={CONTACT_MAILTO}>{CONTACT_EMAIL}</LegalLink>.
       </p>
     ),
