@@ -17,7 +17,7 @@ import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/contact";
 export const metadata: Metadata = {
   title: "Privacy Policy · Remember Me",
   description:
-    "What Remember Me keeps, why, who helps us run it, how long we keep it, and your rights. No tracking, no ads.",
+    "What Remember Me keeps, why, who helps us run it, how long we keep it, and your rights. No ads, no tracking cookies.",
   alternates: { canonical: "/privacy" },
 };
 
@@ -145,7 +145,9 @@ const sections: LegalSection[] = [
           </li>
           <li>
             <strong>Vercel</strong>: hosts the website. Our server code runs in Dublin, Ireland
-            (dub1); pages may be delivered from Vercel&apos;s servers nearest to you.
+            (dub1); pages may be delivered from Vercel&apos;s servers nearest to you. Vercel Web
+            Analytics also counts page views for us, anonymously (see{" "}
+            <LegalLink href="#cookies">Cookies and storage</LegalLink>).
           </li>
           <li>
             <strong>Resend</strong>: sends our emails (confirmations, reminders). Ireland
@@ -179,8 +181,7 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          <strong>No tracking, no analytics, no ads.</strong> We only store what the app needs to
-          work:
+          <strong>No tracking cookies, no ads.</strong> We only store what the app needs to work:
         </p>
         <LegalList>
           <li>
@@ -211,7 +212,18 @@ const sections: LegalSection[] = [
             tab closes), and the app&apos;s own files so it opens offline (never your data).
           </li>
         </LegalList>
-        <p>Because these are all strictly necessary, there&apos;s no cookie banner.</p>
+        <p>
+          <strong>Anonymous page counts.</strong> To see which pages are used, Vercel Web Analytics
+          counts page views: which page (with every link code and ID removed first, so never an
+          invite, a reset link or a person), the site you came from, and your country, browser and
+          device type. It uses no cookies and stores nothing on your device. Visitors are counted
+          with an anonymous code that changes every day, never your IP address, and we only ever see
+          totals. If your browser sends Global Privacy Control or Do Not Track, your visits
+          aren&apos;t counted at all.
+        </p>
+        <p>
+          Because all of this is strictly necessary or anonymous, there&apos;s no cookie banner.
+        </p>
       </>
     ),
   },

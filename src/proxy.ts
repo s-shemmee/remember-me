@@ -23,10 +23,11 @@ export const config = {
      * Everything except:
      * - _next/static, _next/image (build assets)
      * - monitoring (Sentry's tunnel route, see next.config.ts)
+     * - _vercel (Vercel Web Analytics: /_vercel/insights)
      * - api/health (no session needed)
      * - favicon and image/font/text files
      * Keep in sync with src/proxy.test.ts.
      */
-    "/((?!_next/static|_next/image|monitoring|api/health|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?|txt|xml)$).*)",
+    "/((?!_next/static|_next/image|_vercel|monitoring|api/health|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?|txt|xml)$).*)",
   ],
 };

@@ -153,8 +153,13 @@ export function MeetNoor() {
             people&apos;s days bright is her whole job.
           </p>
           <ul className="mt-1.5 flex flex-wrap gap-2">
-            {["🔔 gentle reminders", "🎁 gift ideas", "🎉 a little cheer"].map((t) => (
+            {[
+              ["🔔", "gentle reminders"],
+              ["🎁", "gift ideas"],
+              ["🎉", "a little cheer"],
+            ].map(([emoji, t]) => (
               <li key={t} className="rounded-pill bg-card px-3.5 py-2 text-14 font-semibold">
+                <span aria-hidden>{emoji} </span>
                 {t}
               </li>
             ))}

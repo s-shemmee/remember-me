@@ -78,7 +78,9 @@ test("the privacy policy names the real regions and promises no tracking", async
     "Ireland (eu-west-1)",
     "Dublin, Ireland",
     "Germany",
-    "No tracking, no analytics, no ads.",
+    "No tracking cookies, no ads.",
+    "Anonymous page counts.",
+    "Global Privacy Control or Do Not Track",
   ]) {
     await expect(m.getByText(text, { exact: false }).first()).toBeVisible();
   }

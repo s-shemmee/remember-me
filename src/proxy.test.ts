@@ -18,6 +18,8 @@ describe("proxy matcher", () => {
   it.each([
     "/monitoring",
     "/monitoring?o=1&p=2",
+    "/_vercel/insights/view",
+    "/_vercel/insights/script.js",
     "/api/health",
     "/_next/static/chunks/app.js",
     "/_next/image",

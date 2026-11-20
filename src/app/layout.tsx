@@ -2,6 +2,7 @@ import { SerwistProvider } from "@serwist/turbopack/react";
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Kalam, Plus_Jakarta_Sans } from "next/font/google";
 
+import { SiteAnalytics } from "@/components/site-analytics";
 import { SkipLink } from "@/components/ui/skip-link";
 import { Toaster } from "@/components/ui/sonner";
 import { siteUrl } from "@/lib/env";
@@ -78,6 +79,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </SerwistProvider>
         <Toaster />
+        {/* Anonymous page views, only on Vercel (where /_vercel/insights exists). */}
+        {process.env.VERCEL ? <SiteAnalytics /> : null}
       </body>
     </html>
   );
