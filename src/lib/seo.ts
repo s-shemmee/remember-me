@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+import { HELP_SLUGS } from "@/features/help/slugs";
+
 /**
  * Search engines: the landing page is public; everything personal is not.
  * `NO_INDEX` goes on every app, auth, onboarding, invite and unsubscribe
@@ -21,7 +23,6 @@ export const PRIVATE_PATHS = [
   "/celebrate",
   "/profile",
   "/settings",
-  "/help",
   "/onboarding",
   "/invite/",
   "/auth/",
@@ -39,10 +40,16 @@ export function robotsFor(siteUrl: string): MetadataRoute.Robots {
   };
 }
 
-/** Only public pages: the landing page and the legal pages. */
+/** Only public pages: the landing page, the help center and the legal pages. */
 export function sitemapFor(siteUrl: string): MetadataRoute.Sitemap {
   return [
     { url: `${siteUrl}/`, changeFrequency: "monthly", priority: 1 },
+    { url: `${siteUrl}/help`, changeFrequency: "monthly", priority: 0.6 },
+    ...HELP_SLUGS.map((slug) => ({
+      url: `${siteUrl}/help/${slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
     { url: `${siteUrl}/privacy`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${siteUrl}/terms`, changeFrequency: "yearly", priority: 0.3 },
   ];

@@ -83,6 +83,11 @@ export function LandingFooter() {
           </FooterColumn>
           <FooterColumn title="Company">
             <li>
+              <Link href="/help" className={FOOTER_LINK}>
+                Help
+              </Link>
+            </li>
+            <li>
               <a href={`mailto:${CONTACT_EMAIL}`} className={FOOTER_LINK}>
                 Contact
               </a>

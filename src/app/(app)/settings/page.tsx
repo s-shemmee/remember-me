@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 
 import { Card } from "@/components/ui/card";
@@ -127,11 +128,17 @@ export default function SettingsPage() {
             <span aria-hidden>💬 </span>Help &amp; feedback
           </h2>
           <p className="text-15 text-sub">
-            A question, an idea, something not working? I read every message.
+            Short guides to everything in Remember Me are in the help center. A question, an idea,
+            something not working? I read every message.
           </p>
-          <Button asChild variant="card2" className="self-start">
-            <a href={CONTACT_MAILTO}>Email {CONTACT_EMAIL}</a>
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild variant="card2">
+              <Link href="/help">Browse help articles</Link>
+            </Button>
+            <Button asChild variant="card2">
+              <a href={CONTACT_MAILTO}>Email {CONTACT_EMAIL}</a>
+            </Button>
+          </div>
         </section>
       </div>
     </AppMain>

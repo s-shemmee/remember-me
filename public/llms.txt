@@ -19,6 +19,7 @@ Sign up with Google or email. It's free.
 
 - [Remember Me](https://rememberme.shemme.codes/): what it is and how it works
 - [Sign up](https://rememberme.shemme.codes/sign-up)
+- [Help center](https://rememberme.shemme.codes/help): short guides to every feature
 - [Privacy Policy](https://rememberme.shemme.codes/privacy): what we keep, who helps us run it, and your rights
 - [Terms of use](https://rememberme.shemme.codes/terms)
 - Contact: contact@shemme.codes

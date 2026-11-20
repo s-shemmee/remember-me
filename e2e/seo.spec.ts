@@ -19,6 +19,8 @@ const PUBLIC_PAGES = [
   "/offline",
   "/invite/not-a-real-invite",
   "/unsubscribe",
+  "/help",
+  "/help/getting-started",
 ];
 
 test("one H1 per public page, no skipped heading levels, images and icons labelled", async ({

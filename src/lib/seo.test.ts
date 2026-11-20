@@ -3,6 +3,8 @@ import path from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
+import { HELP_SLUGS } from "@/features/help/slugs";
+
 import { NO_INDEX, PRIVATE_PATHS, robotsFor, sitemapFor } from "./seo";
 
 vi.mock("server-only", () => ({}));
@@ -21,9 +23,11 @@ describe("robots.txt and sitemap.xml", () => {
     expect(PRIVATE_PATHS).not.toContain("/sign-up");
   });
 
-  it("lists only public pages, with absolute URLs: the landing page and the legal pages", () => {
+  it("lists only public pages, with absolute URLs: the landing page, the help center and the legal pages", () => {
     expect(sitemapFor("https://rememberme.shemme.codes").map((e) => e.url)).toEqual([
       "https://rememberme.shemme.codes/",
+      "https://rememberme.shemme.codes/help",
+      ...HELP_SLUGS.map((slug) => `https://rememberme.shemme.codes/help/${slug}`),
       "https://rememberme.shemme.codes/privacy",
       "https://rememberme.shemme.codes/terms",
     ]);
@@ -33,11 +37,13 @@ describe("robots.txt and sitemap.xml", () => {
     for (const load of [
       () => import("@/app/(marketing)/privacy/page"),
       () => import("@/app/(marketing)/terms/page"),
+      () => import("@/app/(marketing)/help/page"),
     ]) {
       const { metadata } = (await load()) as { metadata?: { robots?: unknown } };
       expect(metadata?.robots).toBeUndefined();
     }
     expect(PRIVATE_PATHS).not.toContain("/privacy");
+    expect(PRIVATE_PATHS).not.toContain("/help");
     expect(PRIVATE_PATHS).not.toContain("/terms");
   }, 60_000);
 });
