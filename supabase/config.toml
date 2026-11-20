@@ -470,3 +470,9 @@ verify_jwt = false
 verify_jwt = false
 [functions.delete-account]
 verify_jwt = false
+
+[functions.ask-noor]
+verify_jwt = false
+
+[functions.index-help]
+verify_jwt = false

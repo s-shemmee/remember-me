@@ -7,6 +7,7 @@ import { AccountCard } from "@/features/account/components/account-card";
 import { AppearanceCard } from "@/features/account/components/appearance-card";
 import { DataCard } from "@/features/account/components/data-card";
 import { reauthModeFor } from "@/features/account/reauth";
+import { AskNoorSection } from "@/features/ask-noor/components/ask-noor-section";
 import { InstallCard } from "@/features/notifications/components/install-card";
 import {
   type Device,
@@ -131,11 +132,18 @@ export default function SettingsPage() {
             Short guides to everything in Remember Me are in the help center. A question, an idea,
             something not working? I read every message.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild variant="card2">
+          <Suspense fallback={null}>
+            <AskNoorSection />
+          </Suspense>
+          <div className="flex max-w-full flex-wrap gap-3">
+            <Button asChild variant="card2" className="h-auto max-w-full py-2.5 whitespace-normal">
               <Link href="/help">Browse help articles</Link>
             </Button>
-            <Button asChild variant="card2">
+            <Button
+              asChild
+              variant="card2"
+              className="h-auto max-w-full py-2.5 [overflow-wrap:anywhere] whitespace-normal"
+            >
               <a href={CONTACT_MAILTO}>Email {CONTACT_EMAIL}</a>
             </Button>
           </div>

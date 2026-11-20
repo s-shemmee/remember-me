@@ -48,7 +48,10 @@ Built (M4 part 1, `…_email_reminders.sql`): plus `kind` (`reminder` | `test`),
 
 **account_notices** (fix/auth-flows): `id`, `email_hash bytea` (HMAC-SHA-256 of the lowercased address with `EMAIL_HASH_SECRET`; never the address), `created_at`. RLS on, no policies: server only. `claim_account_notice(email, hash)` (service_role): true only for a confirmed account, once an hour per address, 200 a day overall; records it. `run_cleanup()` drops rows after 30 days. Tests: `supabase/tests/account_notices.test.sql`.
 
-**ai_usage** (planned with the AI phases, not built): `id`, `profile_id`, `feature`, `model`, `input_tokens`, `output_tokens`, `cost_usd numeric`, `created_at`. Used for per-user daily limits.
+**help_chunks** (Ask Noor, built): `key` (pk: source#anchor#n), `source`, `title`, `heading`, `url` (a public page path with anchor), `content`, `content_hash`, `embedding vector(384)` (gte-small, HNSW cosine index), `updated_at`. Public product text, no personal data. RLS: signed-in users can read; only the service role writes (the `index-help` function). `match_help_chunks(embedding, threshold, count)` (security invoker): the closest chunks above the threshold. Tests: `supabase/tests/ask_noor.test.sql`.
+**ai_usage_daily** (built): `profile_id` (cascade), `day`, `feature`, `count`; pk (profile, day, feature). Counts only, never questions or answers. RLS on, no policies: server only. `claim_ai_use(profile, feature, user_limit, global_limit)` (service role): 'ok', 'user_limit' or 'global_limit'; rows over 30 days are removed as it runs.
+
+**ai_usage** (the older plan; superseded by ai_usage_daily): `id`, `profile_id`, `feature`, `model`, `input_tokens`, `output_tokens`, `cost_usd numeric`, `created_at`. Used for per-user daily limits.
 **embeddings** (Phase 3): `id`, `owner_id`, `source_type enum('person','wish','memory')`, `source_id`, `content text`, `embedding vector(N)` (N = the embedding model's dimension), HNSW index.
 
 ## RLS rules (write a test for each)

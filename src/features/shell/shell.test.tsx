@@ -88,9 +88,10 @@ describe("App shell", () => {
       "href",
       "/profile",
     );
+    // Help & feedback: the help articles, Ask Noor and the contact address, in Settings.
     expect(within(menu).getByRole("menuitem", { name: /Help/ })).toHaveAttribute(
       "href",
-      "mailto:contact@shemme.codes",
+      "/settings#help",
     );
 
     await userEvent.click(within(menu).getByRole("menuitem", { name: /Log out/ }));

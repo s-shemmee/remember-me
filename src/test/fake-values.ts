@@ -23,6 +23,8 @@ export const FAKE_CRON_SECRET = "local-only-cron-secret";
 export const FAKE_UNSUBSCRIBE_SECRET = "local-only-unsubscribe-secret-0000000000";
 /** account-notice: the Next server's caller secret, and the HMAC key for its log. */
 export const FAKE_ACCOUNT_NOTICE_SECRET = "local-only-account-notice-secret-0000000000";
+/** Ask Noor: indexing and evals (index-help, ask-noor). */
+export const FAKE_AI_ADMIN_SECRET = "local-only-ai-admin-secret-00000000000000";
 export const FAKE_EMAIL_HASH_SECRET = "local-only-email-hash-secret-000000000000";
 
 /**

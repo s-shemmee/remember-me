@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type * as React from "react";
 
-import type { Block, Inline } from "./markdown";
+import { type Block, type Inline, parseInline } from "./markdown";
 
 const LINK = "font-semibold text-accent-text underline underline-offset-2";
 
@@ -30,6 +30,11 @@ function Inlines({ nodes }: { nodes: Inline[] }) {
       })}
     </>
   );
+}
+
+/** A line of text with the inline subset (bold, links, emails as mailto:). */
+export function InlineText({ text }: { text: string }) {
+  return <Inlines nodes={parseInline(text)} />;
 }
 
 /** A help article's body, from the parsed Markdown subset (no HTML strings). */

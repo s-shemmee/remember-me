@@ -86,6 +86,9 @@ jobs:
             # The account-notice caller secret: the placeholder from
             # supabase/functions/local-dev.env (refused off a local Supabase).
             echo "ACCOUNT_NOTICE_SECRET=local-only-account-notice-secret-0000000000"
+            # Ask Noor in e2e: on, with scripted answers (never real providers).
+            echo "AI_ENABLED=true"
+            echo "AI_MOCK=1"
           } >> "$GITHUB_ENV"
           rm /tmp/supabase.env
       - name: Serve the Edge Functions
@@ -118,7 +121,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" -w "$GITHUB_WORKSPACE" \
             -e CI=true \
             -e NEXT_PUBLIC_SUPABASE_URL -e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY -e MAILPIT_URL \
-            -e NEXT_PUBLIC_VAPID_PUBLIC_KEY -e ACCOUNT_NOTICE_SECRET \
+            -e NEXT_PUBLIC_VAPID_PUBLIC_KEY -e ACCOUNT_NOTICE_SECRET -e AI_ENABLED -e AI_MOCK \
             "mcr.microsoft.com/playwright:v$PLAYWRIGHT_VERSION-noble" \
             node_modules/.bin/playwright test
       # The HTML report, plus test-results/ with the raw traces and screenshots

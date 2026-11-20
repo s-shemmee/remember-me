@@ -39,7 +39,7 @@ export function secretKey(): string {
   return legacy;
 }
 
-function secret(name: string, minLength = 16): string {
+export function secret(name: string, minLength = 16): string {
   const value = Deno.env.get(name) ?? "";
   if (value.length < minLength) throw new Error(`${name} is missing or too short`);
   if (value.startsWith("local-only") && !isLocal()) {

@@ -72,6 +72,11 @@ const sections: LegalSection[] = [
             has an account, we email that address (at most once an hour). To do that, we keep a
             scrambled fingerprint of the address (not the address) for 30 days.
           </li>
+          <li>
+            <strong>Ask Noor:</strong> when you ask Noor a question in Settings, we keep only how
+            many questions you asked today (for the daily limit), never the question or the answer.
+            Those counts go after 30 days.
+          </li>
         </LegalList>
         <p>
           Photos are made smaller and re-saved on your device before they&apos;re uploaded, so
@@ -160,6 +165,13 @@ const sections: LegalSection[] = [
           <li>
             <strong>Google</strong>: only if you choose &ldquo;Continue with Google&rdquo;. Google
             tells us your name and email.
+          </li>
+          <li>
+            <strong>Groq</strong>, and <strong>Cloudflare</strong> as a backup: when you ask Noor a
+            question, your question and the help text that matches it are sent to them to write
+            Noor&apos;s answer. They don&apos;t get your name, email or any of your people, and we
+            don&apos;t store the question or the answer. If nothing in our help matches, nothing is
+            sent at all.
           </li>
           <li>
             <strong>Your browser&apos;s push service</strong> (Google, Mozilla, Apple or Microsoft):
