@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -24,7 +24,9 @@ describe("Help & feedback → Send feedback", () => {
     expect(Object.keys(sent.meta).sort()).toEqual(["browser", "route", "screen"]);
     expect(sent.meta.route).toBe("/help");
     // The thank-you, with "Send another".
-    expect(await screen.findByRole("heading", { name: /Thank you/ })).toHaveFocus();
+    // Focus moves on the next frame: wait for it.
+    const thanks = await screen.findByRole("heading", { name: /Thank you/ });
+    await waitFor(() => expect(thanks).toHaveFocus());
     await userEvent.click(screen.getByRole("button", { name: "Send another" }));
     expect(screen.getByLabelText("Your message")).toHaveValue("");
   });

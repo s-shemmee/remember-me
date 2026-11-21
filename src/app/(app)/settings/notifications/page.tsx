@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { Card } from "@/components/ui/card";
+import { InboxSettingsCard } from "@/features/inbox/components/inbox-settings";
 import { InstallCard } from "@/features/notifications/components/install-card";
 import {
   type Device,
@@ -10,6 +11,7 @@ import {
 import { dayLabel } from "@/features/notifications/messages";
 import { addDays, todayIn, toIsoDate } from "@/lib/dates";
 import { getEnv } from "@/lib/env";
+import { notificationsInboxEnabled } from "@/lib/flags";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Notifications · Settings · Remember Me" };
@@ -52,11 +54,25 @@ async function Notifications() {
   );
 }
 
+/** The bell's inbox (NOTIFICATIONS_INBOX_ENABLED): which updates it collects. */
+async function InApp() {
+  const supabase = await createSupabaseServerClient();
+  if (!notificationsInboxEnabled()) return null;
+  const { data } = await supabase
+    .from("reminder_settings")
+    .select("inbox_wishlist_updates")
+    .maybeSingle();
+  return <InboxSettingsCard wishlistUpdates={data?.inbox_wishlist_updates ?? true} />;
+}
+
 export default function NotificationsSettingsPage() {
   return (
     <>
       <Suspense fallback={<Card aria-busy="true" className="h-64" />}>
         <Notifications />
+      </Suspense>
+      <Suspense fallback={null}>
+        <InApp />
       </Suspense>
       <InstallCard />
     </>

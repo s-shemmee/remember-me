@@ -5,6 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Wishlist } from "../load";
 
 const refresh = vi.fn();
+vi.mock("@/features/inbox/actions", () => ({
+  loadInbox: vi.fn(async () => null),
+  markInboxRead: vi.fn(),
+  setWishlistUpdates: vi.fn(),
+}));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh }),
   useSearchParams: () => new URLSearchParams(),

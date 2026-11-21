@@ -1,6 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("@/features/inbox/actions", () => ({
+  loadInbox: vi.fn(async () => null),
+  markInboxRead: vi.fn(),
+  setWishlistUpdates: vi.fn(),
+}));
 vi.mock("@/features/profile/actions", () => ({ saveTheme: vi.fn() }));
 
 const { HeaderSearch } = await import("./header-actions");
@@ -49,12 +54,9 @@ describe("PageHeader", () => {
     expect(screen.queryByRole("link", { name: "Notifications" })).toBeNull();
   });
 
-  it("the bell goes to notification settings until the inbox exists", () => {
+  it("the bell is a button that opens the inbox", () => {
     render(<PageHeader title="Home" theme={false} bell />);
-    expect(screen.getByRole("link", { name: "Notifications" })).toHaveAttribute(
-      "href",
-      "/settings/notifications",
-    );
+    expect(screen.getByRole("button", { name: "Notifications" })).toBeInTheDocument();
   });
 
   it("on phones the search is a button that opens the field (aria-expanded)", async () => {

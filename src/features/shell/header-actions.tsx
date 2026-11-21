@@ -1,10 +1,10 @@
 "use client";
 
-import { BellIcon, SearchIcon } from "lucide-react";
-import Link from "next/link";
+import { SearchIcon } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import { InboxBell } from "@/features/inbox/components/inbox-bell";
 import { cn } from "@/lib/utils";
 
 /**
@@ -75,16 +75,9 @@ export function HeaderSearchIcon() {
 }
 
 /**
- * The notification bell, always last in a page header. Behind
- * NOTIFICATIONS_INBOX_ENABLED; until the inbox exists it opens notification
- * settings.
+ * The notification bell, always last in a page header, behind
+ * NOTIFICATIONS_INBOX_ENABLED: the inbox (src/features/inbox).
  */
 export function NotificationBell() {
-  return (
-    <Button asChild variant="card2" size="icon">
-      <Link href="/settings/notifications" aria-label="Notifications">
-        <BellIcon aria-hidden />
-      </Link>
-    </Button>
-  );
+  return <InboxBell />;
 }

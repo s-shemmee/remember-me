@@ -423,6 +423,71 @@ export type Database = {
           },
         ];
       };
+      notifications: {
+        Row: {
+          actor_id: string | null;
+          created_at: string;
+          day: string;
+          group_key: string;
+          id: string;
+          kind: Database["public"]["Enums"]["inbox_kind"];
+          payload: NonNullable<Json>;
+          read_at: string | null;
+          subject_id: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id?: string | null;
+          created_at?: string;
+          day?: string;
+          group_key: string;
+          id?: string;
+          kind: Database["public"]["Enums"]["inbox_kind"];
+          payload?: NonNullable<Json>;
+          read_at?: string | null;
+          subject_id?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          actor_id?: string | null;
+          created_at?: string;
+          day?: string;
+          group_key?: string;
+          id?: string;
+          kind?: Database["public"]["Enums"]["inbox_kind"];
+          payload?: NonNullable<Json>;
+          read_at?: string | null;
+          subject_id?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_subject_id_fkey";
+            columns: ["subject_id"];
+            isOneToOne: false;
+            referencedRelation: "occasions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       occasions: {
         Row: {
           created_at: string;
@@ -749,6 +814,7 @@ export type Database = {
       reminder_settings: {
         Row: {
           email: boolean;
+          inbox_wishlist_updates: boolean;
           offsets_days: number[];
           profile_id: string;
           push: boolean;
@@ -760,6 +826,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           email?: boolean;
+          inbox_wishlist_updates?: boolean;
           offsets_days?: number[];
           profile_id?: string;
           push?: boolean;
@@ -770,6 +837,7 @@ export type Database = {
         };
         Update: {
           email?: boolean;
+          inbox_wishlist_updates?: boolean;
           offsets_days?: number[];
           profile_id?: string;
           push?: boolean;
@@ -1056,6 +1124,26 @@ export type Database = {
           profile_id: string;
         }[];
       };
+      my_inbox: {
+        Args: { p_limit?: number };
+        Returns: {
+          actor_id: string;
+          actor_name: string;
+          at: string;
+          birth_year: number;
+          id: string;
+          kind: string;
+          occasion_kind: string;
+          occurs_on: string;
+          offset_days: number;
+          person_id: string;
+          person_name: string;
+          plan_done: number;
+          plan_total: number;
+          read: boolean;
+          wish_count: number;
+        }[];
+      };
       my_sealed_note: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -1182,6 +1270,7 @@ export type Database = {
     };
     Enums: {
       avatar_kind: "initials" | "photo" | "character";
+      inbox_kind: "reminder" | "invite_accepted" | "wishlist_update";
       occasion_kind:
         "birthday" | "anniversary" | "graduation" | "work_milestone" | "remembrance" | "other";
       person_group: "family" | "friends" | "work" | "other";
@@ -1300,6 +1389,7 @@ export const Constants = {
   public: {
     Enums: {
       avatar_kind: ["initials", "photo", "character"],
+      inbox_kind: ["reminder", "invite_accepted", "wishlist_update"],
       occasion_kind: [
         "birthday",
         "anniversary",

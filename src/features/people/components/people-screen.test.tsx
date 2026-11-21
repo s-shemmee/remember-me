@@ -6,6 +6,11 @@ import { type PersonRow, peopleView } from "../view";
 
 // next/navigation: useSearchParams follows history.pushState, as in Next.
 const refresh = vi.fn();
+vi.mock("@/features/inbox/actions", () => ({
+  loadInbox: vi.fn(async () => null),
+  markInboxRead: vi.fn(),
+  setWishlistUpdates: vi.fn(),
+}));
 vi.mock("@/features/messages/actions", () => ({
   draftNoorMessages: vi.fn(),
   saveMessageInPlan: vi.fn(),

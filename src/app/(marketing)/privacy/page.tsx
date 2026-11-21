@@ -90,6 +90,12 @@ const sections: LegalSection[] = [
             person. We count how many times you asked today (for the daily limit).
           </li>
           <li>
+            <strong>Notifications in the app:</strong> the bell keeps your last 30 days of
+            reminders, accepted invites, and how many wishes your connections added to their shared
+            birthday lists (you can turn those off in Settings). Never anything about reservations
+            on your own lists. They&apos;re deleted after 30 days.
+          </li>
+          <li>
             <strong>Feedback:</strong> when you send feedback from Help &amp; feedback, we keep what
             you wrote and its type, and email it to us so we can read it and reply to your address.
             If you leave &ldquo;Include page and device info&rdquo; on, it also holds your browser,
