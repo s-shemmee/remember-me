@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { fieldInputClass } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 
-import { MAX_LABEL, type PlanStep, STEP_EMOJI } from "../steps";
+import { StepIcon } from "../step-icon";
+import { MAX_LABEL, type PlanStep } from "../steps";
 
 type Actions = {
   toggle: (step: PlanStep) => unknown;
@@ -116,9 +117,7 @@ function StepRow({
         >
           {step.done && <CheckIcon className="size-4" strokeWidth={3} />}
         </span>
-        <span aria-hidden className="text-[20px]">
-          {STEP_EMOJI[step.kind]}
-        </span>
+        <StepIcon kind={step.kind} className="text-accent-text" />
         <span
           className={cn(
             "min-w-0 flex-1 text-15 font-semibold [overflow-wrap:anywhere]",

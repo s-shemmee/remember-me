@@ -83,6 +83,13 @@ const sections: LegalSection[] = [
             person. We also count how many times you asked today (for the daily limit). We never
             keep what was sent to make them.
           </li>
+          <li>
+            <strong>Feedback:</strong> when you send feedback from Help &amp; feedback, we keep what
+            you wrote and its type, and email it to us so we can read it and reply to your address.
+            If you leave &ldquo;Include page and device info&rdquo; on, it also holds your browser,
+            screen size and the section of the app you were on, never your people, wishes or names.
+            You can send up to 5 a day; you can&apos;t read them back in the app.
+          </li>
         </LegalList>
         <p>
           Photos are made smaller and re-saved on your device before they&apos;re uploaded, so
@@ -128,7 +135,9 @@ const sections: LegalSection[] = [
         <p>When you and a friend connect (both of you agree, through an invite), they can see:</p>
         <LegalList>
           <li>your first name and your look (including your photo, if you have one);</li>
-          <li>your birthday&apos;s day and month, unless you turn that off in your profile;</li>
+          <li>
+            your birthday&apos;s day and month, unless you turn that off in Settings, Privacy;
+          </li>
           <li>your &ldquo;My birthday&rdquo; wishlist.</li>
         </LegalList>
         <p>
@@ -161,8 +170,8 @@ const sections: LegalSection[] = [
             <LegalLink href="#cookies">Cookies and storage</LegalLink>).
           </li>
           <li>
-            <strong>Resend</strong>: sends our emails (confirmations, reminders). Ireland
-            (eu-west-1).
+            <strong>Resend</strong>: sends our emails (confirmations, reminders, and your feedback
+            to us). Ireland (eu-west-1).
           </li>
           <li>
             <strong>Sentry</strong>: tells us when something breaks, with technical details like the
@@ -266,8 +275,9 @@ const sections: LegalSection[] = [
         </LegalList>
         <p>
           <strong>Deleting your account removes everything at once:</strong> your profile, people,
-          days, wishes, photos, plans, notes, connections, reservations and devices. Copies in our
-          database provider&apos;s backups disappear when those backups expire.
+          days, wishes, photos, plans, notes, connections, reservations, devices and the feedback
+          you sent. Copies in our database provider&apos;s backups disappear when those backups
+          expire.
         </p>
       </>
     ),

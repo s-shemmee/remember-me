@@ -44,7 +44,8 @@ describe("App shell", () => {
     }
     expect(within(sidebar!).getByRole("link", { name: "Celebrate Me" })).toBeInTheDocument();
     expect(within(tabs!).getByRole("link", { name: "Celebrate" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Settings" })).toHaveAttribute("href", "/settings");
+    // No Settings link of its own: the account menu is the only way in.
+    expect(screen.queryByRole("link", { name: "Settings" })).toBeNull();
   });
 
   it("shows your day: a countdown to your birthday, linking to Celebrate Me", () => {
@@ -80,19 +81,24 @@ describe("App shell", () => {
         .getAllByRole("menuitem")
         .map((i) => i.textContent?.trim()),
     ).toEqual(["My profile", "Settings", "Help & feedback", "Log out"]);
-    // Same icon set as the sidebar (lucide SVGs), no emoji.
-    for (const item of within(menu).getAllByRole("menuitem")) {
+    // Same icon set as the sidebar (lucide SVGs), no emoji; Log out is plain text.
+    const items = within(menu).getAllByRole("menuitem");
+    for (const item of items.slice(0, 3)) {
       expect(item.querySelector("svg[aria-hidden]")).not.toBeNull();
     }
+    expect(items[3]!.querySelector("svg")).toBeNull();
+    // No theme control in the menu.
+    expect(within(menu).queryByRole("menuitem", { name: /theme|dark|light/i })).toBeNull();
     expect(within(menu).getByRole("menuitem", { name: /My profile/ })).toHaveAttribute(
       "href",
       "/profile",
     );
-    // Help & feedback: the help articles, Ask Noor and the contact address, in Settings.
-    expect(within(menu).getByRole("menuitem", { name: /Help/ })).toHaveAttribute(
+    expect(within(menu).getByRole("menuitem", { name: /Settings/ })).toHaveAttribute(
       "href",
-      "/settings#help",
+      "/settings",
     );
+    // Help & feedback: Ask Noor, help topics and Send feedback, at /help.
+    expect(within(menu).getByRole("menuitem", { name: /Help/ })).toHaveAttribute("href", "/help");
 
     await userEvent.click(within(menu).getByRole("menuitem", { name: /Log out/ }));
     expect(clearOnboardingDraft).toHaveBeenCalledOnce();
@@ -111,14 +117,12 @@ describe("App shell", () => {
     expect(screen.getByRole("menu")).toBeInTheDocument();
   });
 
-  it("the phone and tablet top bar has the theme toggle next to the avatar", () => {
+  it("the shell has no theme toggle: each page header has its own (not Home)", () => {
     render(
       <AppShell account={account} yourDay={null}>
         x
       </AppShell>,
     );
-    const avatar = screen.getByRole("button", { name: "Account menu for Maya" });
-    const bar = avatar.closest("div")!;
-    expect(within(bar).getByRole("button", { name: /theme|dark|light/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /mode|theme/i })).toBeNull();
   });
 });

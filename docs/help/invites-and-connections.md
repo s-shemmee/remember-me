@@ -6,7 +6,7 @@ Connect with the people you love who also use Remember Me, to see each other's b
 
 You can invite someone from:
 
-- **Profile → Invite your people**;
+- **My profile → Invite your people**, with **Copy invite link**;
 - a person's profile in People, with **Invite [their name] to Remember Me** (once they accept, they're linked to that person);
 - **Celebrate Me → Share with my people**, to share your birthday wishlist.
 
@@ -28,7 +28,7 @@ Never your birth year, email, people, plans or notes. Your **Treat yourself** li
 
 ## Hide your birthday
 
-In **Profile → Who can see what**, turn off **Show my birthday to my connections**.
+In **Settings → Privacy**, turn off **Show my birthday to my connections**. **My profile → Who can see what** shows a summary and links there.
 
 ## Remove a connection
 

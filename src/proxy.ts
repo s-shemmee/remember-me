@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { decideRoute } from "@/features/auth/redirects";
 import { isHelpSlug } from "@/features/help/slugs";
-import { redirectWithCookies, updateSession } from "@/lib/supabase/proxy";
+import { redirectWithCookies, rewriteWithCookies, updateSession } from "@/lib/supabase/proxy";
 
 /**
  * Runs before matched requests (Next 16 "proxy", Node runtime):
@@ -22,6 +22,9 @@ export async function proxy(request: NextRequest) {
 
   if (decision.action === "redirect") {
     return redirectWithCookies(request, response(), decision.to);
+  }
+  if (decision.action === "rewrite") {
+    return rewriteWithCookies(request, response(), decision.to);
   }
   return response();
 }

@@ -121,18 +121,22 @@ test("A invites, B accepts, both see the connection; photos lose their location"
   // Both see the connection.
   await pageB.goto("/profile");
   const listB = pageB.getByRole("region", { name: "Connected with you" });
-  await expect(listB.getByText("Amina", { exact: true })).toBeVisible();
+  await expect(
+    listB.getByRole("list", { name: "Your connections" }).getByText("Amina", { exact: true }),
+  ).toBeVisible();
   await expectAccessible(pageB, "profile, B");
 
   await pageA.goto("/profile");
   const listA = pageA.getByRole("region", { name: "Connected with you" });
   await expect(listA.getByText("Bilal", { exact: true }).first()).toBeVisible();
-  // Invited from Bilal's profile: linked to him automatically.
+  // Invited from Bilal's profile: linked to him automatically (under Manage connections).
+  await listA.getByText("Manage connections").click();
   await expect(listA.getByLabel("This is…")).toHaveValue(/[0-9a-f-]{36}/);
   await expect(listA.getByLabel("This is…").locator("option:checked")).toHaveText("Bilal");
-  await expect(pageA.getByRole("region", { name: "Invite your people" })).toContainText(
-    "No open invites.",
-  );
+  // The used invite is gone: no open invites listed.
+  await expect(
+    pageA.getByRole("region", { name: "Invite your people" }).getByText("Open invites"),
+  ).toHaveCount(0);
   await expectAccessible(pageA, "profile, A");
 
   await pageA.goto("/people");

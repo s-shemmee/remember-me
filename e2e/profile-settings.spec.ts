@@ -1,7 +1,7 @@
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 
 import { hasMetadata, withGpsExif } from "./exif";
-import { expectAccessible, PASSWORD, signUpAndOnboard } from "./helpers";
+import { expectAccessible, PASSWORD, profileInviteLink, signUpAndOnboard } from "./helpers";
 
 /**
  * M5 part 1. Profile: a photo (its GPS must not survive), birthday sharing
@@ -16,10 +16,7 @@ const FUNCTIONS =
 test.use({ timezoneId: "Europe/London" });
 
 async function connect(pageA: Page, page: Page, inviterName: string) {
-  await pageA.goto("/profile");
-  await pageA.getByRole("button", { name: "Create an invite link" }).click();
-  const url = await pageA.getByRole("dialog").getByLabel("Invite link").inputValue();
-  await pageA.keyboard.press("Escape");
+  const url = await profileInviteLink(pageA);
   await page.goto(url);
   await page.getByRole("button", { name: `Connect with ${inviterName}` }).click();
   await expect(page.getByRole("heading", { name: /You're connected/ })).toBeVisible();
@@ -66,6 +63,9 @@ test("profile photo without location data, and birthday sharing on and off", asy
   const about = pageA.getByRole("region", { name: "About you" });
   await expect(about.getByLabel("First name")).toHaveValue("Amina");
   await expectAccessible(pageA, "profile");
+  // The avatar is edited from the header card.
+  await pageA.getByRole("button", { name: "Edit your avatar" }).click();
+  const editor = pageA.getByRole("dialog", { name: "Your avatar" });
   const base = Buffer.from(
     await pageA.evaluate(() => {
       const c = document.createElement("canvas");
@@ -80,16 +80,16 @@ test("profile photo without location data, and birthday sharing on and off", asy
   );
   const photo = withGpsExif(base);
   expect(hasMetadata(photo)).toBe(true);
-  await about.getByRole("radio", { name: "Photo" }).click();
-  await about
+  await editor.getByRole("radio", { name: "Photo" }).click();
+  await editor
     .getByLabel("Your photo")
     .setInputFiles({ name: "me.jpg", mimeType: "image/jpeg", buffer: photo });
-  await expect(about.getByText("Uploading…")).toBeHidden();
-  await about.getByRole("button", { name: "Save changes" }).click();
-  await expect(about.getByText("Saved ✓")).toBeVisible();
+  await expect(editor.getByText("Uploading…")).toBeHidden();
+  await editor.getByRole("button", { name: "Save" }).click();
+  await expect(editor).toBeHidden();
 
   await pageA.reload();
-  const img = about.locator("img").first();
+  const img = pageA.getByRole("region", { name: "Your profile" }).locator("img").first();
   await expect(img).toHaveAttribute("src", /\/storage\/v1\/object\/sign\/avatars\//);
   const stored = Buffer.from(await (await fetch((await img.getAttribute("src"))!)).arrayBuffer());
   expect(stored.length).toBeGreaterThan(0);
@@ -102,7 +102,9 @@ test("profile photo without location data, and birthday sharing on and off", asy
     /Birthday (in|today|tomorrow)/,
   );
 
-  // ...until A hides it.
+  // ...until A hides it (Settings → Privacy; the profile links there).
+  await pageA.getByRole("link", { name: /privacy settings/ }).click();
+  await expect(pageA).toHaveURL(/\/settings\/privacy$/);
   await pageA.getByRole("switch", { name: /Show my birthday to my connections/ }).click();
   await expect(pageA.getByText(/Hidden\. Your connections won't see your birthday/)).toBeVisible();
   await pageB.reload();
@@ -174,7 +176,7 @@ test("delete my account: checked again by the Edge Function, then it can't log i
   const anonymous = await fetch(`${FUNCTIONS}/delete-account`, { method: "POST", body: "{}" });
   expect(anonymous.status).toBe(401);
 
-  await page.goto("/settings");
+  await page.goto("/settings/account");
   await page.getByRole("button", { name: "Delete my account…" }).click();
   const dialog = page.getByRole("dialog", { name: "Delete your account?" });
   await expectAccessible(page, "delete dialog");

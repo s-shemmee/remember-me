@@ -1,5 +1,6 @@
 "use client";
 
+import { DownloadIcon, TriangleAlertIcon } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -15,12 +16,43 @@ import { PasswordField } from "@/components/ui/password-field";
 
 import { type AccountResult, deleteAccount } from "../actions";
 
+/** Settings → Privacy → Your data: everything as a JSON file. */
+export function DownloadDataCard() {
+  return (
+    <section
+      id="data"
+      aria-labelledby="data-title"
+      className="flex scroll-mt-6 flex-col items-start gap-2 rounded-card-lg bg-card p-5 shadow-card sm:p-6"
+    >
+      <h2 id="data-title" className="flex items-center gap-2 text-17 font-bold">
+        <DownloadIcon aria-hidden className="size-5 text-accent-text" />
+        Your data
+      </h2>
+      <p className="text-14 text-sub">
+        It&apos;s yours. Your profile, people and their days, wishlists, reminder settings and the
+        gifts you reserved, as a JSON file.
+      </p>
+      <Button asChild variant="card2">
+        <a href="/settings/export" download>
+          Download my data
+        </a>
+      </Button>
+    </section>
+  );
+}
+
 /**
- * Settings → Your data: download everything as JSON, or delete the account
- * (type your email; your password too for email accounts; Google accounts
- * need a recent sign-in). The Edge Function checks all of it again.
+ * Settings → Account, last: the danger card. Delete the account (type your
+ * email; your password too for email accounts; Google accounts need a recent
+ * sign-in). The Edge Function checks all of it again.
  */
-export function DataCard({ email, mode }: { email: string; mode: "password" | "recent-sign-in" }) {
+export function DeleteAccountCard({
+  email,
+  mode,
+}: {
+  email: string;
+  mode: "password" | "recent-sign-in";
+}) {
   const [open, setOpen] = React.useState(false);
   const [typed, setTyped] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -45,32 +77,18 @@ export function DataCard({ email, mode }: { email: string; mode: "password" | "r
 
   return (
     <section
-      id="data"
-      aria-labelledby="data-title"
-      className="flex scroll-mt-6 flex-col gap-6 rounded-card-lg bg-card p-6 shadow-card sm:p-8"
+      id="delete"
+      aria-labelledby="delete-title"
+      className="flex scroll-mt-6 flex-col gap-4 rounded-card-lg border-[1.5px] border-accent-text/40 bg-card p-5 shadow-card sm:p-6"
     >
-      <div className="flex flex-col gap-1">
-        <h2 id="data-title" className="text-22 font-extrabold tracking-[-0.02em]">
-          <span aria-hidden>📦 </span>Your data
+      <div className="flex flex-col items-start gap-2">
+        <h2
+          id="delete-title"
+          className="flex items-center gap-2 text-17 font-bold text-accent-text"
+        >
+          <TriangleAlertIcon aria-hidden className="size-5" />
+          Delete my account
         </h2>
-        <p className="text-15 text-sub">It&apos;s yours. Take it with you, or take it away.</p>
-      </div>
-
-      <div className="flex flex-col items-start gap-2">
-        <h3 className="text-17 font-bold">Download my data</h3>
-        <p className="text-14 text-sub">
-          Your profile, people and their days, wishlists, reminder settings and the gifts you
-          reserved, as a JSON file.
-        </p>
-        <Button asChild variant="card2">
-          <a href="/settings/export" download>
-            Download my data
-          </a>
-        </Button>
-      </div>
-
-      <div className="flex flex-col items-start gap-2">
-        <h3 className="text-17 font-bold">Delete my account</h3>
         <p className="text-14 text-sub">
           Everything goes for good: your profile, people, days, wishes, photos, reservations and
           notifications. This can&apos;t be undone.

@@ -479,3 +479,6 @@ verify_jwt = false
 
 [functions.gift-ideas]
 verify_jwt = false
+
+[functions.send-feedback]
+verify_jwt = false

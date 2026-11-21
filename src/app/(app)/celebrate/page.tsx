@@ -1,3 +1,4 @@
+import { GiftIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -12,8 +13,14 @@ import { ShareWishlistButton } from "@/features/celebrate/components/share-wishl
 import { loadCelebrate } from "@/features/celebrate/load";
 import { PlansProvider } from "@/features/plans/components/plan-state";
 import { planKey, type PlanTarget } from "@/features/plans/steps";
-import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
 import { AppMain } from "@/features/shell/app-shell";
+import {
+  HeaderLabel,
+  headerPrimaryClass,
+  PageHeader,
+  PageHeaderFallback,
+} from "@/features/shell/page-header";
+import { notificationsInboxEnabled } from "@/lib/flags";
 import type { Wish } from "@/features/wishes/load";
 import { formatPrice } from "@/features/wishes/schema";
 import { formatShortDate, toIsoDate } from "@/lib/dates";
@@ -53,20 +60,22 @@ async function Celebrate() {
 
   return (
     <PlansProvider plans={data.plans}>
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1">
-          <h1 className="text-34 leading-tight font-extrabold tracking-[-0.03em]">
+      <PageHeader
+        title={
+          <>
             Celebrate <span className="font-serif font-normal text-accent-text italic">Me</span>
-          </h1>
-          <p className="text-15 text-sub">
-            Your day matters too. Plan it, treat yourself, keep the memories.
-          </p>
-        </div>
-        <SavedThemeToggle className="hidden lg:inline-flex" />
-        <Button asChild>
-          <Link href="/wishlists?list=birthday">My wishlist</Link>
-        </Button>
-      </div>
+          </>
+        }
+        subtitle="Your day matters too. Plan it, treat yourself, keep the memories."
+        primary={
+          <Button asChild className={headerPrimaryClass}>
+            <Link href="/wishlists?list=birthday">
+              <GiftIcon aria-hidden /> <HeaderLabel>My wishlist</HeaderLabel>
+            </Link>
+          </Button>
+        }
+        bell={notificationsInboxEnabled()}
+      />
 
       <section
         aria-label="Countdown"
@@ -224,9 +233,7 @@ export default function CelebratePage() {
       <Suspense
         fallback={
           <>
-            <h1 className="text-34 leading-tight font-extrabold tracking-[-0.03em]">
-              Celebrate Me
-            </h1>
+            <PageHeaderFallback title="Celebrate Me" />
             <Card aria-busy="true" className="h-64" />
           </>
         }

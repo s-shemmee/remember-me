@@ -13,7 +13,7 @@ import { askNoor } from "../actions";
 import { type AskNoorState, SUGGESTIONS } from "../schema";
 
 /**
- * Ask Noor (Settings → Help & feedback): one question at a time, no chat
+ * Ask Noor (Help & feedback): one question at a time, no chat
  * memory. Three suggested questions, a 300-character field with a live count,
  * and the answer (with links to its sources) in a polite live region.
  */
@@ -35,7 +35,7 @@ export function AskNoorCard() {
       <div className="flex items-center gap-3">
         <Noor size={44} />
         <div>
-          <h3 className="text-19 font-extrabold tracking-[-0.02em]">Ask Noor</h3>
+          <h2 className="text-22 font-extrabold tracking-[-0.02em]">Ask Noor</h2>
           <p className="text-14 text-sub">
             I answer from our help articles. One question at a time.
           </p>

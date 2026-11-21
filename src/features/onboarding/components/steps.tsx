@@ -1,6 +1,13 @@
 "use client";
 
-import { DicesIcon } from "lucide-react";
+import {
+  BellRingIcon,
+  CakeIcon,
+  CameraIcon,
+  DicesIcon,
+  MailIcon,
+  PartyPopperIcon,
+} from "lucide-react";
 import * as React from "react";
 
 import { Avatar } from "@/components/ui/avatar";
@@ -234,7 +241,8 @@ export function StepLook({
           <DicesIcon aria-hidden /> Shuffle
         </Button>
         <span className="text-13 text-sub">
-          <span aria-hidden>📷 </span>Want a photo instead? Add one later from your profile.
+          <CameraIcon aria-hidden className="mr-1 inline size-4 align-[-3px]" />
+          Want a photo instead? Add one later from your profile.
         </span>
       </div>
     </>
@@ -280,11 +288,11 @@ export function PersonPreview({
       </div>
       <span
         className={cn(
-          "self-start rounded-pill px-3 py-1.5 text-13 font-bold",
+          "inline-flex items-center gap-1.5 self-start rounded-pill px-3 py-1.5 text-13 font-bold",
           pastelClasses[color],
         )}
       >
-        🎂 {date ?? "pick a date"}
+        <CakeIcon aria-hidden className="size-3.5" /> {date ?? "pick a date"}
       </span>
       {littleThing && (
         <span className="flex min-w-0 items-center gap-2 rounded-[14px] bg-card2 px-3 py-2 text-13">
@@ -434,7 +442,7 @@ export function StepReminders({
         <div className="grid gap-3 sm:grid-cols-2">
           <HowCard
             id="reminders-email"
-            emoji="📧"
+            icon={<MailIcon className="size-6 text-accent-text" />}
             title="Email"
             line="A short note in your inbox"
             checked={value.email}
@@ -442,7 +450,7 @@ export function StepReminders({
           />
           <HowCard
             id="reminders-push"
-            emoji="🔔"
+            icon={<BellRingIcon className="size-6 text-accent-text" />}
             title="Notifications"
             line="On this device, like a message"
             checked={value.push}
@@ -459,7 +467,7 @@ export function StepReminders({
 
 function HowCard({
   id,
-  emoji,
+  icon,
   title,
   line,
   checked,
@@ -467,7 +475,8 @@ function HowCard({
   note,
 }: {
   id: string;
-  emoji: string;
+  /** A decorative Lucide icon (no emoji in tiles). */
+  icon: React.ReactNode;
   title: string;
   line: string;
   checked: boolean;
@@ -477,8 +486,8 @@ function HowCard({
   return (
     <div className="flex flex-col gap-2 rounded-card bg-card p-4 shadow-card">
       <div className="flex items-center gap-3">
-        <span aria-hidden className="text-22">
-          {emoji}
+        <span aria-hidden className="grid place-items-center">
+          {icon}
         </span>
         <label htmlFor={id} className="flex min-w-0 flex-1 cursor-pointer flex-col">
           <span className="text-15 font-semibold">{title}</span>
@@ -538,9 +547,7 @@ export function StepDone({
   const name = firstName.trim();
   return (
     <div className="flex flex-1 flex-col justify-center gap-5 py-6">
-      <span aria-hidden className="text-[56px] leading-none">
-        🎉
-      </span>
+      <PartyPopperIcon aria-hidden className="size-14 text-accent-text" strokeWidth={1.5} />
       <h1
         tabIndex={-1}
         className="max-w-full text-34 leading-[1.1] font-extrabold tracking-heading outline-none sm:text-44"

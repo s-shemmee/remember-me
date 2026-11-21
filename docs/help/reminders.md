@@ -30,7 +30,7 @@ On iPhone and iPad, notifications only work once Remember Me is on your Home Scr
 
 ## Install the app
 
-In **Settings → App**, choose **Install app**. On iPhone and iPad, tap the Share button in Safari, choose Add to Home Screen, then Add.
+In **Settings → Notifications**, choose **Install app**. On iPhone and iPad, tap the Share button in Safari, choose Add to Home Screen, then Add.
 
 ## Your own birthday
 

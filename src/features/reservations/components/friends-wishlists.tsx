@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLinkIcon } from "lucide-react";
+import { CheckIcon, ExternalLinkIcon, GiftIcon, LockIcon } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -10,6 +10,7 @@ import { pastelClasses } from "@/components/ui/chip";
 import { NoorBubble } from "@/components/ui/noor-bubble";
 import { PRIORITIES } from "@/features/wishes/constants";
 import { formatPrice, shopOf } from "@/features/wishes/schema";
+import { PriorityIcon } from "@/features/wishes/priority-icon";
 import { cn } from "@/lib/utils";
 import { type Pastel, pastels } from "@/styles/tokens";
 
@@ -65,11 +66,11 @@ function FriendWishCard({
         <span
           aria-hidden
           className={cn(
-            "grid aspect-[4/3] w-full place-items-center rounded-[16px] text-[40px]",
+            "grid aspect-[4/3] w-full place-items-center rounded-[16px]",
             pastelClasses[tile(index)],
           )}
         >
-          🎁
+          <GiftIcon className="size-12" strokeWidth={1.5} />
         </span>
       )}
       <h3
@@ -85,8 +86,8 @@ function FriendWishCard({
       )}
       {wish.note && <p className="text-13 [overflow-wrap:anywhere] text-sub">{wish.note}</p>}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-pill bg-card2 px-3 py-1 text-13 font-semibold">
-          <span aria-hidden>{priority.emoji} </span>
+        <span className="inline-flex items-center gap-1.5 rounded-pill bg-card2 px-3 py-1 text-13 font-semibold">
+          <PriorityIcon priority={priority.key} className="size-3.5 text-accent-text" />
           {priority.label}
         </span>
         {wish.url && (
@@ -110,12 +111,12 @@ function FriendWishCard({
             onClick={onReserve}
             aria-label={`Reserve it: ${wish.title}`}
           >
-            Reserve it <span aria-hidden>🤫</span>
+            Reserve it
           </Button>
         ) : status === "mine" ? (
           <>
-            <span className="rounded-pill bg-mint px-3 py-1.5 text-13 font-semibold text-mint-ink">
-              Reserved by you <span aria-hidden>🤫</span>
+            <span className="inline-flex items-center gap-1.5 rounded-pill bg-mint px-3 py-1.5 text-13 font-semibold text-mint-ink">
+              <CheckIcon aria-hidden className="size-3.5" /> Reserved by you
             </span>
             <Button
               variant="transparent"
@@ -128,7 +129,7 @@ function FriendWishCard({
           </>
         ) : (
           <span className="rounded-pill bg-card2 px-3 py-1.5 text-13 font-semibold text-sub">
-            Already taken <span aria-hidden>🤫</span>
+            <LockIcon aria-hidden className="mr-1 inline size-3.5 align-[-2px]" /> Already taken
           </span>
         )}
       </div>

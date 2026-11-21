@@ -76,4 +76,20 @@ describe("decideRoute", () => {
     expect(decideRoute("/privacy", "", true)).toEqual({ action: "continue" });
     expect(decideRoute("/terms", "", true)).toEqual({ action: "continue" });
   });
+
+  it("/help: the public help center for visitors, Help & feedback in the app for signed-in people", () => {
+    expect(decideRoute("/help", "", false)).toEqual({ action: "continue" });
+    expect(decideRoute("/help", "", true)).toEqual({ action: "rewrite", to: "/help-and-feedback" });
+    expect(decideRoute("/help/", "?x=1", true)).toEqual({
+      action: "rewrite",
+      to: "/help-and-feedback?x=1",
+    });
+    // Articles stay public for everyone.
+    expect(decideRoute("/help/reminders", "", true)).toEqual({ action: "continue" });
+    // The in-app page itself needs a session.
+    expect(decideRoute("/help-and-feedback", "", false)).toEqual({
+      action: "redirect",
+      to: "/log-in?next=%2Fhelp-and-feedback",
+    });
+  });
 });

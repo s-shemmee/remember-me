@@ -69,7 +69,7 @@ export function pushPayload(reminders: DueReminder[], tag: string): PushPayload 
 export const TEST_PUSH: Omit<PushPayload, "tag"> = {
   title: "Notifications are on 🕯️",
   body: "This is how your reminders will arrive.",
-  url: "/settings#notifications",
+  url: "/settings/notifications",
 };
 
 /**

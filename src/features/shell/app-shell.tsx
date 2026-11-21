@@ -3,10 +3,8 @@ import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 
-import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
-
 import { type Account, AccountMenu } from "./account-menu";
-import { SidebarNav, SidebarSettingsLink, TabBar } from "./nav";
+import { SidebarNav, TabBar } from "./nav";
 
 export type YourDay = {
   /** Days until your birthday; 0 is today. */
@@ -33,7 +31,6 @@ function YourDayCard({ yourDay }: { yourDay: YourDay }) {
       <span className="text-12 font-bold tracking-[.05em]">YOUR DAY</span>
       <span className="text-[28px] leading-none font-extrabold tracking-[-0.03em]">
         {yourDayHeadline(yourDay.daysUntil)}
-        {yourDay.daysUntil === 0 && <span aria-hidden> 🎂</span>}
       </span>
       <span className="text-13">
         {yourDay.date}
@@ -47,9 +44,11 @@ function YourDayCard({ yourDay }: { yourDay: YourDay }) {
 
 /**
  * The app shell for every signed-in page (docs/design-system.md, "Sidebar").
- * From 1024px: the 248px sidebar with the five sections, "Your day",
- * Settings and the account chip. Below: a top bar with the logo and the
- * account menu, and a tab bar at the bottom. Pages render their own <main>.
+ * From 1024px: the 248px sidebar with the five sections, "Your day" and the
+ * account chip. Below: a top bar with the logo and the account menu, and a
+ * tab bar at the bottom. Settings has no link of its own: the account menu
+ * (My profile, Settings, Help & feedback) is the way in. Pages render their
+ * own <main> and <PageHeader> (with the theme toggle and the bell).
  */
 export function AppShell({
   account,
@@ -70,18 +69,14 @@ export function AppShell({
         <SidebarNav />
         {yourDay && <YourDayCard yourDay={yourDay} />}
         <div className="mt-auto flex flex-col gap-1 pt-6">
-          <SidebarSettingsLink />
           <AccountMenu account={account} variant="chip" />
         </div>
       </aside>
 
-      {/* Phones and tablets: logo on the left, theme toggle and account on the right. */}
+      {/* Phones and tablets: logo on the left, the account menu on the right. */}
       <header className="flex items-center justify-between gap-3 px-4 pt-3 sm:px-8 lg:hidden">
         <Logo href="/home" label="Remember me, home" />
-        <div className="flex items-center gap-2">
-          <SavedThemeToggle />
-          <AccountMenu account={account} variant="avatar" />
-        </div>
+        <AccountMenu account={account} variant="avatar" />
       </header>
 
       {/* Room at the bottom for the tab bar on phones. */}

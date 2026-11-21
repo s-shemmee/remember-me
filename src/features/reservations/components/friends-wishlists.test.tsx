@@ -121,7 +121,7 @@ describe("Friends' wishlists", () => {
     expect(screen.getByText(/Nadia hasn't added any wishes yet/)).toBeInTheDocument();
   });
 
-  it("Reserve it: reserved at once, with a 'Reserved for Khalid 🤫' toast and Undo", async () => {
+  it("Reserve it: reserved at once, with a 'Reserved for Khalid' toast and Undo", async () => {
     reserveWish.mockResolvedValue({ ok: true });
     cancelReservation.mockResolvedValue({ ok: true });
     renderTab();
@@ -129,7 +129,7 @@ describe("Friends' wishlists", () => {
     expect(reserveWish).toHaveBeenCalledWith("w1");
     expect(within(card("Adidas match ball")).getByText(/Reserved by you/)).toBeInTheDocument();
     expect(toast).toHaveBeenCalledWith(
-      "Reserved for Khalid 🤫",
+      "Reserved for Khalid",
       expect.objectContaining({ action: expect.objectContaining({ label: "Undo" }) }),
     );
     expect(screen.getByText(/you have 2 gifts reserved for Khalid/)).toBeInTheDocument();

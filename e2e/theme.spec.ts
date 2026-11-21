@@ -26,8 +26,11 @@ test("a new account starts in light, and the toggle survives navigation and a re
   await signUpAndOnboard(page, "Salma");
   expect(await isDark(page)).toBe(false);
 
+  // Home has no theme toggle; People's header does.
+  await expect(page.getByRole("button", { name: /Switch to (dark|light) mode/ })).toHaveCount(0);
+  await page.goto("/people");
   await page
-    .getByRole("button", { name: "Switch to dark theme" })
+    .getByRole("button", { name: "Switch to dark mode" })
     .filter({ visible: true })
     .first()
     .click();
@@ -51,6 +54,6 @@ test("a new account starts in light, and the toggle survives navigation and a re
   expect(await isDark(page), "after refresh").toBe(true);
 
   // Settings → Appearance agrees.
-  await page.goto("/settings");
+  await page.goto("/settings/appearance");
   await expect(page.getByRole("radio", { name: "Dark" })).toBeChecked();
 });

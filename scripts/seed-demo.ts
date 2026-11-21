@@ -5,10 +5,13 @@
  *
  *   pnpm db:start && pnpm seed:demo
  *
- * Four accounts (Maya, the main one, plus Amina, Badr and Sara), all
- * connected. Maya has 26 people, days over the next 60 days, wishes on
- * both lists (some reserved by the others), birthday plans, a sealed note and
- * reminders on. Everything goes through the app's own database functions with
+ * Four accounts: Maya (the main one: city, little line, birthday,
+ * avatar) plus Khalid, Sara and Amine, all connected. Maya has 7 people
+ * with several days each over the next 60 days and little things with an
+ * emoji; Nadia has a pending invite, the rest aren't connected. Wishes have
+ * images, MAD prices and shops; some are reserved by Maya, some taken by
+ * the others. Khalid's birthday plan is partly done; a sealed note and
+ * reminders are on. Everything goes through the app's own database functions with
  * each account's session, so it passes the same checks as real data.
  *
  * Re-running deletes the previous demo accounts first (only users the admin
@@ -161,6 +164,13 @@ async function main() {
     );
     must(
       await client
+        .from("profiles")
+        .update({ last_name: a.lastName, city: a.city, bio: a.bio, handle: a.handle })
+        .eq("id", uid[a.key]),
+      `profile ${a.firstName}`,
+    );
+    must(
+      await client
         .from("reminder_settings")
         .update({ remind_my_day: true })
         .eq("profile_id", uid[a.key]),
@@ -199,9 +209,18 @@ async function main() {
     must(await db[to].rpc("accept_invite", { p_token: token }), `accept ${from} → ${to}`);
   };
   for (const p of demoPeople(today)) if (p.account) await connect("main", p.account, p.name);
-  await connect("amina", "badr");
-  await connect("amina", "sara");
-  await connect("badr", "sara");
+  await connect("khalid", "sara");
+  await connect("khalid", "amine");
+  await connect("sara", "amine");
+  // The pending request: an invite made for Nadia, not accepted yet.
+  for (const p of demoPeople(today)) {
+    if (p.pendingInvite) {
+      must(
+        await db.main.rpc("create_invite", { p_person_id: personId.get(p.name)! }),
+        `invite ${p.name}`,
+      );
+    }
+  }
 
   // 6. Wishes (with generated gift illustrations), then reservations.
   const wishIds: { id: string; reservedBy?: AccountKey }[] = [];
@@ -284,7 +303,7 @@ async function main() {
     }
   }
 
-  // Reserving after the plans: Maya reserving Amina's wish ticks "Gift" in her plan for Amina.
+  // Reserving after the plans: Maya reserving Khalid's wish ticks "Gift" in her plan for Khalid.
   for (const w of wishIds) {
     if (w.reservedBy)
       must(await db[w.reservedBy].rpc("reserve_wish", { p_wish_id: w.id }), "reserve");
@@ -294,9 +313,12 @@ async function main() {
   must(await db.main.rpc("seal_future_note", { p_body: SEALED_NOTE }), "sealed note");
 
   console.log(`\nDone. ${people.length} people, ${wishIds.length} wishes, ${PLANS.length} plans.`);
-  console.log("Log in as:");
-  for (const a of ACCOUNTS) console.log(`  ${a.firstName.padEnd(8)} ${emails[a.key]}`);
-  console.log(`Password: ${DEMO_LOCAL_PASSWORD} (local only)`);
+  console.log("\nDemo login (local only):");
+  console.log(`  Email:    ${emails.main}   (Maya, the main demo user)`);
+  console.log(`  Password: ${DEMO_LOCAL_PASSWORD}`);
+  console.log("  Friends (same password):");
+  for (const a of ACCOUNTS.filter((x) => x.key !== "main"))
+    console.log(`    ${a.firstName.padEnd(8)} ${emails[a.key]}`);
 }
 
 main().catch((error: unknown) => {

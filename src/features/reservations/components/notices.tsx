@@ -1,5 +1,6 @@
 "use client";
 
+import { EyeOffIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -36,7 +37,7 @@ export function Notices({ notices, className }: { notices: Notice[]; className?:
           className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-[20px] bg-card2 py-1.5 pr-1.5 pl-4 text-14"
         >
           <span className="min-w-0 [overflow-wrap:anywhere]">
-            <span aria-hidden>🤫 </span>
+            <EyeOffIcon aria-hidden className="mr-1.5 inline size-4 align-[-3px]" />
             {n.text}
           </span>
           <Button

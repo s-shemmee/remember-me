@@ -160,7 +160,10 @@ describe("Onboarding · step 3, First person", () => {
     );
 
     // Preview (in the step below 1024px, in Noor's column above): Family is sky.
-    expect(screen.getAllByText("🎂 14 March")[0]).toHaveClass("bg-sky", "text-sky-ink");
+    expect(screen.getAllByText("14 March")[0]!.closest("span")).toHaveClass(
+      "bg-sky",
+      "text-sky-ink",
+    );
     expect(screen.getAllByText("Loves black coffee")).not.toHaveLength(0);
     expect(screen.getByRole("radio", { name: "Family" })).toBeChecked();
     await pressContinue();

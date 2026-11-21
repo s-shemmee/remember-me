@@ -129,7 +129,7 @@ test("reserving a friend's gift ticks Gift in my plan for them", async ({ browse
   await expect(wish).toBeHidden();
   await pageB.goto("/wishlists?tab=friends");
   await pageB.getByRole("button", { name: "Reserve it: Little olive tree" }).click();
-  await expect(pageB.getByText("Reserved for Amina 🤫")).toBeVisible();
+  await expect(pageB.getByText("Reserved for Amina", { exact: true })).toBeVisible();
 
   // B's plan for Amina: Gift is ticked.
   await pageB.goto("/home");

@@ -67,7 +67,7 @@ describe("Noor's nudge on Home", () => {
     expect(reserveWish).toHaveBeenCalledWith("w1");
     expect(screen.getByText("Reserved! Only you know 🤫")).toBeInTheDocument();
     expect(toast).toHaveBeenCalledWith(
-      "Reserved for Khalid 🤫",
+      "Reserved for Khalid",
       expect.objectContaining({ action: expect.objectContaining({ label: "Undo" }) }),
     );
     expect(screen.getByRole("link", { name: "See Khalid's wishlist" })).toHaveAttribute(

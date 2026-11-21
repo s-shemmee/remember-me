@@ -4,11 +4,13 @@ Change how you look, how the app looks, and how you sign in.
 
 ## Your profile
 
-In **Profile → About you**, change your name, your birthday, your time zone and your look (initials and colour, a character, or a photo).
+Open the menu on your name and choose **My profile**. In **About you**, change your first and last name, your birthday, your city, a little line about you and your time zone. To change your look (initials and colour, a character, or a photo), tap the pencil on your picture.
+
+Settings is in the same menu, under **Settings**. On a phone, you also find it at the bottom of My profile.
 
 ## Light, dark or system
 
-In **Settings → Appearance**, choose **Light**, **Dark** or **System**. You can also switch between light and dark with the moon and sun button at the top of the app.
+In **Settings → Appearance**, choose **Light**, **Dark** or **System**. You can also switch between light and dark with the moon and sun button at the top of most pages. Both are the same setting.
 
 ## Change your email or password
 
@@ -31,4 +33,4 @@ See [Your data and privacy](/help/your-data-and-privacy).
 
 ## Help & feedback
 
-Questions, ideas, something not working? Write to contact@shemme.codes.
+Questions, ideas, something not working? Open the menu on your name and choose **Help & feedback**. Ask Noor, browse the help topics, or use **Send feedback** (up to 5 a day). You can also write to contact@shemme.codes.

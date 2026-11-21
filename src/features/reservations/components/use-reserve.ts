@@ -21,7 +21,7 @@ function focusCard(id: string) {
 
 /**
  * Reserve and cancel with an instant local status, an Undo toast
- * ("Reserved for Khalid 🤫 · Undo", 6 seconds), and "Just taken by someone
+ * ("Reserved for Khalid · Undo", 6 seconds), and "Just taken by someone
  * else" when another friend won the race.
  */
 export function useReserve() {
@@ -76,7 +76,7 @@ export function useReserve() {
     }
     router.refresh();
     focusCard(wish.id);
-    toast(`Reserved for ${friendName} 🤫`, {
+    toast(`Reserved for ${friendName}`, {
       action: {
         label: "Undo",
         onClick: () =>

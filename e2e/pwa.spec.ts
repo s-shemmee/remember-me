@@ -192,7 +192,7 @@ test("notifications: turn on, a reminder and a test push, the worker shows it, l
   await dialog.getByRole("button", { name: "Add Khalid" }).click();
   await expect(dialog).toBeHidden();
 
-  await page.goto("/settings");
+  await page.goto("/settings/notifications");
   await waitForWorker(page);
   const card = page.getByRole("region", { name: "Notifications" });
   const turnOn = card.getByRole("button", { name: "Turn on notifications" });
@@ -270,7 +270,7 @@ test("notifications: turn on, a reminder and a test push, the worker shows it, l
   await page.locator("input[name=password]").fill(PASSWORD);
   await page.getByRole("button", { name: /^Log in/ }).click();
   await expect(page).toHaveURL(/\/home$/);
-  await page.goto("/settings");
+  await page.goto("/settings/notifications");
   await expect(card.getByRole("button", { name: "Turn on notifications" })).toBeVisible();
   await expect(card.getByRole("list", { name: "Your devices" })).toHaveCount(0);
 

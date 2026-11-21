@@ -97,7 +97,11 @@ describe("Calendar", () => {
     expect(todayCell).toHaveAttribute("aria-selected", "true");
     expect(todayCell).toHaveAttribute("tabindex", "0");
     expect(cell(/^Friday 6 November, Khalid's birthday$/)).toHaveAttribute("tabindex", "-1");
-    expect(within(grid()).getByText("🎂 Khalid")).toHaveClass("bg-butter", "text-butter-ink");
+    const tag = within(grid()).getByText("Khalid").parentElement!;
+    expect(tag).toHaveClass("bg-butter", "text-butter-ink");
+    // A Lucide icon, not an emoji.
+    expect(tag.querySelector("svg[aria-hidden]")).not.toBeNull();
+    expect(tag.textContent).toBe("Khalid");
     expect(
       screen.getByRole("heading", { name: "Today · Wednesday 4 November" }),
     ).toBeInTheDocument();
@@ -191,10 +195,10 @@ describe("Calendar", () => {
       .getAllByRole("button")
       .map((b) => b.textContent);
     expect(items).toEqual([
-      "NOV6🎂 Khalid's birthdayFri, 6 November, in 2 days",
-      "NOV16💞 Mom & Dad's anniversaryMon, 16 November, in 12 days",
-      "NOV22✨ Your daySun, 22 November, in 18 days",
-      "DEC2🎂 Omar's birthdayWed, 2 December, in 28 days",
+      "NOV6Khalid's birthdayFri, 6 November, in 2 days",
+      "NOV16Mom & Dad's anniversaryMon, 16 November, in 12 days",
+      "NOV22Your daySun, 22 November, in 18 days",
+      "DEC2Omar's birthdayWed, 2 December, in 28 days",
     ]);
     await userEvent.click(within(next).getByRole("button", { name: /Omar's birthday/ }));
     expect(screen.getByRole("heading", { level: 2, name: "December 2026" })).toBeInTheDocument();

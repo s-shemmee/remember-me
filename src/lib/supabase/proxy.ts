@@ -49,3 +49,10 @@ export function redirectWithCookies(request: NextRequest, from: NextResponse, to
   for (const cookie of from.cookies.getAll()) redirect.cookies.set(cookie);
   return redirect;
 }
+
+/** The same, for showing another page at this address (refreshed cookies kept). */
+export function rewriteWithCookies(request: NextRequest, from: NextResponse, to: string) {
+  const rewrite = NextResponse.rewrite(new URL(to, request.url));
+  for (const cookie of from.cookies.getAll()) rewrite.cookies.set(cookie);
+  return rewrite;
+}

@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { BellRingIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
@@ -20,6 +21,7 @@ import {
   toIsoDate,
   weekdayIndex,
 } from "@/lib/dates";
+import { OccasionIcon } from "@/features/occasions/occasion-icon";
 import { cn } from "@/lib/utils";
 
 import { inkBg } from "../days/colors";
@@ -59,11 +61,11 @@ function EventCard({ e }: { e: DayEvent }) {
         <span
           aria-hidden
           className={cn(
-            "grid size-10 shrink-0 place-items-center rounded-full text-[18px]",
+            "grid size-10 shrink-0 place-items-center rounded-full",
             pastelClasses[s.color],
           )}
         >
-          {e.emoji}
+          <OccasionIcon kind={s.kind} isYou={s.isYou} gentle={e.gentle} className="size-5" />
         </span>
         <span className="flex min-w-0 flex-col">
           <span className="text-16 font-bold [overflow-wrap:anywhere]">{e.title}</span>
@@ -292,11 +294,17 @@ export function CalendarScreen({
                           <span
                             key={e.key}
                             className={cn(
-                              "hidden max-w-full truncate rounded-[8px] px-2 py-[3px] text-12 font-bold sm:block",
+                              "hidden max-w-full items-center gap-1 truncate rounded-[8px] px-2 py-[3px] text-12 font-bold sm:flex",
                               pastelClasses[e.source.color],
                             )}
                           >
-                            {e.emoji} {e.short}
+                            <OccasionIcon
+                              kind={e.source.kind}
+                              isYou={e.source.isYou}
+                              gentle={e.gentle}
+                              className="size-3"
+                            />
+                            <span className="truncate">{e.short}</span>
                           </span>
                         ))}
                         {list.length > TAGS_SHOWN && (
@@ -360,8 +368,12 @@ export function CalendarScreen({
                       <span className="text-[20px] leading-none font-extrabold">{e.on.day}</span>
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="text-15 font-bold [overflow-wrap:anywhere]">
-                        <span aria-hidden>{e.emoji} </span>
+                      <span className="flex items-center gap-1.5 text-15 font-bold [overflow-wrap:anywhere]">
+                        <OccasionIcon
+                          kind={e.source.kind}
+                          isYou={e.source.isYou}
+                          gentle={e.gentle}
+                        />
                         {e.title}
                       </span>
                       <span className="text-13 text-sub">
@@ -383,12 +395,12 @@ export function CalendarScreen({
         </section>
 
         <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-[20px] bg-card2 px-4 py-3.5 text-14 text-sub">
-          <span>
-            <span aria-hidden>🔔 </span>
+          <span className="inline-flex items-center gap-2">
+            <BellRingIcon aria-hidden className="size-4 shrink-0" />
             {remindersLine}
           </span>
           <Link
-            href="/settings"
+            href="/settings/reminders"
             className="inline-flex min-h-11 items-center font-semibold whitespace-nowrap text-accent-text underline-offset-4 hover:underline"
           >
             Change

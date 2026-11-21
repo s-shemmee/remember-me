@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { Card } from "@/components/ui/card";
-import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
 import { CalendarScreen } from "@/features/calendar/calendar-screen";
 import { remindersLine } from "@/features/days/days";
 import { loadDays } from "@/features/days/load";
 import { AddPersonButton } from "@/features/people/components/add-person-button";
 import { AppMain } from "@/features/shell/app-shell";
+import { PageHeader, PageHeaderFallback } from "@/features/shell/page-header";
+import { notificationsInboxEnabled } from "@/lib/flags";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Calendar · Remember Me" };
@@ -24,17 +26,25 @@ async function Calendar() {
   );
 }
 
+/** Its own Suspense: the bell switch is read per request. */
+async function CalendarHeader() {
+  await connection();
+  return (
+    <PageHeader
+      title="Calendar"
+      subtitle="Every day worth remembering, in one place"
+      primary={<AddPersonButton compact />}
+      bell={notificationsInboxEnabled()}
+    />
+  );
+}
+
 export default function CalendarPage() {
   return (
     <AppMain>
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1">
-          <h1 className="text-34 leading-tight font-extrabold tracking-[-0.03em]">Calendar</h1>
-          <p className="text-15 text-sub">Every day worth remembering, in one place</p>
-        </div>
-        <SavedThemeToggle className="hidden lg:inline-flex" />
-        <AddPersonButton />
-      </div>
+      <Suspense fallback={<PageHeaderFallback title="Calendar" />}>
+        <CalendarHeader />
+      </Suspense>
       <Suspense fallback={<Card aria-busy="true" className="h-[480px]" />}>
         <Calendar />
       </Suspense>

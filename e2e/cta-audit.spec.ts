@@ -209,7 +209,12 @@ const SIGNED_IN = [
   "/wishlists",
   "/celebrate",
   "/profile",
-  "/settings",
+  "/settings/reminders",
+  "/settings/notifications",
+  "/settings/privacy",
+  "/settings/appearance",
+  "/settings/account",
+  "/help",
 ];
 
 for (const theme of ["light", "dark"] as const) {

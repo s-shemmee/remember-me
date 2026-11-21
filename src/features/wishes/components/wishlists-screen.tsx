@@ -1,10 +1,11 @@
 "use client";
 
-import { EllipsisIcon, ExternalLinkIcon, PlusIcon } from "lucide-react";
+import { EllipsisIcon, ExternalLinkIcon, EyeOffIcon, GiftIcon, PlusIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import { HeaderLabel, headerPrimaryClass, PageHeader } from "@/features/shell/page-header";
 import { FilterChip, pastelClasses } from "@/components/ui/chip";
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ import { removeWish, reorderWishes, restoreWish } from "../actions";
 import { PRIORITIES } from "../constants";
 import type { Wish, Wishlist } from "../load";
 import { formatPrice, shopOf, type WishFormValues } from "../schema";
+import { PriorityIcon } from "../priority-icon";
 import { emptyWishForm, WishDialog, wishToForm } from "./wish-dialog";
 
 const tile = (i: number): Pastel => pastels[i % pastels.length]!;
@@ -70,11 +72,11 @@ function WishCard({
         <span
           aria-hidden
           className={cn(
-            "grid aspect-[4/3] w-full place-items-center rounded-[16px] text-[40px]",
+            "grid aspect-[4/3] w-full place-items-center rounded-[16px]",
             pastelClasses[tile(index)],
           )}
         >
-          🎁
+          <GiftIcon className="size-12" strokeWidth={1.5} />
         </span>
       )}
       {/* The menu sits on the photo: first in the Tab order, as it looks. */}
@@ -111,8 +113,8 @@ function WishCard({
       )}
       {wish.note && <p className="text-13 [overflow-wrap:anywhere] text-sub">{wish.note}</p>}
       <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
-        <span className="rounded-pill bg-card2 px-3 py-1 text-13 font-semibold">
-          <span aria-hidden>{priority.emoji} </span>
+        <span className="inline-flex items-center gap-1.5 rounded-pill bg-card2 px-3 py-1 text-13 font-semibold">
+          <PriorityIcon priority={priority.key} className="size-3.5 text-accent-text" />
           {priority.label}
         </span>
         {wish.url && (
@@ -143,9 +145,12 @@ export function WishlistsScreen({
   userId,
   friends,
   notices,
+  bell = false,
 }: {
   lists: Wishlist[];
   userId: string;
+  /** The notification bell in the header (NOTIFICATIONS_INBOX_ENABLED). */
+  bell?: boolean;
   friends: Friend[];
   notices: Notice[];
 }) {
@@ -251,21 +256,17 @@ export function WishlistsScreen({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1">
-          <h1
-            ref={titleRef}
-            tabIndex={-1}
-            className="text-34 leading-tight font-extrabold tracking-[-0.03em] outline-none"
-          >
-            Wishlists
-          </h1>
-          <p className="text-15 text-sub">What you hope for, and what your people do</p>
-        </div>
-        <Button onClick={() => open(emptyWishForm(list.id), null)}>
-          <PlusIcon aria-hidden /> Add a wish
-        </Button>
-      </div>
+      <PageHeader
+        title="Wishlists"
+        titleRef={titleRef}
+        subtitle="What you hope for, and what your people do"
+        primary={
+          <Button onClick={() => open(emptyWishForm(list.id), null)} className={headerPrimaryClass}>
+            <PlusIcon aria-hidden /> <HeaderLabel>Add a wish</HeaderLabel>
+          </Button>
+        }
+        bell={bell}
+      />
 
       <Tabs
         value={tab}
@@ -339,8 +340,8 @@ export function WishlistsScreen({
           )}
 
           <p className="rounded-[20px] bg-card2 px-4 py-3.5 text-14 text-sub">
-            <span aria-hidden>🤫 </span>When your people reserve something, you won&apos;t see it.
-            Surprises stay surprises.
+            <EyeOffIcon aria-hidden className="mr-1.5 inline size-4 align-[-3px]" />
+            When your people reserve something, you won&apos;t see it. Surprises stay surprises.
           </p>
         </TabsContent>
 

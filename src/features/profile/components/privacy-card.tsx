@@ -1,5 +1,6 @@
 "use client";
 
+import { GiftIcon, LockIcon } from "lucide-react";
 import * as React from "react";
 
 import { Switch } from "@/components/ui/switch";
@@ -43,7 +44,7 @@ export function PrivacyCard({ shareBirthday }: { shareBirthday: boolean }) {
       <div className="flex items-center justify-between gap-4 rounded-[20px] bg-card2 px-4 py-3.5">
         <div className="flex min-w-0 flex-col gap-0.5">
           <label htmlFor="share-birthday" className="text-15 font-bold">
-            <span aria-hidden>🎂 </span>Show my birthday to my connections
+            Show my birthday to my connections
           </label>
           <span id="share-birthday-hint" className="text-14 text-sub">
             Day and month only, never the year. Off: no date, no countdown, no gift reminders about
@@ -60,13 +61,21 @@ export function PrivacyCard({ shareBirthday }: { shareBirthday: boolean }) {
       <dl className="grid gap-2 text-15">
         <div className="flex flex-wrap justify-between gap-x-4 rounded-[20px] bg-card2 px-4 py-3">
           <dt className="font-bold">
-            <span aria-hidden>🎁 </span>Birthday wishlist
+            <GiftIcon
+              aria-hidden
+              className="mr-2 inline size-[18px] align-[-3px] text-accent-text"
+            />
+            Birthday wishlist
           </dt>
           <dd className="text-sub">Your connections</dd>
         </div>
         <div className="flex flex-wrap justify-between gap-x-4 rounded-[20px] bg-card2 px-4 py-3">
           <dt className="font-bold">
-            <span aria-hidden>🔒 </span>Treat yourself
+            <LockIcon
+              aria-hidden
+              className="mr-2 inline size-[18px] align-[-3px] text-accent-text"
+            />
+            Treat yourself
           </dt>
           <dd className="text-sub">Only you</dd>
         </div>

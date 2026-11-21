@@ -1,13 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { expectAccessible, signUpAndOnboard } from "./helpers";
+import { expectAccessible, profileInviteLink, signUpAndOnboard } from "./helpers";
 
-/** A creates an invite link on Profile; `page` (signed in) accepts it. */
+/** A copies an invite link on Profile; `page` (signed in) accepts it. */
 async function connect(pageA: Page, page: Page) {
-  await pageA.goto("/profile");
-  await pageA.getByRole("button", { name: "Create an invite link" }).click();
-  const url = await pageA.getByRole("dialog").getByLabel("Invite link").inputValue();
-  await pageA.keyboard.press("Escape");
+  const url = await profileInviteLink(pageA);
   await page.goto(url);
   await page.getByRole("button", { name: "Connect with Amina" }).click();
   await expect(page.getByRole("heading", { name: /You're connected with Amina/ })).toBeVisible();
@@ -53,7 +50,7 @@ test("B reserves A's wish in secret; A sees nothing; C sees it's taken", async (
   await expect(pageB.getByRole("heading", { name: "Amina's birthday wishlist" })).toBeVisible();
   await expectAccessible(pageB, "friends' wishlists, B");
   await pageB.getByRole("button", { name: "Reserve it: Little olive tree" }).click();
-  await expect(pageB.getByText("Reserved for Amina 🤫")).toBeVisible();
+  await expect(pageB.getByText("Reserved for Amina", { exact: true })).toBeVisible();
   const cardB = pageB.locator("[data-friend-wish-id]").filter({ hasText: "Little olive tree" });
   await expect(cardB).toContainText("Reserved by you");
   await pageB.reload();

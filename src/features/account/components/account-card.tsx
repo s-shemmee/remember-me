@@ -1,5 +1,6 @@
 "use client";
 
+import { UserRoundCogIcon } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -77,8 +78,12 @@ export function AccountCard({ email, mode }: { email: string; mode: Mode }) {
       className="flex scroll-mt-6 flex-col gap-6 rounded-card-lg bg-card p-6 shadow-card sm:p-8"
     >
       <div className="flex flex-col gap-1">
-        <h2 id="account-title" className="text-22 font-extrabold tracking-[-0.02em]">
-          <span aria-hidden>👤 </span>Account
+        <h2
+          id="account-title"
+          className="flex items-center gap-2 text-22 font-extrabold tracking-[-0.02em]"
+        >
+          <UserRoundCogIcon aria-hidden className="size-5 text-accent-text" />
+          Account
         </h2>
         <p className="text-15 [overflow-wrap:anywhere] text-sub">Signed in as {email}</p>
       </div>

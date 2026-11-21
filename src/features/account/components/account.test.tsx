@@ -14,7 +14,7 @@ vi.mock("@/features/profile/actions", () => ({ saveTheme: (...a: unknown[]) => s
 
 const { AccountCard } = await import("./account-card");
 const { AppearanceCard } = await import("./appearance-card");
-const { DataCard } = await import("./data-card");
+const { DeleteAccountCard, DownloadDataCard } = await import("./data-card");
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -97,16 +97,16 @@ describe("Settings → Appearance", () => {
     expect(document.documentElement.classList.contains("dark")).toBe(true);
     expect(localStorage.getItem("rm-theme")).toBe("dark");
     expect(saveTheme).toHaveBeenCalledWith("dark");
-    expect(await screen.findByText("Saved ✓")).toBeVisible();
+    expect(await screen.findByText("Saved")).toBeVisible();
     await userEvent.click(screen.getByRole("radio", { name: "Light" }));
     expect(document.documentElement.classList.contains("dark")).toBe(false);
     expect(group).toBeVisible();
   });
 });
 
-describe("Settings → Your data", () => {
+describe("Settings → Privacy (your data) and Account (delete)", () => {
   it("download is a plain link to the export", () => {
-    render(<DataCard email="c@example.com" mode="password" />);
+    render(<DownloadDataCard />);
     expect(screen.getByRole("link", { name: "Download my data" })).toHaveAttribute(
       "href",
       "/settings/export",
@@ -119,7 +119,7 @@ describe("Settings → Your data", () => {
       message: "That password isn't right.",
       field: "password",
     });
-    render(<DataCard email="c@example.com" mode="password" />);
+    render(<DeleteAccountCard email="c@example.com" mode="password" />);
     await userEvent.click(screen.getByRole("button", { name: "Delete my account…" }));
     const dialog = await screen.findByRole("dialog", { name: "Delete your account?" });
     const confirm = screen.getByRole("button", { name: "Delete forever" });
@@ -141,7 +141,7 @@ describe("Settings → Your data", () => {
       ok: false,
       message: "Please log in again to continue.",
     });
-    render(<DataCard email="c@gmail.com" mode="recent-sign-in" />);
+    render(<DeleteAccountCard email="c@gmail.com" mode="recent-sign-in" />);
     await userEvent.click(screen.getByRole("button", { name: "Delete my account…" }));
     expect(screen.queryByLabelText("Your password")).toBeNull();
     await userEvent.type(screen.getByLabelText("Type c@gmail.com"), "c@gmail.com");
@@ -152,7 +152,7 @@ describe("Settings → Your data", () => {
   });
 
   it("Keep my account closes it and focus goes back", async () => {
-    render(<DataCard email="c@example.com" mode="password" />);
+    render(<DeleteAccountCard email="c@example.com" mode="password" />);
     const opener = screen.getByRole("button", { name: "Delete my account…" });
     await userEvent.click(opener);
     await userEvent.click(await screen.findByRole("button", { name: "Keep my account" }));

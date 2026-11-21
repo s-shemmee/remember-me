@@ -46,7 +46,7 @@ describe("Settings → Reminders", () => {
     renderCard();
     await userEvent.click(screen.getByRole("button", { name: "2 weeks before" }));
     expect(saveReminderSettings).toHaveBeenCalledWith({ offsets: [14, 7, 1, 0], email: true });
-    expect(await screen.findByText("Saved ✓")).toBeInTheDocument();
+    expect(await screen.findByText("Saved")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("switch", { name: "By email" }));
     expect(saveReminderSettings).toHaveBeenLastCalledWith({ offsets: [14, 7, 1, 0], email: false });
   });

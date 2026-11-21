@@ -90,3 +90,18 @@ export async function signUpAndOnboard(
   await expect(page).toHaveURL(/\/home$/);
   return email;
 }
+
+/**
+ * Profile → "Copy invite link": makes a new link and copies it; returns the
+ * link read back from the clipboard (permissions granted for this page).
+ */
+export async function profileInviteLink(page: Page): Promise<string> {
+  await page.goto("/profile");
+  const origin = new URL(page.url()).origin;
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin });
+  await page.getByRole("button", { name: "Copy invite link" }).click();
+  await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
+  const url = await page.evaluate(() => navigator.clipboard.readText());
+  expect(url).toMatch(/\/invite\/[0-9a-f]{64}$/);
+  return url;
+}

@@ -23,6 +23,7 @@ async function viaResend(email: OutgoingEmail, apiKey: string): Promise<SendResu
       html: email.html,
       text: email.text,
       headers: email.headers,
+      ...(email.replyTo ? { reply_to: email.replyTo } : {}),
     }),
   });
   const body = (await res.json().catch(() => ({}))) as {
@@ -50,6 +51,7 @@ async function viaMailpit(email: OutgoingEmail, base: string): Promise<SendResul
       Subject: email.subject,
       HTML: email.html,
       Text: email.text,
+      ...(email.replyTo ? { ReplyTo: [{ Email: email.replyTo }] } : {}),
       Headers: { ...email.headers, "X-Idempotency-Key": email.idempotencyKey },
     }),
   });

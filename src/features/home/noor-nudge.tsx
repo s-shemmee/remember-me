@@ -34,7 +34,7 @@ export type NudgeOffer = {
 
 /**
  * Noor's nudge on Home (AppHome). When the next birthday belongs to a
- * connected friend with a free wish, she offers to reserve it: "Reserve it 🤫"
+ * connected friend with a free wish, she offers to reserve it: "Reserve it"
  * reserves that wish (with Undo), "Later" waits until tomorrow.
  */
 export function NoorNudge({
@@ -125,7 +125,7 @@ export function NoorNudge({
       {offering ? (
         <div className="flex flex-wrap gap-2">
           <Button disabled={busy === offer.wishId} onClick={() => void onReserve()}>
-            Reserve it <span aria-hidden>🤫</span>
+            Reserve it
           </Button>
           <Button variant="card2" className="bg-card" onClick={onLater}>
             Later

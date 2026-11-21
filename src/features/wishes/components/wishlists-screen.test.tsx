@@ -15,6 +15,7 @@ vi.mock("@/features/reservations/actions", () => ({
   dismissNotice: vi.fn(),
 }));
 vi.mock("@/lib/supabase/client", () => ({ createSupabaseBrowserClient: vi.fn() }));
+vi.mock("@/features/profile/actions", () => ({ saveTheme: vi.fn() }));
 
 const saveWish = vi.fn();
 const removeWish = vi.fn();

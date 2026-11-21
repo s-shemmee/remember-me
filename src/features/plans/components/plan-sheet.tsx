@@ -14,6 +14,8 @@ import {
 import { fieldInputClass, FieldLabel, FieldNote } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 
+import { StepIcon } from "../step-icon";
+
 import {
   MAX_LABEL,
   MAX_NOTE,
@@ -21,7 +23,6 @@ import {
   type PlanTarget,
   previewSteps,
   progress,
-  STEP_EMOJI,
   SUGGESTIONS,
 } from "../steps";
 import { PlanChecklist } from "./plan-checklist";
@@ -133,7 +134,7 @@ function PlanSheetBody({ target, onDone }: { target: PlanTarget; onDone: () => v
                   onClick={() => void actions.add(s.kind, s.label)}
                   className="px-4 text-14"
                 >
-                  <span aria-hidden>{STEP_EMOJI[s.kind]}</span> Add {s.label}
+                  <StepIcon kind={s.kind} className="size-4" /> Add {s.label}
                 </Button>
               </li>
             ))}

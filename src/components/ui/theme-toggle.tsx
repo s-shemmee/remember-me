@@ -22,7 +22,7 @@ function ThemeToggle({
       variant="card2"
       size="icon"
       className={className}
-      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={() => {
         const choice = isDark ? "light" : "dark";
         setThemeChoice(choice);

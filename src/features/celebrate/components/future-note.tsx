@@ -1,5 +1,6 @@
 "use client";
 
+import { LockIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -91,8 +92,8 @@ export function FutureNoteCard({
       ) : state ? (
         <div className="flex flex-col gap-2.5">
           <p className="text-14 font-semibold">
-            <span aria-hidden>🔒 </span>Sealed until {dayMonthOf(state.opensOn)}. Not even you can
-            read it before then.
+            <LockIcon aria-hidden className="mr-1 inline size-4 align-[-2px]" />
+            Sealed until {dayMonthOf(state.opensOn)}. Not even you can read it before then.
           </p>
           {confirming ? (
             <div role="group" aria-label="Throw the note away?" className="flex flex-col gap-2">

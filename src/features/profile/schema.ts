@@ -3,7 +3,7 @@ import { z } from "zod";
 import { CHARACTER_KEYS, PASTELS } from "@/features/onboarding/constants";
 import { isLeapYear, isRealDayMonth } from "@/lib/dates";
 
-import { FIRST_NAME_MAX } from "./constants";
+import { CITY_MAX, FIRST_NAME_MAX, LAST_NAME_MAX, LITTLE_LINE_MAX } from "./constants";
 
 export const themeSchema = z.enum(["light", "dark", "system"]);
 
@@ -20,25 +20,54 @@ export function isTimeZone(value: unknown): value is string {
   }
 }
 
-/** About you (Profile): name, look, birthday (year optional and private), time zone. */
-export const profileSchema = z
+/** How your people see you: initials, a character or a photo, and a colour. */
+export const lookSchema = z
+  .object({
+    kind: z.enum(["initials", "character", "photo"]),
+    color: z.enum(PASTELS),
+    character: z.enum(CHARACTER_KEYS).nullable(),
+    photoPath: z.string().max(200).nullable(),
+  })
+  .superRefine((look, ctx) => {
+    if (look.kind === "photo" && !look.photoPath) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["look"],
+        message: "Add a photo, or pick initials or a character.",
+      });
+    }
+    if (look.kind === "character" && !look.character) {
+      ctx.addIssue({ code: "custom", path: ["look"], message: "Pick a character." });
+    }
+  });
+
+/** Empty text is "not set" (null in the database). */
+const optionalText = (max: number, message: string) =>
+  z
+    .string()
+    .trim()
+    .max(max, { error: message })
+    .transform((v) => (v === "" ? null : v));
+
+/**
+ * Profile → About you: first and last name, birthday (year optional and
+ * private), city, the little line about you, and time zone.
+ */
+export const aboutSchema = z
   .object({
     firstName: z
       .string()
       .trim()
       .min(1, { error: "Your first name, please." })
       .max(FIRST_NAME_MAX, { error: `Up to ${FIRST_NAME_MAX} characters.` }),
-    look: z.object({
-      kind: z.enum(["initials", "character", "photo"]),
-      color: z.enum(PASTELS),
-      character: z.enum(CHARACTER_KEYS).nullable(),
-      photoPath: z.string().max(200).nullable(),
-    }),
+    lastName: optionalText(LAST_NAME_MAX, `Up to ${LAST_NAME_MAX} characters.`),
     birthday: z.object({
       day: z.number().int().min(1).max(31),
       month: z.number().int().min(1).max(12),
       year: z.number().int().min(1900).max(new Date().getFullYear()).nullable(),
     }),
+    city: optionalText(CITY_MAX, `Up to ${CITY_MAX} characters.`),
+    bio: optionalText(LITTLE_LINE_MAX, `Up to ${LITTLE_LINE_MAX} characters.`),
     timezone: z.string().refine(isTimeZone, { error: "Pick a time zone from the list." }),
   })
   .superRefine((v, ctx) => {
@@ -49,19 +78,10 @@ export const profileSchema = z
     ) {
       ctx.addIssue({ code: "custom", path: ["birthday"], message: "That date doesn't exist." });
     }
-    if (v.look.kind === "photo" && !v.look.photoPath) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["look"],
-        message: "Add a photo, or pick initials or a character.",
-      });
-    }
-    if (v.look.kind === "character" && !v.look.character) {
-      ctx.addIssue({ code: "custom", path: ["look"], message: "Pick a character." });
-    }
   });
 
-export type ProfileValues = z.input<typeof profileSchema>;
+export type AboutValues = z.input<typeof aboutSchema>;
+export type LookValues = z.input<typeof lookSchema>;
 
 /** Field errors for the form: first message per field. */
 export function profileErrors(error: z.ZodError): Record<string, string> {

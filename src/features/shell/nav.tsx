@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  CalendarDaysIcon,
-  GiftIcon,
-  HouseIcon,
-  SettingsIcon,
-  StarIcon,
-  UsersIcon,
-} from "lucide-react";
+import { CalendarDaysIcon, GiftIcon, HouseIcon, StarIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -51,21 +44,6 @@ export function SidebarNav() {
         );
       })}
     </nav>
-  );
-}
-
-/** Settings, at the bottom of the sidebar. */
-export function SidebarSettingsLink() {
-  const current = isCurrent(usePathname(), "/settings");
-  return (
-    <Link
-      href="/settings"
-      aria-current={current ? "page" : undefined}
-      className={navItemClass(current)}
-    >
-      <SettingsIcon aria-hidden className="size-5" />
-      Settings
-    </Link>
   );
 }
 

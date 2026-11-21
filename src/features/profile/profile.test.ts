@@ -5,30 +5,45 @@ vi.mock("server-only", () => ({}));
 const { reauthModeFor } = await import("@/features/account/reauth");
 const { buildExport, exportFileName } = await import("@/features/account/export");
 const { squareCrop } = await import("./avatar-image");
-const { isTimeZone, profileSchema, signedInRecently, REAUTH_WINDOW_SECONDS } =
+const { aboutSchema, isTimeZone, lookSchema, signedInRecently, REAUTH_WINDOW_SECONDS } =
   await import("./schema");
 
 const valid = {
   firstName: "Maya",
-  look: { kind: "initials", color: "lilac", character: null, photoPath: null },
+  lastName: "",
   birthday: { day: 22, month: 11, year: null },
+  city: "",
+  bio: "",
   timezone: "Africa/Casablanca",
 };
+const look = { kind: "initials", color: "lilac", character: null, photoPath: null };
 
 describe("About you", () => {
-  it("accepts a normal profile", () => {
-    expect(profileSchema.safeParse(valid).success).toBe(true);
+  it("accepts a normal profile; empty last name, city and little line are null", () => {
+    const r = aboutSchema.safeParse(valid);
+    expect(r.success).toBe(true);
+    expect(r.data).toMatchObject({ lastName: null, city: null, bio: null });
+    expect(
+      aboutSchema.parse({ ...valid, lastName: " Alaoui ", city: "Rabat", bio: "Tea first." }),
+    ).toMatchObject({ lastName: "Alaoui", city: "Rabat", bio: "Tea first." });
   });
 
   it("first name: needed, up to 40 characters", () => {
-    expect(profileSchema.safeParse({ ...valid, firstName: "  " }).success).toBe(false);
-    expect(profileSchema.safeParse({ ...valid, firstName: "x".repeat(41) }).success).toBe(false);
-    expect(profileSchema.safeParse({ ...valid, firstName: "x".repeat(40) }).success).toBe(true);
+    expect(aboutSchema.safeParse({ ...valid, firstName: "  " }).success).toBe(false);
+    expect(aboutSchema.safeParse({ ...valid, firstName: "x".repeat(41) }).success).toBe(false);
+    expect(aboutSchema.safeParse({ ...valid, firstName: "x".repeat(40) }).success).toBe(true);
+  });
+
+  it("last name 40, city 80, little line 120 characters at most", () => {
+    expect(aboutSchema.safeParse({ ...valid, lastName: "x".repeat(41) }).success).toBe(false);
+    expect(aboutSchema.safeParse({ ...valid, city: "x".repeat(81) }).success).toBe(false);
+    expect(aboutSchema.safeParse({ ...valid, bio: "x".repeat(121) }).success).toBe(false);
+    expect(aboutSchema.safeParse({ ...valid, bio: "x".repeat(120) }).success).toBe(true);
   });
 
   it("birthday: a real date; 29 February only with a leap year (or no year)", () => {
     const bday = (day: number, month: number, year: number | null) =>
-      profileSchema.safeParse({ ...valid, birthday: { day, month, year } }).success;
+      aboutSchema.safeParse({ ...valid, birthday: { day, month, year } }).success;
     expect(bday(31, 4, null)).toBe(false);
     expect(bday(29, 2, null)).toBe(true);
     expect(bday(29, 2, 2000)).toBe(true);
@@ -37,25 +52,19 @@ describe("About you", () => {
   });
 
   it("look: a photo needs a photo, a character needs a character", () => {
-    expect(
-      profileSchema.safeParse({ ...valid, look: { ...valid.look, kind: "photo" } }).success,
-    ).toBe(false);
-    expect(
-      profileSchema.safeParse({ ...valid, look: { ...valid.look, kind: "character" } }).success,
-    ).toBe(false);
-    expect(
-      profileSchema.safeParse({
-        ...valid,
-        look: { ...valid.look, kind: "character", character: "fox" },
-      }).success,
-    ).toBe(true);
+    expect(lookSchema.safeParse(look).success).toBe(true);
+    expect(lookSchema.safeParse({ ...look, kind: "photo" }).success).toBe(false);
+    expect(lookSchema.safeParse({ ...look, kind: "character" }).success).toBe(false);
+    expect(lookSchema.safeParse({ ...look, kind: "character", character: "fox" }).success).toBe(
+      true,
+    );
   });
 
   it("time zone: one this runtime knows", () => {
     expect(isTimeZone("Europe/London")).toBe(true);
     expect(isTimeZone("Mars/Olympus")).toBe(false);
     expect(isTimeZone("../../etc")).toBe(false);
-    expect(profileSchema.safeParse({ ...valid, timezone: "Nope/Nowhere" }).success).toBe(false);
+    expect(aboutSchema.safeParse({ ...valid, timezone: "Nope/Nowhere" }).success).toBe(false);
   });
 
   it("photos are cropped to the centred square", () => {

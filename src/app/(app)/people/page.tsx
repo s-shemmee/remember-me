@@ -5,8 +5,10 @@ import { giftIdeasEnabled } from "@/ai/config";
 import { PeopleScreen } from "@/features/people/components/people-screen";
 import { type PersonRow, peopleView } from "@/features/people/view";
 import { AppMain } from "@/features/shell/app-shell";
+import { PageHeaderFallback } from "@/features/shell/page-header";
 import { loadPlans } from "@/features/plans/load";
 import { todayIn, toIsoDate } from "@/lib/dates";
+import { notificationsInboxEnabled } from "@/lib/flags";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "People · Remember Me" };
@@ -37,6 +39,7 @@ async function People() {
       plans={plans}
       today={toIsoDate(today)}
       giftIdeas={giftIdeasEnabled()}
+      bell={notificationsInboxEnabled()}
     />
   );
 }
@@ -47,7 +50,7 @@ export default function PeoplePage() {
       <Suspense
         fallback={
           <>
-            <h1 className="text-34 leading-tight font-extrabold tracking-[-0.03em]">People</h1>
+            <PageHeaderFallback title="People" />
             <div aria-busy="true" className="h-48 rounded-card bg-card shadow-card" />
           </>
         }

@@ -20,7 +20,21 @@ vi.mock("../actions", () => ({
 const toast = Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() });
 vi.mock("@/components/ui/sonner", () => ({ toast }));
 
-const { ConnectionsScreen } = await import("./connections-screen");
+const { ConnectedCard, InviteCard } = await import("./connections-screen");
+
+/** Both Profile cards, as the page shows them. */
+function ConnectionsScreen(p: {
+  invites: React.ComponentProps<typeof InviteCard>["invites"];
+  connections: React.ComponentProps<typeof ConnectedCard>["connections"];
+  people: React.ComponentProps<typeof ConnectedCard>["people"];
+}) {
+  return (
+    <>
+      <InviteCard invites={p.invites} />
+      <ConnectedCard connections={p.connections} people={p.people} />
+    </>
+  );
+}
 const { AcceptInvite } = await import("./accept-invite");
 const { InviteLinkDialog } = await import("./invite-link-dialog");
 
@@ -68,7 +82,7 @@ describe("Connections on Profile", () => {
     linkConnection.mockResolvedValue({ ok: true });
     render(<ConnectionsScreen {...props} />);
     const list = screen.getByRole("region", { name: "Connected with you" });
-    expect(within(list).getByText("Amina")).toBeInTheDocument();
+    expect(within(list).getAllByText("Amina").length).toBeGreaterThan(0);
     const select = within(list).getByLabelText("This is…");
     expect(
       within(select)
@@ -100,10 +114,35 @@ describe("Connections on Profile", () => {
     expect(toast).toHaveBeenCalledWith("You and Amina are no longer connected");
   });
 
-  it("with no connections or invites, says so", () => {
+  it("with no connections, an empty state (and no invite list)", () => {
     render(<ConnectionsScreen invites={[]} connections={[]} people={[]} />);
-    expect(screen.getByText("No open invites.")).toBeInTheDocument();
-    expect(screen.getByText(/No connections yet/)).toBeInTheDocument();
+    expect(screen.queryByText("Open invites")).toBeNull();
+    expect(screen.getByText("No connections yet")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "All people" })).toHaveAttribute("href", "/people");
+  });
+
+  it("shows connections as avatars with their names", () => {
+    render(<ConnectionsScreen {...props} />);
+    const list = screen.getByRole("list", { name: "Your connections" });
+    expect(within(list).getByText("Amina")).toBeInTheDocument();
+  });
+
+  it("Copy invite link makes a link, copies it, and says Copied for 2 seconds", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    createInvite.mockResolvedValue({ ok: true, url: "http://localhost:3000/invite/abc" });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    render(<InviteCard invites={[]} />);
+    await userEvent.click(screen.getByRole("button", { name: "Copy invite link" }));
+    expect(writeText).toHaveBeenCalledWith("http://localhost:3000/invite/abc");
+    expect(await screen.findByRole("button", { name: "Copied" })).toBeVisible();
+    expect(screen.getByRole("status")).toHaveTextContent(/Copied/);
+    expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
+    await vi.advanceTimersByTimeAsync(2100);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Copy invite link" })).toBeVisible(),
+    );
+    vi.useRealTimers();
   });
 });
 

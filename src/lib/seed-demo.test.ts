@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { ACCOUNTS, COLORS, demoPeople, PLANS, RELATIONS, WISHES } from "../../scripts/demo/data";
+import { ACCOUNTS, demoPeople, PLANS, WISHES } from "../../scripts/demo/data";
 import { addDays, daysBetween, nextOccurrence } from "./dates";
 import { checkSeedTarget } from "./seed-guard";
 
@@ -91,22 +91,43 @@ describe("demo data", () => {
   const inDays = (dm: { day: number; month: number }) =>
     daysBetween(today, nextOccurrence(dm, today));
 
-  it("about 25 people, every relation and colour, one In memory", () => {
-    expect(people.length).toBeGreaterThanOrEqual(25);
-    expect(new Set(people.map((p) => p.relationKind))).toEqual(new Set(RELATIONS));
-    expect(new Set(people.map((p) => p.color))).toEqual(new Set(COLORS));
-    expect(people.filter((p) => p.inMemory)).toHaveLength(1);
-    expect(new Set(people.map((p) => p.name)).size).toBe(people.length);
+  it("the seven people from the spec, connected, not connected and one pending", () => {
+    expect(people.map((p) => p.name)).toEqual([
+      "Khalid",
+      "Yasmine",
+      "Mom & Dad",
+      "Omar",
+      "Nadia",
+      "Amine",
+      "Sara",
+    ]);
+    expect(people.filter((p) => p.account).length).toBeGreaterThanOrEqual(2);
+    expect(people.filter((p) => !p.account && !p.pendingInvite).length).toBeGreaterThanOrEqual(2);
+    expect(people.filter((p) => p.pendingInvite).map((p) => p.name)).toEqual(["Nadia"]);
+    expect(people.filter((p) => p.pendingInvite && p.account)).toHaveLength(0);
   });
 
-  it("every occasion type, birthdays with and without a year", () => {
+  it("several days each, little things with an emoji", () => {
+    for (const p of people) {
+      expect(p.days.length, p.name).toBeGreaterThanOrEqual(1);
+      expect(p.littleThings.length, p.name).toBeGreaterThanOrEqual(2);
+      expect(p.littleThings.length, p.name).toBeLessThanOrEqual(4);
+      for (const t of p.littleThings) {
+        expect(t, p.name).toMatch(/^\p{Extended_Pictographic}/u);
+        expect(t.length).toBeLessThanOrEqual(60);
+      }
+    }
     const kinds = new Set(people.flatMap((p) => p.days.map((d) => d.kind)));
-    expect(kinds).toEqual(
-      new Set(["anniversary", "graduation", "work_milestone", "remembrance", "other"]),
-    );
+    for (const k of ["anniversary", "graduation"]) expect(kinds).toContain(k);
     expect(people.some((p) => p.birthday.year)).toBe(true);
     expect(people.some((p) => !p.birthday.year)).toBe(true);
-    expect(people.find((p) => p.inMemory)!.days.map((d) => d.kind)).toContain("remembrance");
+  });
+
+  it("the main account has a city, a little line and a handle", () => {
+    const main = ACCOUNTS.find((a) => a.key === "main")!;
+    expect(main.city).toBeTruthy();
+    expect(main.bio.length).toBeLessThanOrEqual(280);
+    expect(main.handle).toMatch(/^[A-Za-z0-9_]{3,30}$/);
   });
 
   it("every day within the next 60 days, some today, tomorrow and this week", () => {
@@ -114,7 +135,7 @@ describe("demo data", () => {
     expect(Math.max(...all)).toBeLessThanOrEqual(60);
     expect(all).toContain(0);
     expect(all).toContain(1);
-    expect(all.filter((n) => n <= 7).length).toBeGreaterThanOrEqual(5);
+    expect(all.filter((n) => n <= 7).length).toBeGreaterThanOrEqual(4);
   });
 
   it("stays valid on any day of the year (29 February included)", () => {
@@ -141,6 +162,19 @@ describe("demo data", () => {
       }
     }
     expect(WISHES.main.some((w) => w.list === "treat")).toBe(true);
+    const friendWishes = Object.entries(WISHES).filter(([k]) => k !== "main");
+    // Some reserved by Maya, some taken by the others.
+    expect(friendWishes.some(([, ws]) => ws.some((w) => w.reservedBy === "main"))).toBe(true);
+    expect(
+      friendWishes.some(([, ws]) => ws.some((w) => w.reservedBy && w.reservedBy !== "main")),
+    ).toBe(true);
+    for (const ws of Object.values(WISHES))
+      for (const w of ws) expect(w.currency ?? "MAD", w.title).toBe("MAD");
+    expect(
+      Object.values(WISHES)
+        .flat()
+        .filter((w) => w.image).length,
+    ).toBeGreaterThan(10);
     expect(PLANS.some((p) => p.ticked.length > 0)).toBe(true);
   });
 });

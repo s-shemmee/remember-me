@@ -1,5 +1,6 @@
 "use client";
 
+import { BellIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -159,8 +160,12 @@ export function NotificationsCard({
       className="flex scroll-mt-6 flex-col gap-5 rounded-card-lg bg-card p-6 shadow-card sm:p-8"
     >
       <div className="flex flex-col gap-1">
-        <h2 id="notifications-title" className="text-22 font-extrabold tracking-[-0.02em]">
-          <span aria-hidden>💬 </span>Notifications
+        <h2
+          id="notifications-title"
+          className="flex items-center gap-2 text-22 font-extrabold tracking-[-0.02em]"
+        >
+          <BellIcon aria-hidden className="size-5 text-accent-text" />
+          Notifications
         </h2>
         <p className="text-15 text-sub">A little nudge on your phone or computer</p>
       </div>

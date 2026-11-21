@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
@@ -8,7 +8,12 @@ import { Button } from "@/components/ui/button";
 import { FilterChip } from "@/components/ui/chip";
 import { NoorBubble } from "@/components/ui/noor-bubble";
 import { toast } from "@/components/ui/sonner";
-import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
+import {
+  HeaderSearch,
+  headerSearchInputClass,
+  HeaderSearchIcon,
+} from "@/features/shell/header-actions";
+import { HeaderLabel, headerPrimaryClass, PageHeader } from "@/features/shell/page-header";
 
 import { InviteLinkDialog } from "@/features/connections/components/invite-link-dialog";
 
@@ -38,8 +43,11 @@ export function PeopleScreen({
   plans = [],
   today = "",
   giftIdeas = false,
+  bell = false,
 }: {
   people: PersonView[];
+  /** The notification bell in the header (NOTIFICATIONS_INBOX_ENABLED). */
+  bell?: boolean;
   /** Noor's gift ideas are switched on (AI_GIFT_IDEAS_ENABLED). */
   giftIdeas?: boolean;
   /** Your plans, this year's and past ones (private: only ever yours). */
@@ -150,42 +158,38 @@ export function PeopleScreen({
 
   return (
     <PlansProvider plans={plans}>
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <div className="flex min-w-0 flex-[1_1_240px] flex-col gap-1">
-          <h1
-            ref={titleRef}
-            tabIndex={-1}
-            className="text-34 leading-tight font-extrabold tracking-[-0.03em] outline-none"
-          >
-            People
-          </h1>
-          <p className="text-15 text-sub">{countLabel(people.length)}</p>
-        </div>
-        {people.length > 0 && (
-          <div className="relative min-w-0 flex-[1_1_220px] sm:max-w-[280px]">
-            <label htmlFor="people-search" className="sr-only">
-              Search people
-            </label>
-            <SearchIcon
-              aria-hidden
-              className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-sub"
-            />
-            <input
-              id="people-search"
-              type="search"
-              placeholder="Search people…"
-              autoComplete="off"
-              value={query}
-              onChange={(e) => setQuery(e.currentTarget.value)}
-              className="min-h-11 w-full rounded-pill border-[1.5px] border-line bg-card pr-4 pl-11 text-15 text-text placeholder:text-sub focus:border-accent focus:outline-none"
-            />
-          </div>
-        )}
-        <SavedThemeToggle className="hidden lg:inline-flex" />
-        <Button onClick={openAdd}>
-          <PlusIcon aria-hidden /> Add someone
-        </Button>
-      </div>
+      <PageHeader
+        title="People"
+        titleRef={titleRef}
+        subtitle={countLabel(people.length)}
+        search={
+          people.length > 0 ? (
+            <HeaderSearch inputId="people-search" label="Search people" defaultOpen={query !== ""}>
+              <div role="search" className="relative w-full">
+                <label htmlFor="people-search" className="sr-only">
+                  Search people
+                </label>
+                <HeaderSearchIcon />
+                <input
+                  id="people-search"
+                  type="search"
+                  placeholder="Search people…"
+                  autoComplete="off"
+                  value={query}
+                  onChange={(e) => setQuery(e.currentTarget.value)}
+                  className={headerSearchInputClass}
+                />
+              </div>
+            </HeaderSearch>
+          ) : undefined
+        }
+        primary={
+          <Button onClick={openAdd} className={headerPrimaryClass}>
+            <PlusIcon aria-hidden /> <HeaderLabel>Add someone</HeaderLabel>
+          </Button>
+        }
+        bell={bell}
+      />
 
       {people.length === 0 ? (
         <div className="flex max-w-xl flex-col gap-5 rounded-card-lg bg-card p-6 shadow-card sm:p-8">

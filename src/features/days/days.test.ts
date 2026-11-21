@@ -215,14 +215,14 @@ describe("month", () => {
 
 describe("Home copy", () => {
   it.each([
-    [4, "Good evening", "🌙"],
-    [5, "Good morning", "☀️"],
-    [11, "Good morning", "☀️"],
-    [12, "Good afternoon", "🌤️"],
-    [17, "Good afternoon", "🌤️"],
-    [18, "Good evening", "🌙"],
-    [23, "Good evening", "🌙"],
-  ])("at %i:00 it's %s %s", (hour, text, emoji) => expect(greeting(hour)).toEqual({ text, emoji }));
+    [4, "Good evening"],
+    [5, "Good morning"],
+    [11, "Good morning"],
+    [12, "Good afternoon"],
+    [17, "Good afternoon"],
+    [18, "Good evening"],
+    [23, "Good evening"],
+  ])("at %i:00 it's %s, no emoji", (hour, text) => expect(greeting(hour)).toEqual({ text }));
 
   describe("Noor's nudge", () => {
     const nudge = (sources: DaySource[], hasPeople = true) =>

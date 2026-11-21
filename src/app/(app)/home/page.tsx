@@ -1,4 +1,4 @@
-import { SearchIcon } from "lucide-react";
+import { CakeIcon, CalendarDaysIcon, GiftIcon, StarIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Form from "next/form";
 import { Suspense } from "react";
@@ -6,7 +6,6 @@ import { Suspense } from "react";
 import { giftIdeasEnabled } from "@/ai/config";
 import { Card } from "@/components/ui/card";
 import { pastelClasses } from "@/components/ui/chip";
-import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
 import { TruncatedName } from "@/components/ui/truncated-name";
 import {
   greeting,
@@ -22,6 +21,7 @@ import { loadDays } from "@/features/days/load";
 import { ComingUp } from "@/features/home/coming-up";
 import { MiniMonth } from "@/features/home/mini-month";
 import { NoorNudge, type NudgeOffer } from "@/features/home/noor-nudge";
+import { OccasionIcon } from "@/features/occasions/occasion-icon";
 import { AddPersonButton } from "@/features/people/components/add-person-button";
 import { HomePlanCard } from "@/features/plans/components/home-plan-card";
 import { PlansProvider } from "@/features/plans/components/plan-state";
@@ -31,6 +31,13 @@ import { Notices } from "@/features/reservations/components/notices";
 import { loadFriends } from "@/features/reservations/load";
 import { giftsSorted, nudgeWishLine, pickNudgeWish } from "@/features/reservations/logic";
 import { AppMain } from "@/features/shell/app-shell";
+import {
+  HeaderSearch,
+  headerSearchInputClass,
+  HeaderSearchIcon,
+} from "@/features/shell/header-actions";
+import { PageHeader, PageHeaderFallback } from "@/features/shell/page-header";
+import { notificationsInboxEnabled } from "@/lib/flags";
 import { addDays, formatFullDate, toIsoDate } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
@@ -40,13 +47,14 @@ export const metadata: Metadata = { title: "Home · Remember Me" };
 
 function StatCard({
   label,
-  emoji,
+  icon,
   value,
   line,
   pastel,
 }: {
   label: string;
-  emoji: string;
+  /** A decorative Lucide icon (no emoji in tiles). */
+  icon: React.ReactNode;
   value: React.ReactNode;
   line: string;
   pastel: Pastel;
@@ -60,9 +68,7 @@ function StatCard({
     >
       <span className="flex items-center justify-between gap-2 text-12 font-bold tracking-[.05em]">
         <span>{label}</span>
-        <span aria-hidden className="text-[18px]">
-          {emoji}
-        </span>
+        {icon}
       </span>
       <span className="truncate text-[28px] leading-[1.1] font-extrabold tracking-[-0.03em] sm:text-[30px]">
         {value}
@@ -130,12 +136,9 @@ async function Dashboard() {
 
   return (
     <>
-      {/* Phones and tablets: greeting + date, then search and a round "+".
-          Desktop (lg): search, the theme toggle and "Add someone" stay together,
-          next to the greeting (or just under it when the screen is narrow). */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-4">
-        <div className="flex min-w-0 flex-col gap-1 lg:flex-[1_1_320px]">
-          <h1 className="text-34 leading-tight font-extrabold tracking-[-0.03em]">
+      <PageHeader
+        title={
+          <>
             {greet.text}
             {firstName && (
               <>
@@ -144,41 +147,34 @@ async function Dashboard() {
                   {firstName}
                 </TruncatedName>
               </>
-            )}{" "}
-            <span aria-hidden>{greet.emoji}</span>
-          </h1>
-          <p className="text-15 text-sub">
-            {formatFullDate(today)} · {weekSummary(events)}
-          </p>
-        </div>
-        <div className="flex items-center gap-3 lg:ml-auto lg:gap-4">
-          {peopleCount > 0 && (
-            <Form
-              action="/people"
-              role="search"
-              className="relative min-w-0 flex-1 lg:w-[280px] lg:flex-none"
-            >
-              <label htmlFor="home-search" className="sr-only">
-                Search people
-              </label>
-              <SearchIcon
-                aria-hidden
-                className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-sub"
-              />
-              <input
-                id="home-search"
-                name="q"
-                type="search"
-                placeholder="Search people…"
-                autoComplete="off"
-                className="min-h-11 w-full rounded-pill border-[1.5px] border-line bg-card pr-4 pl-11 text-15 text-text placeholder:text-sub focus:border-accent focus:outline-none"
-              />
-            </Form>
-          )}
-          <SavedThemeToggle className="hidden lg:inline-flex" />
-          <AddPersonButton compact className="ml-auto lg:ml-0" />
-        </div>
-      </div>
+            )}
+          </>
+        }
+        subtitle={`${formatFullDate(today)} · ${weekSummary(events)}`}
+        search={
+          peopleCount > 0 ? (
+            <HeaderSearch inputId="home-search" label="Search people">
+              <Form action="/people" role="search" className="relative w-full">
+                <label htmlFor="home-search" className="sr-only">
+                  Search people
+                </label>
+                <HeaderSearchIcon />
+                <input
+                  id="home-search"
+                  name="q"
+                  type="search"
+                  placeholder="Search people…"
+                  autoComplete="off"
+                  className={headerSearchInputClass}
+                />
+              </Form>
+            </HeaderSearch>
+          ) : undefined
+        }
+        primary={<AddPersonButton compact />}
+        theme={false}
+        bell={notificationsInboxEnabled()}
+      />
 
       <PlansProvider plans={plans}>
         <NoorNudge
@@ -195,7 +191,13 @@ async function Dashboard() {
         <ul aria-label="At a glance" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           <StatCard
             label="NEXT UP"
-            emoji={next?.emoji ?? "🎂"}
+            icon={
+              next ? (
+                <OccasionIcon kind={next.source.kind} className="size-5" />
+              ) : (
+                <CakeIcon aria-hidden className="size-5" />
+              )
+            }
             value={next ? next.source.name : peopleCount ? "All quiet" : "No one yet"}
             line={
               next ? nextUpLine(next) : peopleCount ? "nothing coming up" : "add your first person"
@@ -204,7 +206,7 @@ async function Dashboard() {
           />
           <StatCard
             label="THIS MONTH"
-            emoji="🗓️"
+            icon={<CalendarDaysIcon aria-hidden className="size-5" />}
             value={more ? String(more) : "None"}
             line={
               more
@@ -215,7 +217,7 @@ async function Dashboard() {
           />
           <StatCard
             label="YOUR DAY"
-            emoji="🕯️"
+            icon={<StarIcon aria-hidden className="size-5" />}
             value={
               !yourDay
                 ? "Not set"
@@ -225,12 +227,12 @@ async function Dashboard() {
                     ? "Tomorrow"
                     : `${yourDay.daysUntil} days`
             }
-            line={yourDay ? `${formatFullDate(yourDay.on)} ✨` : "add it in your profile"}
+            line={yourDay ? formatFullDate(yourDay.on) : "add it in your profile"}
             pastel={you?.color ?? "rose"}
           />
           <StatCard
             label="GIFTS SORTED"
-            emoji="🎁"
+            icon={<GiftIcon aria-hidden className="size-5" />}
             value={gifts.value}
             line={gifts.line}
             pastel="mint"
@@ -270,7 +272,7 @@ export default function HomePage() {
       <Suspense
         fallback={
           <>
-            <h1 className="text-34 leading-tight font-extrabold tracking-[-0.03em]">Home</h1>
+            <PageHeaderFallback title="Home" />
             <Card aria-busy="true" className="h-40" />
           </>
         }

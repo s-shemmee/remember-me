@@ -33,7 +33,7 @@ describe("/unsubscribe", () => {
     expect(unsubscribeEmail.mock.calls[0]![1].get("token")).toBe(TOKEN);
     expect(screen.getByRole("link", { name: "Open Settings" })).toHaveAttribute(
       "href",
-      "/settings#reminders",
+      "/settings/reminders",
     );
   });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { PaletteIcon } from "lucide-react";
 import * as React from "react";
 
 import { ChoiceGroup, ChoiceItem } from "@/components/ui/choice-group";
@@ -34,7 +35,7 @@ export function AppearanceCard({ saved }: { saved: ThemeChoice }) {
     const next = value as ThemeChoice;
     setThemeChoice(next);
     const result = await saveTheme(next);
-    setStatus(result.ok ? "Saved ✓" : result.message);
+    setStatus(result.ok ? "Saved" : result.message);
   };
 
   return (
@@ -45,8 +46,12 @@ export function AppearanceCard({ saved }: { saved: ThemeChoice }) {
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <h2 id="appearance-title" className="text-22 font-extrabold tracking-[-0.02em]">
-            <span aria-hidden>🎨 </span>Appearance
+          <h2
+            id="appearance-title"
+            className="flex items-center gap-2 text-22 font-extrabold tracking-[-0.02em]"
+          >
+            <PaletteIcon aria-hidden className="size-5 text-accent-text" />
+            Appearance
           </h2>
           <p className="text-15 text-sub">Make it feel like yours</p>
         </div>

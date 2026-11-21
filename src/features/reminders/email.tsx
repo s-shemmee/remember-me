@@ -214,7 +214,7 @@ export function Layout({
                         {links.unsubscribeUrl ? (
                           <p style={{ margin: 0 }}>
                             <a
-                              href={`${links.appUrl}/settings#reminders`}
+                              href={`${links.appUrl}/settings/reminders`}
                               style={{ color: EMAIL_COLORS.accentText }}
                             >
                               Change reminders
@@ -432,7 +432,7 @@ export function TestEmail({ firstName, links }: { firstName: string; links: Emai
         This is a test from Remember Me. Your reminders will arrive at this address, at 9:00 in the
         morning, your time.
       </p>
-      <ButtonLink href={`${links.appUrl}/settings#reminders`}>Open my settings</ButtonLink>
+      <ButtonLink href={`${links.appUrl}/settings/reminders`}>Open my settings</ButtonLink>
       <p style={{ margin: "20px 0 0", fontSize: 16, lineHeight: "24px" }}>
         With love,
         <br />

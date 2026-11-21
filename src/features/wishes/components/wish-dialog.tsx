@@ -25,6 +25,7 @@ import {
   WISH_NOTE_MAX,
   WISH_TITLE_MAX,
 } from "../constants";
+import { PriorityIcon } from "../priority-icon";
 import { checkImageFile, prepareImage } from "../image";
 import type { Wish, Wishlist } from "../load";
 import { wishFieldErrors, wishFormSchema, type WishFormValues } from "../schema";
@@ -274,7 +275,7 @@ export function WishDialog({
                   value={p.key}
                   className="inline-flex min-h-11 items-center gap-2 rounded-pill bg-card2 px-4 text-15 font-semibold text-text data-[state=checked]:bg-text data-[state=checked]:text-bg"
                 >
-                  <span aria-hidden>{p.emoji}</span>
+                  <PriorityIcon priority={p.key} />
                   {p.label}
                 </ChoiceItem>
               ))}

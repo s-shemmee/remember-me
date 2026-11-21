@@ -1,8 +1,7 @@
 "use client";
 
-import { EllipsisIcon, LifeBuoyIcon, LogOutIcon, SettingsIcon, UserRoundIcon } from "lucide-react";
+import { EllipsisIcon, LifeBuoyIcon, SettingsIcon, UserRoundIcon } from "lucide-react";
 import Link from "next/link";
-import { useTransition } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import {
@@ -12,10 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logOut } from "@/features/auth/actions";
-import { unsubscribeThisDevice } from "@/features/notifications/browser";
-import { clearOnboardingDraft } from "@/features/onboarding/store";
-import { forgetThemeUser } from "@/lib/theme";
+import { useLogOut } from "@/features/auth/components/use-log-out";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
 
@@ -33,7 +29,8 @@ const peopleLabel = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
 
 /**
  * The account chip and its menu (AppPeople.dc.html): My profile, Settings,
- * Help & feedback, Log out. `variant="chip"` is the sidebar chip;
+ * Help & feedback, then Log out as plain text. The only way to Settings (the
+ * sidebar has no link). No theme control here: that's in each page header. `variant="chip"` is the sidebar chip;
  * `variant="avatar"` is the round button in the mobile top bar.
  */
 export function AccountMenu({
@@ -43,7 +40,7 @@ export function AccountMenu({
   account: Account;
   variant: "chip" | "avatar";
 }) {
-  const [pending, startTransition] = useTransition();
+  const { pending, logOutNow } = useLogOut();
   const name = account.firstName || "you";
 
   return (
@@ -102,27 +99,13 @@ export function AccountMenu({
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/settings#help">
+          <Link href="/help">
             <LifeBuoyIcon aria-hidden className="size-5" /> Help &amp; feedback
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="accent"
-          disabled={pending}
-          onSelect={() => {
-            clearOnboardingDraft();
-            // The next person to log in here starts with their own theme.
-            forgetThemeUser();
-            // On a shared device, the next person never gets your reminders:
-            // this device's push subscription goes before you're signed out.
-            startTransition(async () => {
-              const endpoint = await unsubscribeThisDevice();
-              await logOut(endpoint);
-            });
-          }}
-        >
-          <LogOutIcon aria-hidden className="size-5" /> Log out
+        <DropdownMenuItem disabled={pending} onSelect={logOutNow}>
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,5 +1,7 @@
 "use client";
 
+import { BellRingIcon } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -27,7 +29,7 @@ export function ReminderSettings({ initial, email }: { initial: Settings; email:
     const result = await saveReminderSettings(next);
     if (result.ok) {
       last.current = next;
-      setSaved("Saved ✓");
+      setSaved("Saved");
     } else {
       setValue(last.current);
       setSaved(result.message);
@@ -57,8 +59,12 @@ export function ReminderSettings({ initial, email }: { initial: Settings; email:
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <h2 id="reminders-title" className="text-22 font-extrabold tracking-[-0.02em]">
-            <span aria-hidden>🔔 </span>Reminders
+          <h2
+            id="reminders-title"
+            className="flex items-center gap-2 text-22 font-extrabold tracking-[-0.02em]"
+          >
+            <BellRingIcon aria-hidden className="size-5 text-accent-text" />
+            Reminders
           </h2>
           <p className="text-15 text-sub">When Noor should nudge you before someone&apos;s day</p>
         </div>
@@ -130,12 +136,12 @@ export function ReminderSettings({ initial, email }: { initial: Settings; email:
 
       <p className="text-14 text-sub">
         Want a nudge on your phone too?{" "}
-        <a
-          href="#notifications"
+        <Link
+          href="/settings/notifications"
           className="font-semibold text-accent-text underline-offset-4 hover:underline"
         >
           Turn on notifications
-        </a>
+        </Link>
       </p>
     </section>
   );

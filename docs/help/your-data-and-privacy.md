@@ -8,11 +8,11 @@ The details you keep about your friends stay with you: they aren't told, and nob
 
 ## Download your data
 
-In **Settings → Your data**, choose **Download my data** to get everything in one file: your profile, people and their days, wishes, plans, connections and the gifts you reserved.
+In **Settings → Privacy**, choose **Download my data** to get everything in one file: your profile, people and their days, wishes, plans, connections and the gifts you reserved.
 
 ## Delete your account
 
-In **Settings → Your data**, choose **Delete my account**. To be sure it's you, type your email (and your password, if you use one). Everything is deleted at once and can't be brought back, so download your data first if you'd like a copy.
+In **Settings → Account**, choose **Delete my account**. To be sure it's you, type your email (and your password, if you use one). Everything is deleted at once and can't be brought back, so download your data first if you'd like a copy.
 
 ## Cookies
 

@@ -61,6 +61,8 @@ export type OutgoingEmail = RenderedEmail & {
   to: string;
   headers: Record<string, string>;
   idempotencyKey: string;
+  /** Where a reply goes (feedback: the person who sent it). */
+  replyTo?: string;
 };
 
 export type SendResult =

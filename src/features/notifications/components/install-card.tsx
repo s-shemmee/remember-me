@@ -1,5 +1,6 @@
 "use client";
 
+import { ShareIcon, SmartphoneIcon } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -46,8 +47,12 @@ export function InstallCard() {
       className="flex scroll-mt-6 flex-col gap-4 rounded-card-lg bg-card p-6 shadow-card sm:p-8"
     >
       <div className="flex flex-col gap-1">
-        <h2 id="app-title" className="text-22 font-extrabold tracking-[-0.02em]">
-          <span aria-hidden>📱 </span>App
+        <h2
+          id="app-title"
+          className="flex items-center gap-2 text-22 font-extrabold tracking-[-0.02em]"
+        >
+          <SmartphoneIcon aria-hidden className="size-5 text-accent-text" />
+          App
         </h2>
         <p className="text-15 text-sub">Remember Me on your home screen</p>
       </div>
@@ -57,7 +62,7 @@ export function InstallCard() {
         <ol className="flex list-decimal flex-col gap-1 pl-5 text-15">
           <li>Open Remember Me in Safari.</li>
           <li>
-            Tap the Share button <span aria-hidden>(⬆️)</span>.
+            Tap the Share button <ShareIcon aria-hidden className="inline size-4 align-[-2px]" />.
           </li>
           <li>Choose Add to Home Screen, then Add.</li>
         </ol>

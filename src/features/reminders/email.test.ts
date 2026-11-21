@@ -140,7 +140,7 @@ describe("rendered email", () => {
     expect(email.html).toContain('href="https://app.example/wishlists?tab=friends&amp;friend=f1"');
     expect(email.html).toContain("See Khalid&#x27;s wishlist");
     expect(email.html).toContain('href="https://app.example/unsubscribe?token=abc"');
-    expect(email.html).toContain('href="https://app.example/settings#reminders"');
+    expect(email.html).toContain('href="https://app.example/settings/reminders"');
     for (const part of [
       "Hi Maya,",
       "Khalid turns 30 in 7 days",

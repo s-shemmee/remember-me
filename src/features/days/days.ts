@@ -172,10 +172,11 @@ export function monthGrid(year: number, month: number): (CalendarDate | null)[][
 
 // Home --------------------------------------------------------------------------------
 
-export function greeting(hour: number): { text: string; emoji: string } {
-  if (hour >= 5 && hour < 12) return { text: "Good morning", emoji: "☀️" };
-  if (hour >= 12 && hour < 18) return { text: "Good afternoon", emoji: "🌤️" };
-  return { text: "Good evening", emoji: "🌙" };
+/** Home's greeting (no emoji: it's a heading). */
+export function greeting(hour: number): { text: string } {
+  if (hour >= 5 && hour < 12) return { text: "Good morning" };
+  if (hour >= 12 && hour < 18) return { text: "Good afternoon" };
+  return { text: "Good evening" };
 }
 
 /**

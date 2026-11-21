@@ -129,13 +129,13 @@ test("the 7-day reminder arrives once, the test email works, unsubscribe turns e
   expect((await messagesTo(email)).filter((m) => /Khalid/.test(m.Subject))).toHaveLength(1);
 
   // Settings → Reminders: a test email.
-  await page.goto("/settings");
+  await page.goto("/settings/reminders");
   await expect(page.getByRole("heading", { name: "Reminders" })).toBeVisible();
   await expect(page.getByRole("switch", { name: "By email" })).toBeChecked();
   await expectAccessible(page, "settings");
   // Saved as you go, and still there after a reload.
   await page.getByRole("button", { name: "2 weeks before" }).click();
-  await expect(page.getByText("Saved ✓")).toBeVisible();
+  await expect(page.getByText("Saved")).toBeVisible();
   await page.reload();
   await expect(page.getByRole("button", { name: "2 weeks before" })).toHaveAttribute(
     "aria-pressed",

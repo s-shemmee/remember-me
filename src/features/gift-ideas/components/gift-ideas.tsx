@@ -1,5 +1,6 @@
 "use client";
 
+import { LightbulbIcon } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ export function GiftIdeasButton({
         onClick={() => setOpen(true)}
         className={cn("h-auto max-w-full py-2.5 whitespace-normal", className)}
       >
-        Ask Noor for gift ideas <span aria-hidden>💡</span>
+        <LightbulbIcon aria-hidden /> Ask Noor for gift ideas
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent

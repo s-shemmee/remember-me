@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { AVATARS_BUCKET } from "./constants";
-import { profileErrors, profileSchema, themeSchema } from "./schema";
+import { aboutSchema, lookSchema, profileErrors, themeSchema } from "./schema";
 
 export type ProfileResult =
   { ok: true } | { ok: false; message: string; fieldErrors?: Record<string, string> };
@@ -20,23 +20,45 @@ async function signedIn() {
   return { supabase, userId };
 }
 
-/**
- * About you: name, look (with a photo from your own avatars folder),
- * birthday (year optional and private) and time zone. A replaced photo is
- * deleted from Storage once the new one is saved.
- */
-export async function saveProfile(input: unknown): Promise<ProfileResult> {
+const invalid = (error: import("zod").ZodError): ProfileResult => ({
+  ok: false,
+  message: error.issues[0]?.message ?? "Something needs a quick look.",
+  fieldErrors: profileErrors(error),
+});
+
+/** About you: names, birthday (year optional and private), city, little line, time zone. */
+export async function saveAbout(input: unknown): Promise<ProfileResult> {
   const { supabase, userId } = await signedIn();
-  const parsed = profileSchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      ok: false,
-      message: parsed.error.issues[0]?.message ?? "Something needs a quick look.",
-      fieldErrors: profileErrors(parsed.error),
-    };
-  }
+  const parsed = aboutSchema.safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
   const v = parsed.data;
-  const photoPath = v.look.kind === "photo" ? v.look.photoPath : null;
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      first_name: v.firstName,
+      last_name: v.lastName,
+      birthday_day: v.birthday.day,
+      birthday_month: v.birthday.month,
+      birth_year: v.birthday.year,
+      city: v.city,
+      bio: v.bio,
+      timezone: v.timezone,
+    })
+    .eq("id", userId);
+  return error ? { ok: false, message: OOPS } : { ok: true };
+}
+
+/**
+ * Your avatar: initials, a character or a photo from your own avatars
+ * folder, and a colour. A replaced photo is deleted from Storage once the
+ * new look is saved.
+ */
+export async function saveLook(input: unknown): Promise<ProfileResult> {
+  const { supabase, userId } = await signedIn();
+  const parsed = lookSchema.safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+  const look = parsed.data;
+  const photoPath = look.kind === "photo" ? look.photoPath : null;
   if (photoPath && !photoPath.startsWith(`${userId}/`)) {
     return { ok: false, message: "That photo didn't upload. Please try again." };
   }
@@ -44,15 +66,10 @@ export async function saveProfile(input: unknown): Promise<ProfileResult> {
   const { error } = await supabase
     .from("profiles")
     .update({
-      first_name: v.firstName,
-      avatar_kind: v.look.kind,
-      avatar_color: v.look.color,
-      avatar_character: v.look.character,
+      avatar_kind: look.kind,
+      avatar_color: look.color,
+      avatar_character: look.character,
       avatar_path: photoPath,
-      birthday_day: v.birthday.day,
-      birthday_month: v.birthday.month,
-      birth_year: v.birthday.year,
-      timezone: v.timezone,
     })
     .eq("id", userId);
   if (error) return { ok: false, message: OOPS };

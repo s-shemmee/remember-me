@@ -31,7 +31,15 @@ export const PROTECTED_PREFIXES = [
   "/celebrate",
   "/profile",
   "/settings",
+  "/help-and-feedback",
 ] as const;
+
+/**
+ * /help is two pages: the public help center for visitors, and Help &
+ * feedback (Ask Noor, topics, Send feedback) inside the app for signed-in
+ * people, at the same address. Articles (/help/<slug>) stay public for all.
+ */
+export const IN_APP_HELP_PATH = "/help-and-feedback";
 
 /** Pages signed-in people skip (they go home instead): the landing page too. */
 export const GUEST_ONLY_PATHS = ["/", "/log-in", "/sign-up"] as const;
@@ -39,7 +47,8 @@ export const GUEST_ONLY_PATHS = ["/", "/log-in", "/sign-up"] as const;
 const matchesPrefix = (pathname: string, prefix: string) =>
   pathname === prefix || pathname.startsWith(`${prefix}/`);
 
-export type RouteDecision = { action: "continue" } | { action: "redirect"; to: string };
+export type RouteDecision =
+  { action: "continue" } | { action: "redirect"; to: string } | { action: "rewrite"; to: string };
 
 /** What the proxy should do for a request, given whether someone is signed in. */
 export function decideRoute(pathname: string, search: string, signedIn: boolean): RouteDecision {
@@ -54,6 +63,9 @@ export function decideRoute(pathname: string, search: string, signedIn: boolean)
   }
   if (signedIn && GUEST_ONLY_PATHS.some((p) => matchesPrefix(pathname, p))) {
     return { action: "redirect", to: HOME_PATH };
+  }
+  if (signedIn && (pathname === "/help" || pathname === "/help/")) {
+    return { action: "rewrite", to: `${IN_APP_HELP_PATH}${search}` };
   }
   return { action: "continue" };
 }

@@ -183,7 +183,7 @@ test("change email to a taken address: the usual 'Almost there', and the owner i
   const taken = await signUpAndOnboard(pageA, "Amina");
   await signUpAndOnboard(pageB, "Badr");
 
-  await pageB.goto("/settings");
+  await pageB.goto("/settings/account");
   const changeEmail = pageB.locator("form").filter({ has: pageB.getByLabel("New email") });
   await changeEmail.getByLabel("New email").fill(taken);
   await changeEmail.getByLabel("Current password").fill(PASSWORD);

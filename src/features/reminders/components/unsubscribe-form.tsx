@@ -69,7 +69,7 @@ export function UnsubscribeForm({ token }: { token: string }) {
         </form>
       ) : (
         <Button asChild variant="card2" className="w-fit">
-          <Link href="/settings#reminders">Open Settings</Link>
+          <Link href="/settings/reminders">Open Settings</Link>
         </Button>
       )}
     </>

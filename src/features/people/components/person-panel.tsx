@@ -8,6 +8,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { pastelClasses } from "@/components/ui/chip";
 import { Switch } from "@/components/ui/switch";
+import { OccasionIcon } from "@/features/occasions/occasion-icon";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
 
@@ -122,9 +123,7 @@ export function PersonPanel({
               key={d.id}
               className="flex min-w-0 items-center gap-2.5 rounded-[16px] bg-card2 px-3.5 py-3"
             >
-              <span aria-hidden className="text-[20px]">
-                {d.emoji}
-              </span>
+              <OccasionIcon kind={d.kind} gentle={d.gentle} className="size-5 text-accent-text" />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="text-15 font-bold [overflow-wrap:anywhere]">{d.title}</span>
                 <span className="text-13 text-sub">{d.date}</span>
@@ -179,7 +178,7 @@ export function PersonPanel({
           <p className="text-14 text-sub">In memory. No gift ideas here.</p>
         ) : person.connected ? (
           <p className="text-14 text-sub">
-            Connected 💛 Their wishlist shows up here once sharing arrives.
+            Connected. Their wishlist shows up here once sharing arrives.
           </p>
         ) : (
           <div className="flex flex-col items-start gap-2">

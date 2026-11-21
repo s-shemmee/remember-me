@@ -18,7 +18,7 @@ test("ask a question and see the answer with its source", async ({ page }) => {
   // The account menu leads to Help & feedback.
   await page.getByRole("button", { name: /Account menu/ }).click();
   await page.getByRole("menuitem", { name: /Help & feedback/ }).click();
-  await expect(page).toHaveURL(/\/settings#help$/);
+  await expect(page).toHaveURL(/\/help$/);
 
   const card = page.locator("#ask-noor");
   await expect(card.getByRole("heading", { name: "Ask Noor" })).toBeVisible();

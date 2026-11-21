@@ -89,6 +89,45 @@ export type Database = {
           },
         ];
       };
+      feedback: {
+        Row: {
+          created_at: string;
+          emailed_at: string | null;
+          id: string;
+          message: string;
+          meta: NonNullable<Json>;
+          type: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          emailed_at?: string | null;
+          id?: string;
+          message: string;
+          meta?: NonNullable<Json>;
+          type: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          emailed_at?: string | null;
+          id?: string;
+          message?: string;
+          meta?: NonNullable<Json>;
+          type?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "feedback_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       future_notes: {
         Row: {
           body: string;
