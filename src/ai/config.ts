@@ -14,3 +14,8 @@ export const aiMock = () => process.env.AI_MOCK === "1" && !process.env.VERCEL;
  * (so Ask Noor can stay on while gift ideas are off, and the other way round).
  */
 export const giftIdeasEnabled = () => process.env.AI_GIFT_IDEAS_ENABLED === "true";
+/**
+ * Noor drafts a message (AI phase 2): AI_MESSAGES_ENABLED=true, and AI_ENABLED
+ * too. Off by default.
+ */
+export const messagesEnabled = () => aiEnabled() && process.env.AI_MESSAGES_ENABLED === "true";

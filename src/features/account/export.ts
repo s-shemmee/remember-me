@@ -27,7 +27,7 @@ export type ExportInput = {
     for: string | null;
     occursOn: string;
     note: string | null;
-    steps: { label: string; done: boolean }[];
+    steps: { label: string; done: boolean; message?: string }[];
   }[];
   /** Notes you can read (from their day on). */
   openedNotes?: { opensOn: string; body: string; writtenAt: string }[];

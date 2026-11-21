@@ -17,6 +17,8 @@ import { byKey, keyOf, type PlanTarget, type PlanView, type StepKind } from "../
 type PlansContextValue = {
   plans: Map<string, PlanView>;
   setPlan: (plan: PlanView) => void;
+  /** Noor drafts messages here (AI_MESSAGES_ENABLED and AI_ENABLED). */
+  messages: boolean;
 };
 
 const PlansContext = React.createContext<PlansContextValue | null>(null);
@@ -28,9 +30,11 @@ const PlansContext = React.createContext<PlansContextValue | null>(null);
  */
 export function PlansProvider({
   plans: initial,
+  messages = false,
   children,
 }: {
   plans: PlanView[];
+  messages?: boolean;
   children: React.ReactNode;
 }) {
   const [plans, setPlans] = React.useState(() => byKey(initial));
@@ -43,11 +47,11 @@ export function PlansProvider({
   const setPlan = React.useCallback((plan: PlanView) => {
     setPlans((current) => new Map(current).set(keyOf(plan), plan));
   }, []);
-  const value = React.useMemo(() => ({ plans, setPlan }), [plans, setPlan]);
+  const value = React.useMemo(() => ({ plans, setPlan, messages }), [plans, setPlan, messages]);
   return <PlansContext value={value}>{children}</PlansContext>;
 }
 
-const NO_PLANS: PlansContextValue = { plans: new Map(), setPlan: () => {} };
+const NO_PLANS: PlansContextValue = { plans: new Map(), setPlan: () => {}, messages: false };
 
 /** The page's plans (none outside a PlansProvider, e.g. in isolated tests). */
 export function usePlans() {

@@ -25,12 +25,19 @@ export function PlanChecklist({
   steps,
   busy,
   labelledBy,
+  extra,
   ...actions
-}: Actions & { steps: PlanStep[]; busy?: boolean; labelledBy?: string }) {
+}: Actions & {
+  steps: PlanStep[];
+  busy?: boolean;
+  labelledBy?: string;
+  /** Something under a step (e.g. "Write with Noor" on the Message step). */
+  extra?: (step: PlanStep) => React.ReactNode;
+}) {
   return (
     <ul aria-labelledby={labelledBy} className="flex flex-col gap-1">
       {steps.map((step) => (
-        <StepRow key={step.id} step={step} busy={busy} {...actions} />
+        <StepRow key={step.id} step={step} busy={busy} extra={extra?.(step)} {...actions} />
       ))}
     </ul>
   );
@@ -39,10 +46,11 @@ export function PlanChecklist({
 function StepRow({
   step,
   busy,
+  extra,
   toggle,
   rename,
   remove,
-}: Actions & { step: PlanStep; busy?: boolean }) {
+}: Actions & { step: PlanStep; busy?: boolean; extra?: React.ReactNode }) {
   const [editing, setEditing] = React.useState(false);
   const [value, setValue] = React.useState(step.label);
   const inputId = React.useId();
@@ -100,7 +108,7 @@ function StepRow({
   }
 
   return (
-    <li className="flex min-w-0 items-center gap-1">
+    <li className="flex min-w-0 flex-wrap items-center gap-1">
       <button
         type="button"
         role="checkbox"
@@ -147,6 +155,16 @@ function StepRow({
           <XIcon aria-hidden className="size-[18px]" />
           <span className="sr-only">Remove {step.label}</span>
         </Button>
+      )}
+      {(step.message || extra) && (
+        <div className="flex w-full flex-col items-start gap-1 pb-1 pl-[50px]">
+          {step.message && (
+            <p dir="auto" className="text-14 [overflow-wrap:anywhere] text-sub">
+              &ldquo;{step.message}&rdquo;
+            </p>
+          )}
+          {extra}
+        </div>
       )}
     </li>
   );

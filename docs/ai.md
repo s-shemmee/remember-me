@@ -47,6 +47,18 @@ flowchart LR
 - **Evals:** `docs/ai/evals/ask-noor.json` (15 questions with their expected page, plus 3 that must be refused). `pnpm ai:eval` runs them against the real providers and prints the pass rate (it exits 1 under 80%). **Never in CI.**
 - **Tests:** Vitest (the chunker, sources, threshold refusal, source validation, prompt injection, the Server Action), pgTAP (`supabase/tests/ask_noor.test.sql`: read-only chunks, server-only writes and counts, the caps), Playwright (`e2e/ask-noor.spec.ts` with `AI_MOCK=1`).
 
+## Messages (phase 2, built)
+
+Noor drafts a message to one of your people. Off unless `AI_ENABLED` **and** `AI_MESSAGES_ENABLED` are `true`.
+
+- **Where:** "Write a message" on a person's page (for their next day that isn't gentle), and "Write with Noor" on the Message step of a celebratory plan. Hidden for Remembrance days and people "In memory" (and refused on the server).
+- **Choices:** tone (Warm, Funny, Short and sweet, Formal), language (English, French, Arabic, Darija in Latin letters), length (Short, Medium), and an optional "something to mention" (≤ 200).
+- **What's sent** (`src/ai/messages/prompt.ts`, a whitelist copied field by field): first name, relation chip, occasion type, age only for a birthday with a known year, the little things' text, the mention, and the choices. Never emails, notes, the free-text relation, dates, wishes, reservations or anyone else's data. People's text sits in an untrusted `<data>` block.
+- **Model:** the same chain as gift ideas (Groq twice, then Cloudflare; `src/ai/messages/drafts.ts`). Zod: exactly 3 different drafts, each ≤ 400 characters, no emails, links or phone numbers. The system prompt is kind and safe, never invents facts, and answers `{"refused": true}` when the mention asks for anything but a kind message.
+- **Edge Function `noor-messages`:** the user's token; the person must be yours; `claim_ai_use('messages')`, 10 a day (`AI_MESSAGES_DAILY_LIMIT`), inside the shared global cap; every draft and regenerate counts. Prompts and drafts are never logged or stored.
+- **Use in plan:** the chosen text (editable first) is saved on the plan's Message step (`plan_steps.message`, ≤ 400, owner only) and the step is ticked. Copy copies it. Nothing is saved without that tap.
+- **Tests and evals:** Vitest (`src/ai/messages/messages.test.ts`), e2e with `AI_MOCK=1` fixtures (`e2e/noor-messages.spec.ts`), and `docs/ai/evals/messages.json` (9 fictional cases: four languages, tones, length, no PII, an injection, an off-topic refusal) via `[maintainer-only command omitted]` (never in CI).
+
 ## Gift ideas (phase 1, built)
 
 "Ask Noor for gift ideas 💡" on a person's panel, and in Home's nudge when the next day is a birthday. Never for a Remembrance day or someone "In memory" (hidden in the UI, refused by the Server Action and the function). It's for their next day that isn't gentle.

@@ -45,7 +45,10 @@ export function PeopleScreen({
   giftIdeas = false,
   bell = false,
   wishlists = {},
+  messages = false,
 }: {
+  /** Noor drafts messages (AI_MESSAGES_ENABLED and AI_ENABLED). */
+  messages?: boolean;
   people: PersonView[];
   /** Connected people's shared lists, by person id. */
   wishlists?: Record<string, PersonWishlist>;
@@ -160,7 +163,7 @@ export function PeopleScreen({
   };
 
   return (
-    <PlansProvider plans={plans}>
+    <PlansProvider plans={plans} messages={messages}>
       <PageHeader
         title="People"
         titleRef={titleRef}

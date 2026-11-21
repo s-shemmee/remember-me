@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 import { occasionTitle, typeFor } from "@/features/occasions/types";
 import { GiftIdeasButton } from "@/features/gift-ideas/components/gift-ideas";
+import { WriteMessageButton } from "@/features/messages/components/message-sheet";
 import { PlanDots } from "@/features/plans/components/plan-dots";
 import { PlanSheet } from "@/features/plans/components/plan-sheet";
 import { usePlans } from "@/features/plans/components/plan-state";
@@ -66,6 +67,7 @@ export function PersonPanel({
   className?: string;
 }) {
   const headingId = `person-${person.id}-name`;
+  const { messages } = usePlans();
   // Gift ideas are for their next day that isn't gentle; never "In memory".
   const giftDay = person.inMemory
     ? undefined
@@ -160,6 +162,12 @@ export function PersonPanel({
               ? "Nothing yet."
               : "Nothing yet. Add what they love, so gift ideas come easy."}
           </p>
+        )}
+        {messages && giftDay && (
+          <WriteMessageButton
+            className="self-start"
+            target={{ name: person.name, occasionId: giftDay.id, occursOn: giftDay.occursOn }}
+          />
         )}
         {giftIdeas && giftDay && (
           <GiftIdeasButton

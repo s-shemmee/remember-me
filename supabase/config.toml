@@ -482,3 +482,6 @@ verify_jwt = false
 
 [functions.send-feedback]
 verify_jwt = false
+
+[functions.noor-messages]
+verify_jwt = false

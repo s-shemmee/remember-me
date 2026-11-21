@@ -549,6 +549,7 @@ export type Database = {
           id: string;
           kind: string;
           label: string;
+          message: string | null;
           owner_id: string;
           plan_id: string;
           position: number;
@@ -561,6 +562,7 @@ export type Database = {
           id?: string;
           kind?: string;
           label: string;
+          message?: string | null;
           owner_id?: string;
           plan_id: string;
           position?: number;
@@ -572,6 +574,7 @@ export type Database = {
           id?: string;
           kind?: string;
           label?: string;
+          message?: string | null;
           owner_id?: string;
           plan_id?: string;
           position?: number;

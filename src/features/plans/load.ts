@@ -8,7 +8,7 @@ import { sortedSteps } from "./steps";
 type Supabase = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
 const PLAN_COLUMNS =
-  "id, occasion_id, occurs_on, note, plan_steps(id, kind, label, position, done_at, ticked_by)";
+  "id, occasion_id, occurs_on, note, plan_steps(id, kind, label, position, done_at, ticked_by, message)";
 
 type PlanRow = {
   id: string;
@@ -22,6 +22,7 @@ type PlanRow = {
     position: number;
     done_at: string | null;
     ticked_by: string | null;
+    message?: string | null;
   }[];
 };
 
@@ -39,6 +40,7 @@ export function toPlanView(row: PlanRow): PlanView {
         position: s.position,
         done: s.done_at !== null,
         byReservation: s.ticked_by === "reservation",
+        message: s.message ?? null,
       })),
     ),
   };

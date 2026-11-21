@@ -16,6 +16,10 @@ const actions = vi.hoisted(() => ({
   addStep: vi.fn(),
   saveNote: vi.fn(),
 }));
+vi.mock("@/features/messages/actions", () => ({
+  draftNoorMessages: vi.fn(),
+  saveMessageInPlan: vi.fn(),
+}));
 vi.mock("../actions", () => actions);
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 

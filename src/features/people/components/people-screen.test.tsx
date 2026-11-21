@@ -6,6 +6,10 @@ import { type PersonRow, peopleView } from "../view";
 
 // next/navigation: useSearchParams follows history.pushState, as in Next.
 const refresh = vi.fn();
+vi.mock("@/features/messages/actions", () => ({
+  draftNoorMessages: vi.fn(),
+  saveMessageInPlan: vi.fn(),
+}));
 vi.mock("next/navigation", async () => {
   const React = await import("react");
   const listeners = new Set<() => void>();

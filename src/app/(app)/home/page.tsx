@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Form from "next/form";
 import { Suspense } from "react";
 
-import { giftIdeasEnabled } from "@/ai/config";
+import { giftIdeasEnabled, messagesEnabled } from "@/ai/config";
 import { Card } from "@/components/ui/card";
 import { pastelClasses } from "@/components/ui/chip";
 import { TruncatedName } from "@/components/ui/truncated-name";
@@ -176,7 +176,7 @@ async function Dashboard() {
         bell={notificationsInboxEnabled()}
       />
 
-      <PlansProvider plans={plans}>
+      <PlansProvider plans={plans} messages={messagesEnabled()}>
         <NoorNudge
           text={nudge.text}
           personId={nudge.personId}

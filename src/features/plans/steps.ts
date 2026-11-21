@@ -68,6 +68,8 @@ export type PlanStep = {
   done: boolean;
   /** Ticked by reserving a gift (cancelling the reservation unticks it). */
   byReservation: boolean;
+  /** The message chosen for this step ("Use in plan" from Noor's drafts). */
+  message?: string | null;
 };
 
 export type PlanView = {

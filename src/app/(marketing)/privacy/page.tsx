@@ -84,6 +84,12 @@ const sections: LegalSection[] = [
             keep what was sent to make them.
           </li>
           <li>
+            <strong>Messages Noor drafts:</strong> we don&apos;t keep the drafts. If you choose
+            &ldquo;Use in plan&rdquo;, the message you picked (after any edits) is saved on that
+            step of your plan, which only you can see, until you change it or delete the plan or the
+            person. We count how many times you asked today (for the daily limit).
+          </li>
+          <li>
             <strong>Feedback:</strong> when you send feedback from Help &amp; feedback, we keep what
             you wrote and its type, and email it to us so we can read it and reply to your address.
             If you leave &ldquo;Include page and device info&rdquo; on, it also holds your browser,
@@ -190,7 +196,10 @@ const sections: LegalSection[] = [
             the relation you picked (like Friend or Family), the kind of day, the budget you chose,
             their little things, and the titles of wishes on their shared list that nobody has
             reserved. Never emails, birth dates or years, notes, prices, links, or who reserved
-            what.
+            what. When you ask Noor to draft a message, they get only that person&apos;s first name,
+            the relation you picked, the kind of day, their age if it&apos;s their birthday and you
+            saved the year, their little things, what you asked to mention, and the tone, language
+            and length you chose. Nothing else, and we don&apos;t store what was sent or the drafts.
           </li>
           <li>
             <strong>Your browser&apos;s push service</strong> (Google, Mozilla, Apple or Microsoft):

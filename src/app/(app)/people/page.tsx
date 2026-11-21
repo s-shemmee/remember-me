@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { giftIdeasEnabled } from "@/ai/config";
+import { giftIdeasEnabled, messagesEnabled } from "@/ai/config";
 import { PeopleScreen } from "@/features/people/components/people-screen";
 import type { PersonWishlist } from "@/features/people/components/person-panel";
 import { loadFriends } from "@/features/reservations/load";
@@ -49,6 +49,7 @@ async function People() {
       giftIdeas={giftIdeasEnabled()}
       bell={notificationsInboxEnabled()}
       wishlists={wishlists}
+      messages={messagesEnabled()}
     />
   );
 }

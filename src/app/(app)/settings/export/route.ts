@@ -63,7 +63,9 @@ export async function GET() {
     supabase.rpc("my_friends"),
     supabase
       .from("plans")
-      .select("occurs_on, note, occasions(people(name)), plan_steps(label, position, done_at)")
+      .select(
+        "occurs_on, note, occasions(people(name)), plan_steps(label, position, done_at, message)",
+      )
       .order("occurs_on"),
     // Only notes already open are readable (RLS); a sealed one stays sealed.
     supabase.from("future_notes").select("opens_on, body, created_at").order("opens_on"),
@@ -110,7 +112,11 @@ export async function GET() {
       note: p.note,
       steps: [...p.plan_steps]
         .sort((a, b) => a.position - b.position)
-        .map((st) => ({ label: st.label, done: st.done_at !== null })),
+        .map((st) => ({
+          label: st.label,
+          done: st.done_at !== null,
+          ...(st.message ? { message: st.message } : {}),
+        })),
     })),
     giftIdeas: (giftIdeas.data ?? []).map((g) => ({
       for: g.people?.name ?? "Someone",
