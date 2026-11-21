@@ -58,12 +58,15 @@ export const emailHashSecret = () => secret("EMAIL_HASH_SECRET", 32);
 /**
  * The site (links in emails and notifications): SITE_URL, e.g.
  * https://rememberme.shemme.codes. APP_URL is the older name, still read.
+ * Unset, it is localhost only on a local Supabase: emails from the cloud
+ * project never point (or load their logo) at localhost.
  */
 export const appUrl = () =>
-  (Deno.env.get("SITE_URL") ?? Deno.env.get("APP_URL") ?? "http://localhost:3000").replace(
-    /\/+$/,
-    "",
-  );
+  (
+    Deno.env.get("SITE_URL") ??
+    Deno.env.get("APP_URL") ??
+    (isLocal() ? "http://localhost:3000" : "https://rememberme.shemme.codes")
+  ).replace(/\/+$/, "");
 
 /** Public functions URL for List-Unsubscribe (not SUPABASE_URL, which is internal locally). */
 export const functionsUrl = () =>

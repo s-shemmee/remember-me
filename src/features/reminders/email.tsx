@@ -55,8 +55,18 @@ export type EmailLinks = {
  * `pnpm icons`) inside a red cell of the same size, so the red square
  * still shows when images are blocked (square in Outlook, which is fine).
  * alt="": "Remember me" follows.
+ *
+ * Always the absolute URL on the site (SITE_URL), never a relative path or
+ * an import, so it shows in real inboxes. A function, not an exported
+ * string constant: the deploy reads an exported string that starts with a
+ * slash as an import path and warns (src/lib/edge-bundle.test.ts).
  */
-export const EMAIL_LOGO_PATH = "/email/logo.png";
+export function emailLogoUrl(appUrl: string): string {
+  if (!/^https?:\/\/[^/]/.test(appUrl)) {
+    throw new Error("Email links need an absolute site URL (SITE_URL)");
+  }
+  return `${appUrl.replace(/\/+$/, "")}/email/logo.png`;
+}
 
 function Logo({ appUrl }: { appUrl: string }) {
   return (
@@ -83,7 +93,7 @@ function Logo({ appUrl }: { appUrl: string }) {
             {/* An email, not a Next page: a plain <img> is right here. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`${appUrl}${EMAIL_LOGO_PATH}`}
+              src={emailLogoUrl(appUrl)}
               width={28}
               height={28}
               alt=""

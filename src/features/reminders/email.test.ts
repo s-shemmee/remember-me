@@ -8,7 +8,7 @@ import { renderAccountExistsEmail } from "../auth/account-exists-email";
 
 import {
   EMAIL_COLORS,
-  EMAIL_LOGO_PATH,
+  emailLogoUrl,
   EMAIL_PASTELS,
   renderReminderEmail,
   renderTestEmail,
@@ -258,7 +258,9 @@ describe("the logo", () => {
       expect(cell).toBeDefined();
       expect(cell).toContain('bgcolor="#d63b48"');
       expect(cell).toContain("border-radius:8px");
-      expect(cell).toContain(`src="${links.appUrl}${EMAIL_LOGO_PATH}"`);
+      // Absolute, on the site: never a relative path, an import or a data: URL.
+      expect(cell).toContain('src="https://app.example/email/logo.png"');
+      expect(email.html).not.toMatch(/src="(?!https:\/\/)/);
       expect(cell).toContain('alt=""');
       expect(cell).toMatch(/width="28"[^>]*height="28"/);
       expect(email.html).not.toContain("♥");
@@ -277,13 +279,25 @@ describe("the logo", () => {
       expect(cell, name).toBeDefined();
       expect(cell).toContain('bgcolor="#d63b48"');
       expect(cell).toContain('src="{{ .SiteURL }}/email/logo.png"');
+      // Every image is absolute: Supabase fills {{ .SiteURL }} with the full site URL.
+      expect(html, name).not.toMatch(/src="(?!\{\{ \.SiteURL \}\}\/)/);
       expect(cell).toContain('alt=""');
       expect(html, name).not.toMatch(/&#9829;|♥/);
     }
   });
 
+  it("the URL is always absolute, from SITE_URL", () => {
+    expect(emailLogoUrl("https://rememberme.shemme.codes")).toBe(
+      "https://rememberme.shemme.codes/email/logo.png",
+    );
+    expect(emailLogoUrl("http://localhost:3000/")).toBe("http://localhost:3000/email/logo.png");
+    for (const bad of ["", "/", "rememberme.shemme.codes", "./public"]) {
+      expect(() => emailLogoUrl(bad), bad).toThrow(/absolute site URL/);
+    }
+  });
+
   it("the PNG is the 2× mark: 56×56", () => {
-    const png = readFileSync(`public${EMAIL_LOGO_PATH}`);
+    const png = readFileSync("public/email/logo.png");
     expect(png.subarray(1, 4).toString()).toBe("PNG");
     expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([56, 56]);
   });

@@ -3,36 +3,53 @@
  * index-help Edge Function, which embeds only new or changed chunks.
  *
  * Sources: docs/help/*.md, plus the landing FAQ (its FAQPage JSON-LD),
- * /privacy and /terms, read from the site (AI_INDEX_SITE_URL, default
- * NEXT_PUBLIC_SITE_URL, else the production site).
+ * /privacy and /terms, read from the site that matches the target
+ * (src/ai/ask-noor/index-site.ts): --site=<url>, else SITE_URL, else the
+ * production site for the cloud project and localhost for local Supabase.
+ * Localhost is refused for the cloud project, and so is a site that doesn't
+ * answer.
  *
  *   pnpm ai:index --dry-run                     # print the chunks, send nothing
  *   SUPABASE_URL=http://127.0.0.1:54321 AI_ADMIN_SECRET=… pnpm ai:index
  *
- * Prints only counts and the target host, never the secret.
+ * Prints only counts, the site and the target host, never the secret.
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import { chunkDoc, estimateTokens, type SourceDoc } from "../src/ai/ask-noor/chunk.ts";
+import { indexSite, siteFlag } from "../src/ai/ask-noor/index-site.ts";
 import { faqDoc, helpDoc, legalDoc } from "../src/ai/ask-noor/sources.ts";
 import { HELP_SLUGS } from "../src/features/help/slugs.ts";
 
 const root = path.resolve(import.meta.dirname, "..");
 const dryRun = process.argv.includes("--dry-run");
-const site = (
-  process.env.AI_INDEX_SITE_URL ||
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  "https://rememberme.shemme.codes"
-).replace(/\/+$/, "");
 
 function fail(message: string): never {
   console.error(`\nai:index: ${message}\n`);
   process.exit(1);
 }
 
+const supabaseUrl = (
+  process.env.SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  ""
+).replace(/\/+$/, "");
+const chosen = indexSite({
+  flag: siteFlag(process.argv),
+  siteUrl: process.env.SITE_URL,
+  supabaseUrl,
+});
+if (!chosen.ok) fail(chosen.error);
+const site = chosen.site;
+console.log(
+  `Site: ${site} (for ${supabaseUrl ? new URL(supabaseUrl).host : "a dry run with no Supabase target"}).`,
+);
+
 async function page(p: string): Promise<string> {
-  const res = await fetch(`${site}${p}`, { signal: AbortSignal.timeout(20_000) });
+  const res = await fetch(`${site}${p}`, { signal: AbortSignal.timeout(20_000) }).catch(() =>
+    fail(`${site}${p} didn't answer. Is the site running? Pass --site=<url> to read another one.`),
+  );
   if (!res.ok) fail(`${site}${p} answered ${res.status}`);
   return res.text();
 }
@@ -59,11 +76,6 @@ if (dryRun) {
   process.exit(0);
 }
 
-const supabaseUrl = (
-  process.env.SUPABASE_URL ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  ""
-).replace(/\/+$/, "");
 const secret = process.env.AI_ADMIN_SECRET;
 if (!supabaseUrl) fail("set SUPABASE_URL (the project's URL, or http://127.0.0.1:54321 locally).");
 if (!secret) fail("set AI_ADMIN_SECRET (the index-help function secret).");
