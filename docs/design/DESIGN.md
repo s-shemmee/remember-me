@@ -1,0 +1,90 @@
+# Remember Me — Design system and UI rules
+
+Read this before changing any UI. The code (Tailwind theme, `globals.css`, shadcn components) is the source of truth for exact values; this file explains the intent and the rules. If they disagree, follow the code and fix this file in the same PR.
+
+## Personality
+
+Playful, bright, never overwhelming. iOS-clean surfaces, soft pastels (one per person), rounded everything, gentle motion. Warm, short, human copy. Noor, a small pink birthday candle, is the mascot and the only "voice" allowed to be cute.
+
+## Colour tokens
+
+Light (default) / Dark:
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| bg | #F4F5F9 | #0E0E10 | page background |
+| card | #FFFFFF | #1A1A1D | cards, header buttons, menus |
+| card2 | #E9EBF1 | #232327 | secondary buttons, segmented tracks, chips off |
+| text | #1C1B1F | #F5F4F2 | body text |
+| sub | #5F5C66 | #A9A6AE | helper text, timestamps |
+| line | #E2E4EB | #2C2C31 | borders, dividers |
+| accent | #D63B48 | #FF8A8E | primary buttons, switches on, badges, focus ring |
+| accentText | #C2333F | #FF9EA1 | accent-coloured text and icons (passes 4.5:1) |
+| onAccent | #FFFFFF | #1A0B0C | text on accent |
+| bubble | #E9E9EB | #2C2C2E | Noor chat bubbles |
+| glass | rgba(255,255,255,.8) | rgba(26,26,29,.8) | phone tab bar (blurred) |
+
+Person pastels (background / ink): peach #FFE5D6 / #8A3B12, lilac #EAE3FF / #5B3FB5, mint #D7F5E6 / #1E6B49, sky #DCEBFF / #1F4F8F, rose #FFE0EA / #9A2E55, butter #FFF1C2 / #5E4500. Each person gets one pastel for avatar, pills and highlights. Dark versions: peach #3A2418/#FFC6A8, lilac #2A2140/#CDBDFF, mint #12302A/#9FE5C4, sky #142640/#A9CBFF, rose #3A1C28/#FFB3CB, butter #352C10/#FFE08A.
+
+Shadow (light): `0 1px 2px rgba(28,27,31,.04), 0 10px 28px rgba(28,27,31,.07)`. Dark mode uses a 1px ring (`0 0 0 1px #26262B`) instead of shadows.
+
+## Type
+
+- UI: Plus Jakarta Sans (`font-sans`, loaded in `src/app/layout.tsx`).
+- Instrument Serif italic in the accent colour (`font-serif`) for one or two words in key headings: the Home greeting name ("Good afternoon, *Maya*"), Celebrate *Me*, Birthday *memories*, the help center and auth headings.
+- Kalam (`font-hand`) only for small handwritten touches (the little line on My profile, the Celebrate Me countdown line).
+- Page title 28px on phones, 34px from 640px (`PageHeader`) / 800 / -0.03em. Section title 18–22px / 800. Body 15px. Helper 13px. Labels on tiles 12px / 700 / uppercase / +0.05em.
+
+## Shape and spacing
+
+- Radius (Tailwind theme in `globals.css`): page cards 28px (`rounded-card-lg`), tiles 24px (`rounded-card`), list rows 16–20px, text inputs 16px (`rounded-input`), buttons, chips and search fields full pill (999px), menus 20px, icon squares 12px.
+- Touch targets ≥ 44px. Header icon buttons (search on phones, theme, bell) are 44px circles on `card2`, no shadow.
+- Gaps: 24–28px between page sections, 12–16px inside cards.
+
+## Icons and emoji
+
+- Lucide icons only, stroke 2, 18–20px. Where an icon must stand out (Settings tabs and list, Help topics, My profile rows), tint it with `accentText`, on its own or inside a 12px-radius `card2`/`card` square.
+- **No emoji in app UI**: headings, nav, buttons, labels, tiles, empty-state titles, settings rows, menus.
+- Emoji ARE allowed in: Noor's own messages and nudges; user-written content (wish titles, "little things", notes); the character avatars people pick. "Little things" each carry a user-chosen emoji (default ❤️). Occasion types, plan steps and wish priorities use Lucide icon maps in the UI; their emoji are only for Noor's messages, emails and push.
+
+## App shell
+
+- Desktop (from 1024px): left sidebar (248px) + main. Sidebar = logo, Home, People, Calendar, Wishlists, Celebrate Me, the "Your day" countdown card, and the account button (avatar, first name, "7 people", ⋯) at the bottom.
+- Settings is NOT in the sidebar.
+- Account menu (opens upward from the account button): My profile · Settings · Help & feedback (Lucide icons) · divider · "Log out" as plain text, no icon. No theme control here.
+- Phone: a top bar (logo, and your avatar opening the same account menu) and a bottom tab bar Home · People · Calendar · Wishlists · Celebrate. My profile ends with Settings and Help & feedback rows on phones.
+
+## Page header (shared `<PageHeader>`)
+
+Left: title (Home: greeting + date line). Right side always in this order, skipping what a page doesn't have: **search → primary button → theme toggle → bell**. The bell is always the last item.
+
+| Page | Right side |
+|---|---|
+| Home | search · Add someone · bell (no theme toggle: header is full) |
+| People | search · Add someone · theme · bell |
+| Calendar | Add someone · theme · bell |
+| Wishlists | Add a wish · theme · bell |
+| Celebrate Me | My wishlist · theme · bell |
+| My profile, Settings, Help & feedback | bell |
+
+Theme toggle: moon in light, sun in dark ("Switch to dark mode" / "Switch to light mode"); same stored preference as Settings → Appearance. Bell is behind `NOTIFICATIONS_INBOX_ENABLED` (off: not rendered); until the inbox exists it links to Settings → Notifications. Phones: the actions become 44px icon buttons in the same order, and search opens its field on its own line.
+
+## Page layouts
+
+- **Home**: header → Noor nudge card (candle + iMessage-style bubble + actions) → 4 pastel stat tiles (Next up, This month, Your day, Gifts sorted) → "Coming up" list with filter chips and plan dots, beside the next person's birthday plan (4 steps) and a mini month calendar.
+- **People**: filter chips → desktop (from 1280px) two columns: people cards (left) and the selected person's panel (right: Days to remember with countdown pills, Little things chips with emoji, Their wishlist with thumbnails and status, or "Not connected yet" + Invite them; actions Plan their day / Edit). Connected cards carry a small link badge. Below 1280px: list → person page ("All people" goes back). No pending-request banner: connections are made only by accepting an invite link.
+- **Wishlists**: tabs My wishlists / Friends' wishlists → list chips → item cards (image, title, price · shop; on friends' lists a status: Reserved by you / Already taken / Reserve it). The owner never sees anything about reservations on their own wishes (not even that one exists), and nobody sees who reserved.
+- **My profile**: header card (avatar, name, @handle · City, birthday countdown, little line) → 3 stat tiles → Invite your people (copy link) → About you form → Who can see what → Connected with you.
+- **Settings**: /settings/{reminders,notifications,privacy,appearance,account}; /settings opens Reminders on desktop. Desktop: title, "Saved automatically as you go", pill tab bar (links, `aria-current`), one section at a time as cards. Phone: grouped list → drill-in pages with a back button. Account ends with the delete card, then an outlined "Log out".
+- **Help & feedback** (/help when signed in; visitors get the public help center there): Ask Noor card (only when `AI_ENABLED`) → 6 help topic cards → Send feedback form (type, message, device-info switch; 5 a day) → footer (contact, version, Privacy, Terms).
+
+## Noor
+
+- Look: pink candle body with darker stripes, flickering orange flame, dot eyes, small smile, blush. Gentle bob animation; respect reduced motion.
+- Voice: first person, short, warm, one emoji at most per message, never pushy, never guilt. Speaks in iMessage-style bubbles (grey `bubble`, tail bottom-left: radius 22 22 22 6).
+- Never reveals who reserved a gift. Only helps with Remember Me.
+
+## Motion and accessibility
+
+- 200–600ms with the soft ease (`ease-soft`); buttons lift 1px on hover and scale to .97 when pressed. At most one moving thing per section; nothing loops forever except Noor's bob. Everything off under `prefers-reduced-motion`.
+- Real `<button>`/`<a>`/`<input>`+`<label>`; aria-labels on icon-only buttons (the visible text, if any, starts the name); visible 3px accent focus ring (offset 3px); text contrast ≥ 4.5:1; axe clean in CI.

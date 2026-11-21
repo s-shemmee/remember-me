@@ -6,7 +6,7 @@ Goal: practise real AI product engineering (tool calling, structured output, RAG
 
 Built in feat/ask-noor-rag (the groundwork every AI feature reuses):
 
-- **Providers (`supabase/functions/_shared/ai.ts`):** Groq first, Cloudflare Workers AI as fallback. Both speak the OpenAI chat format, so plain `fetch` from Edge Functions, no SDK. JSON mode, temperature 0.2, a 15 s timeout each. Models come from env (`GROQ_MODEL`, default `llama-3.3-70b-versatile`; `CLOUDFLARE_MODEL`, default `@cf/meta/llama-3.3-70b-instruct-fp8-fast`). Keys are Supabase function secrets only, never in the Next app or Vercel. (This replaced the planned an earlier AI SDK integration: free tiers, and the calls belong next to the data.)
+- **Providers (`supabase/functions/_shared/ai.ts`):** Groq first, Cloudflare Workers AI as fallback. Both speak the OpenAI chat format, so plain `fetch` from Edge Functions, no SDK. JSON mode, temperature 0.2, a 15 s timeout each. Models come from env (`GROQ_MODEL`, default `llama-3.3-70b-versatile`; `CLOUDFLARE_MODEL`, default `@cf/meta/llama-3.3-70b-instruct-fp8-fast`). Keys are Supabase function secrets only, never in the Next app or Vercel. (This replaced the planned paid LLM APIs via the Vercel AI SDK: free tiers, and the calls belong next to the data.)
 - **Embeddings:** Supabase's built-in **gte-small** (384 dims, mean-pooled and normalised), run inside Edge Functions for free. **gte-small is English-first:** questions in French, Darija or Arabic match less well and may be refused with "I can only help with Remember Me". That's acceptable for now; a multilingual model is the fix if people need it.
 - **Schemas:** Zod for every input and output: `src/ai/ask-noor/answer.ts` (the question; the model's JSON) and `src/features/ask-noor/schema.ts` (the function's response, checked again in Next).
 - **Limits:** `ai_usage_daily` (counts only: user, day, feature) and `claim_ai_use()` (service role): a per-user daily limit per feature (Ask Noor `AI_USER_DAILY_LIMIT`, default 20; gift ideas `AI_GIFT_IDEAS_DAILY_LIMIT`, default 5) and **one global daily cap shared by every AI feature** (`AI_GLOBAL_DAILY_CAP`, default 500). Old rows go after 30 days.
@@ -44,7 +44,7 @@ flowchart LR
 - **Validation:** Zod checks the shape; **every source must be one of the retrieved chunks**, or the answer is rejected (one retry, then "I'm not sure"). Em dashes are turned into commas.
 - **Prompt injection:** the documents are trusted; the question is wrapped in `<question>` as untrusted data that may not change the rules or the format, and it can't close its delimiter or add a document. Even an obeyed injection can only cite retrieved chunks.
 - **Privacy:** questions are never stored or logged (not in Sentry either); only the daily count per user. Groq or Cloudflare see the question and the matching help text, never names, emails or people.
-- **Evals:** `docs/ai/evals/ask-noor.json` (15 questions with their expected page, plus 3 that must be refused). `pnpm ai:eval` runs them against the real providers and prints the pass rate (it exits 1 under 80%). **Never in CI.**
+- **Evals:** `docs/ai/evals/ask-noor.json` (15 questions with their expected page, plus 3 that must be refused). `[maintainer-only command omitted]` (the owner; local Supabase without the flag) runs them against the real providers and prints the pass rate (it exits 1 under 80%). **Never in CI.**
 - **Tests:** Vitest (the chunker, sources, threshold refusal, source validation, prompt injection, the Server Action), pgTAP (`supabase/tests/ask_noor.test.sql`: read-only chunks, server-only writes and counts, the caps), Playwright (`e2e/ask-noor.spec.ts` with `AI_MOCK=1`).
 
 ## Messages (phase 2, built)
@@ -83,7 +83,7 @@ flowchart LR
 - **Saved:** `gift_idea_results` keeps the last ideas per person, so reopening costs nothing. "New ideas" uses one of the day's 5.
 - **Add to their plan:** opens the plan for that day, then **renames its unticked Gift step to the idea**, or adds a new unticked Gift step when there's none or it's already ticked. Never ticked: it's an idea to act on.
 - **Privacy:** prompts and ideas are never logged or sent to Sentry. Groq or Cloudflare see only the whitelist above.
-- **Evals:** `docs/ai/evals/gift-ideas.json` (8 fictional people, one with a prompt injection in a little thing). `pnpm ai:eval gift-ideas` checks 3–5 ideas, the length limits, no prices or links, and that an idea mentions one of their little things. **Never in CI.**
+- **Evals:** `docs/ai/evals/gift-ideas.json` (8 fictional people, one with a prompt injection in a little thing). `[maintainer-only command omitted]` checks 3–5 ideas, the length limits, no prices or links, and that an idea mentions one of their little things. **Never in CI.**
 - **Tests:** Vitest (forbidden fields never sent, free wishes only, delimiters, gentle days, the schema, retry and fallback, the limit messages, the rename-or-add rule), pgTAP (`supabase/tests/gift_ideas.test.sql`: owner-only results, server-only writes, deleted with the person, free and connected wish titles only, the shared cap), Playwright (`e2e/gift-ideas.spec.ts` with `AI_MOCK=1`).
 
 ## Phases
