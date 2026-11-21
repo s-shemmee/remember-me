@@ -3,7 +3,12 @@
  * providers, and prints a pass rate per suite. Never in CI (it calls real AI
  * providers). Both suites by default, or one: `pnpm ai:eval gift-ideas`.
  *
- *   SUPABASE_URL=http://127.0.0.1:54321 AI_ADMIN_SECRET=… pnpm ai:eval
+ * Like `supabase db push`, local Supabase unless you name the cloud project
+ * (src/lib/script-target.ts):
+ *
+ *   pnpm ai:eval                                             # local Supabase
+ *   read -rs AI_ADMIN_SECRET
+ *   AI_ADMIN_SECRET="$AI_ADMIN_SECRET" pnpm ai:eval gift-ideas --remote="${SUPABASE_PROJECT_REF:?}"
  *
  * Ask Noor (docs/ai/evals/ask-noor.json): a case passes when Noor answers and
  * cites a source starting with expectedSource, or, for expectedSource null,
@@ -21,6 +26,7 @@ import {
   TITLE_MAX,
   WHY_MAX,
 } from "../src/ai/gift-ideas/ideas.ts";
+import { adminSecretFor, positionalArgs, scriptTarget } from "../src/lib/script-target.ts";
 
 type Case = { question: string; expectedSource: string | null };
 type Result =
@@ -30,18 +36,20 @@ type Result =
   | { error: string };
 
 const root = path.resolve(import.meta.dirname, "..");
-const supabaseUrl = (
-  process.env.SUPABASE_URL ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  ""
-).replace(/\/+$/, "");
-const secret = process.env.AI_ADMIN_SECRET;
-if (!supabaseUrl || !secret) {
-  console.error("\nai:eval: set SUPABASE_URL and AI_ADMIN_SECRET.\n");
+function fail(message: string): never {
+  console.error(`\nai:eval: ${message}\n`);
   process.exit(1);
 }
 
-const only = process.argv[2];
+const target = scriptTarget(process.argv, { SUPABASE_URL: process.env.SUPABASE_URL });
+if (!target.ok) fail(target.error);
+const supabaseUrl = target.url;
+const secretFor = adminSecretFor(target, process.env.AI_ADMIN_SECRET);
+if (!secretFor.ok) fail(secretFor.error);
+const secret = secretFor.secret;
+console.log(`Target: ${target.label}.`);
+
+const only = positionalArgs(process.argv.slice(2))[0];
 const rates: boolean[] = [];
 
 async function askNoorSuite() {

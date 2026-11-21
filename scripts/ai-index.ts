@@ -9,18 +9,24 @@
  * Localhost is refused for the cloud project, and so is a site that doesn't
  * answer.
  *
- *   pnpm ai:index --dry-run                     # print the chunks, send nothing
- *   SUPABASE_URL=http://127.0.0.1:54321 AI_ADMIN_SECRET=… pnpm ai:index
+ * Like `supabase db push`, local Supabase unless you name the cloud project
+ * (src/lib/script-target.ts):
  *
- * Prints only counts, the site and the target host, never the secret.
+ *   pnpm ai:index --dry-run                                  # the chunks, nothing sent
+ *   pnpm ai:index                                            # local Supabase
+ *   read -rs AI_ADMIN_SECRET
+ *   AI_ADMIN_SECRET="$AI_ADMIN_SECRET" pnpm ai:index --remote="${SUPABASE_PROJECT_REF:?}"
+ *
+ * Prints only counts, the site and the target, never the secret.
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import { chunkDoc, estimateTokens, type SourceDoc } from "../src/ai/ask-noor/chunk.ts";
-import { indexSite, siteFlag } from "../src/ai/ask-noor/index-site.ts";
+import { indexSite, isLocalUrl, siteFlag } from "../src/ai/ask-noor/index-site.ts";
 import { faqDoc, helpDoc, legalDoc } from "../src/ai/ask-noor/sources.ts";
 import { HELP_SLUGS } from "../src/features/help/slugs.ts";
+import { adminSecretFor, scriptTarget } from "../src/lib/script-target.ts";
 
 const root = path.resolve(import.meta.dirname, "..");
 const dryRun = process.argv.includes("--dry-run");
@@ -30,21 +36,25 @@ function fail(message: string): never {
   process.exit(1);
 }
 
-const supabaseUrl = (
-  process.env.SUPABASE_URL ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  ""
-).replace(/\/+$/, "");
+const target = scriptTarget(process.argv, { SUPABASE_URL: process.env.SUPABASE_URL });
+if (!target.ok) fail(target.error);
+const supabaseUrl = target.url;
+// Checked before reading anything (a dry run sends nothing, so needs none).
+const secretFor = dryRun ? null : adminSecretFor(target, process.env.AI_ADMIN_SECRET);
+if (secretFor && !secretFor.ok) fail(secretFor.error);
+const secret = secretFor?.ok ? secretFor.secret : "";
+// For the cloud project, a localhost SITE_URL (from .env.local) is skipped:
+// the production site is the default there.
+const siteFromEnv = process.env.SITE_URL;
 const chosen = indexSite({
   flag: siteFlag(process.argv),
-  siteUrl: process.env.SITE_URL,
+  siteUrl: target.remote && siteFromEnv && isLocalUrl(siteFromEnv) ? undefined : siteFromEnv,
   supabaseUrl,
 });
 if (!chosen.ok) fail(chosen.error);
 const site = chosen.site;
-console.log(
-  `Site: ${site} (for ${supabaseUrl ? new URL(supabaseUrl).host : "a dry run with no Supabase target"}).`,
-);
+console.log(`Target: ${target.label}${dryRun ? " (dry run: nothing is sent)" : ""}.`);
+console.log(`Site: ${site}.`);
 
 async function page(p: string): Promise<string> {
   const res = await fetch(`${site}${p}`, { signal: AbortSignal.timeout(20_000) }).catch(() =>
@@ -75,10 +85,6 @@ if (dryRun) {
     console.log(`  ${c.key.padEnd(48)} ${estimateTokens(c.content)} tokens  ${c.url}`);
   process.exit(0);
 }
-
-const secret = process.env.AI_ADMIN_SECRET;
-if (!supabaseUrl) fail("set SUPABASE_URL (the project's URL, or http://127.0.0.1:54321 locally).");
-if (!secret) fail("set AI_ADMIN_SECRET (the index-help function secret).");
 
 // Small batches: embedding is slow and every request has a wall-clock limit.
 const BATCH = 3;
