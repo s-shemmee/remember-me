@@ -12,7 +12,7 @@ const valid: PersonFormValues = {
   day: 6,
   month: 11,
   year: 1996,
-  littleThings: ["black coffee"],
+  littleThings: [{ text: "black coffee", emoji: "☕" }],
   days: [
     { id: null, kind: "anniversary", title: "", day: 16, month: 11, year: 1993, recurring: true },
   ],
@@ -62,12 +62,14 @@ describe("personFormSchema", () => {
 
   it("limits little things to 20, each up to 60 characters", () => {
     expect(
-      errorsOf({ ...valid, littleThings: Array.from({ length: 21 }, (_, i) => `t${i}`) })
-        .littleThings,
+      errorsOf({
+        ...valid,
+        littleThings: Array.from({ length: 21 }, (_, i) => ({ text: `t${i}` })),
+      }).littleThings,
     ).toBe("Up to 20 little things.");
-    expect(errorsOf({ ...valid, littleThings: ["x".repeat(61)] })["littleThings.0"]).toBe(
-      "Keep each one to 60 characters.",
-    );
+    expect(
+      errorsOf({ ...valid, littleThings: [{ text: "x".repeat(61) }] })["littleThings.0.text"],
+    ).toBe("Keep each one to 60 characters.");
   });
 
   it("checks other days, keyed by their row", () => {
@@ -114,5 +116,22 @@ describe("personError", () => {
     });
     expect(personError("not_authenticated")).toEqual({ kind: "signed_out" });
     expect(personError("boom").kind).toBe("unknown");
+  });
+});
+
+describe("little things: an emoji each", () => {
+  it("one emoji, a heart when none was chosen", () => {
+    const r = personFormSchema.parse({ ...valid, littleThings: [{ text: "Tea" }] });
+    expect(r.littleThings).toEqual([{ text: "Tea", emoji: "❤️" }]);
+    for (const emoji of ["tea", "☕☕", " ☕", ""]) {
+      expect(
+        errorsOf({ ...valid, littleThings: [{ text: "Tea", emoji }] })["littleThings.0.emoji"],
+        emoji,
+      ).toBe("Pick one emoji.");
+    }
+    expect(
+      personFormSchema.safeParse({ ...valid, littleThings: [{ text: "Tea", emoji: "👩🏽‍💻" }] })
+        .success,
+    ).toBe(true);
   });
 });

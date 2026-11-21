@@ -487,6 +487,7 @@ export type Database = {
           id: string;
           in_memory: boolean;
           linked_profile_id: string | null;
+          little_thing_emojis: string[];
           little_things: string[];
           name: string;
           owner_id: string;
@@ -502,6 +503,7 @@ export type Database = {
           id?: string;
           in_memory?: boolean;
           linked_profile_id?: string | null;
+          little_thing_emojis?: string[];
           little_things?: string[];
           name: string;
           owner_id?: string;
@@ -516,6 +518,7 @@ export type Database = {
           id?: string;
           in_memory?: boolean;
           linked_profile_id?: string | null;
+          little_thing_emojis?: string[];
           little_things?: string[];
           name?: string;
           owner_id?: string;
@@ -1005,8 +1008,10 @@ export type Database = {
           status: string;
         }[];
       };
+      is_little_emoji: { Args: { p_emoji: string }; Returns: boolean };
       is_push_endpoint: { Args: { p_endpoint: string }; Returns: boolean };
       link_person: { Args: { p_person_id: string; p_profile_id: string }; Returns: undefined };
+      little_emojis_valid: { Args: { p_emojis: string[] }; Returns: boolean };
       match_help_chunks: {
         Args: { p_count: number; p_embedding: string; p_threshold: number };
         Returns: {
@@ -1152,6 +1157,7 @@ export type Database = {
           p_color?: string;
           p_days?: Json;
           p_id?: string;
+          p_little_thing_emojis?: string[];
           p_little_things?: string[];
           p_name?: string;
           p_relation?: string;

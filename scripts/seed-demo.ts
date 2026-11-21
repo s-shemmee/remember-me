@@ -39,6 +39,7 @@ import {
   demoPeople,
   PLANS,
   SEALED_NOTE,
+  splitThing,
   WISHES,
 } from "./demo/data.ts";
 import { giftPng } from "./demo/gift-png.ts";
@@ -190,7 +191,8 @@ async function main() {
         p_birthday_day: p.birthday.day,
         p_birthday_month: p.birthday.month,
         p_birthday_year: p.birthday.year,
-        p_little_things: p.littleThings,
+        p_little_things: p.littleThings.map((t) => splitThing(t).text),
+        p_little_thing_emojis: p.littleThings.map((t) => splitThing(t).emoji),
         p_days: p.days,
       }),
       `add ${p.name}`,

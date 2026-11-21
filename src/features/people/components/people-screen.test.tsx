@@ -317,7 +317,12 @@ describe("Add and edit dialog", () => {
       color: "sky",
       day: 14,
       month: 4,
-      littleThings: ["sunflowers", "watercolours", "her cat Mimi"],
+      // Suggested from the words (sunflowers → 🌻, watercolours → 🎨, cat → 🐱).
+      littleThings: [
+        { text: "sunflowers", emoji: "🌻" },
+        { text: "watercolours", emoji: "🎨" },
+        { text: "her cat Mimi", emoji: "🐱" },
+      ],
       days: [
         {
           id: null,

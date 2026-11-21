@@ -46,7 +46,7 @@ export async function GET() {
     supabase
       .from("people")
       .select(
-        "name, relation_kind, relation, color, little_things, in_memory, created_at, occasions(kind, title, day, month, year, recurring)",
+        "name, relation_kind, relation, color, little_things, little_thing_emojis, in_memory, created_at, occasions(kind, title, day, month, year, recurring)",
       )
       .is("archived_at", null)
       .order("created_at"),

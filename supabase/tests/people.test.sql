@@ -22,7 +22,7 @@ select has_column('public', 'people', 'relation_kind', 'people.relation_kind exi
 select is((select prosecdef from pg_proc where proname = 'save_person'), false,
   'save_person runs as the caller (security invoker)');
 select is(
-  has_function_privilege('anon', 'public.save_person(uuid, text, text, text, text, integer, integer, integer, text[], jsonb)', 'execute'),
+  has_function_privilege('anon', 'public.save_person(uuid, text, text, text, text, integer, integer, integer, text[], jsonb, text[])', 'execute'),
   false, 'anonymous visitors cannot call save_person');
 
 -- A: add a person with days and little things --------------------------------

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { DEFAULT_EMOJI, isSingleEmoji } from "./little-emoji";
+
 import { birthdayRules, dayField, monthField, optionalYear } from "@/features/onboarding/schema";
 import { isLeapYear, isRealDayMonth } from "@/lib/dates";
 import { occasionType, OTHER_DAY_KINDS, type OtherDayKind } from "@/features/occasions/types";
@@ -94,11 +96,17 @@ export const personFormSchema = z
     year: optionalYear,
     littleThings: z
       .array(
-        z
-          .string()
-          .trim()
-          .min(1)
-          .max(LITTLE_THING_MAX, { error: `Keep each one to ${LITTLE_THING_MAX} characters.` }),
+        z.object({
+          text: z
+            .string()
+            .trim()
+            .min(1)
+            .max(LITTLE_THING_MAX, { error: `Keep each one to ${LITTLE_THING_MAX} characters.` }),
+          emoji: z
+            .string()
+            .refine(isSingleEmoji, { error: "Pick one emoji." })
+            .default(DEFAULT_EMOJI),
+        }),
       )
       .max(LITTLE_THINGS_LIMIT, { error: `Up to ${LITTLE_THINGS_LIMIT} little things.` }),
     days: z

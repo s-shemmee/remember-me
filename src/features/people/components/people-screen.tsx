@@ -23,7 +23,7 @@ import type { PersonFormValues } from "../schema";
 import { filterPeople, type PersonView } from "../view";
 import { PersonCard } from "./person-card";
 import { emptyPersonForm, PersonDialog, type PersonDialogResult } from "./person-dialog";
-import { PersonPanel } from "./person-panel";
+import { PersonPanel, type PersonWishlist } from "./person-panel";
 import { PlansProvider } from "@/features/plans/components/plan-state";
 import type { PlanView } from "@/features/plans/steps";
 
@@ -44,8 +44,11 @@ export function PeopleScreen({
   today = "",
   giftIdeas = false,
   bell = false,
+  wishlists = {},
 }: {
   people: PersonView[];
+  /** Connected people's shared lists, by person id. */
+  wishlists?: Record<string, PersonWishlist>;
   /** The notification bell in the header (NOTIFICATIONS_INBOX_ENABLED). */
   bell?: boolean;
   /** Noor's gift ideas are switched on (AI_GIFT_IDEAS_ENABLED). */
@@ -255,6 +258,7 @@ export function PeopleScreen({
               headingRef={headingRef}
               today={today}
               giftIdeas={giftIdeas}
+              wishlist={wishlists[panelPerson.id] ?? null}
               onBack={backToList}
               onEdit={() => openEdit(panelPerson)}
               onInvite={() => {

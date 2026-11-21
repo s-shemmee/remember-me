@@ -60,7 +60,7 @@ const form = {
   day: 9,
   month: 1,
   year: null,
-  littleThings: ["roses"],
+  littleThings: [{ text: "roses", emoji: "🌹" }],
   days: [
     {
       id: DAY_ID,
@@ -106,6 +106,7 @@ describe("savePerson", () => {
       p_birthday_month: 1,
       p_birthday_year: undefined,
       p_little_things: ["roses"],
+      p_little_thing_emojis: ["🌹"],
       p_days: [
         {
           id: DAY_ID,

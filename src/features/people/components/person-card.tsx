@@ -1,3 +1,5 @@
+import { LinkIcon } from "lucide-react";
+
 import { Avatar } from "@/components/ui/avatar";
 import { pastelClasses } from "@/components/ui/chip";
 import { cn } from "@/lib/utils";
@@ -5,8 +7,9 @@ import { cn } from "@/lib/utils";
 import type { PersonView } from "../view";
 
 /**
- * A person on the People grid (AppPeople.dc.html): avatar in their colour,
- * name and relation, and a pill in their colour with their next day.
+ * A person on the People grid (AppPeople.dc.html): avatar in their colour
+ * (a small link badge when you're connected), name and relation, and a pill
+ * in their colour with their next day.
  * A link to their profile (?person=id), marked aria-current when shown.
  */
 export function PersonCard({
@@ -33,17 +36,26 @@ export function PersonCard({
         current === "implicit" && "xl:ring-[2.5px] xl:ring-accent",
       )}
     >
-      <Avatar name={person.name} pastel={person.color} decorative className="size-[52px] text-16" />
+      <span className="relative shrink-0">
+        <Avatar
+          name={person.name}
+          pastel={person.color}
+          decorative
+          className="size-[52px] text-16"
+        />
+        {person.connected && (
+          <span className="absolute -right-0.5 -bottom-0.5 grid size-5 place-items-center rounded-full bg-accent text-on-accent ring-2 ring-card">
+            <LinkIcon aria-hidden className="size-3" strokeWidth={2.5} />
+          </span>
+        )}
+      </span>
       <span className="flex w-full min-w-0 flex-1 flex-col items-start gap-2 @[30rem]:gap-2.5">
         <span className="flex w-full min-w-0 flex-col gap-0.5">
           <span className="truncate text-17 font-bold">{person.name}</span>
-          {(person.relationLabel || person.connected) && (
-            <span className="truncate text-14 text-sub">
-              {[person.relationLabel, person.connected ? "Connected" : null]
-                .filter(Boolean)
-                .join(" · ")}
-            </span>
+          {person.relationLabel && (
+            <span className="truncate text-14 text-sub">{person.relationLabel}</span>
           )}
+          {person.connected && <span className="sr-only">Connected</span>}
         </span>
         {person.next && (
           <span

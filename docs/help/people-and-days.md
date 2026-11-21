@@ -19,6 +19,8 @@ Tap **Add another day** to add an anniversary, a graduation, a work milestone, a
 
 Little things help you choose gifts and remember what makes someone smile. Noor uses them in your reminders too.
 
+Each little thing has an emoji. I suggest one as you type (coffee gets ☕, football gets ⚽), or tap it to choose another, type any emoji you like, or go back to the heart.
+
 ## In memory
 
 If someone has passed away, turn on **In memory** in their profile. Their days are then remembered gently: no countdowns, no "turns 70", and no gift ideas.

@@ -3,7 +3,8 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { ACCOUNTS, demoPeople, PLANS, WISHES } from "../../scripts/demo/data";
+import { ACCOUNTS, demoPeople, PLANS, splitThing, WISHES } from "../../scripts/demo/data";
+import { isSingleEmoji } from "../features/people/little-emoji";
 import { addDays, daysBetween, nextOccurrence } from "./dates";
 import { checkSeedTarget } from "./seed-guard";
 
@@ -113,8 +114,10 @@ describe("demo data", () => {
       expect(p.littleThings.length, p.name).toBeGreaterThanOrEqual(2);
       expect(p.littleThings.length, p.name).toBeLessThanOrEqual(4);
       for (const t of p.littleThings) {
-        expect(t, p.name).toMatch(/^\p{Extended_Pictographic}/u);
-        expect(t.length).toBeLessThanOrEqual(60);
+        const { emoji, text } = splitThing(t);
+        expect(isSingleEmoji(emoji), `${p.name}: ${t}`).toBe(true);
+        expect(text.length).toBeGreaterThan(0);
+        expect(text.length).toBeLessThanOrEqual(60);
       }
     }
     const kinds = new Set(people.flatMap((p) => p.days.map((d) => d.kind)));

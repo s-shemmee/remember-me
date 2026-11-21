@@ -124,6 +124,12 @@ function once(today: CalendarDate, n: number) {
   return { day: d.day, month: d.month, year: d.year };
 }
 
+/** "⚽ Loves football" → the emoji and the text, as the app stores them. */
+export function splitThing(thing: string): { emoji: string; text: string } {
+  const [emoji = "", ...rest] = thing.split(" ");
+  return { emoji, text: rest.join(" ") };
+}
+
 /** Maya's seven people, over the next 60 days. */
 export function demoPeople(today: CalendarDate): DemoPerson[] {
   const birth = (n: number, year?: number) => on(today, n, year);

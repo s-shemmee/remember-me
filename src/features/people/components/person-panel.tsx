@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, GiftIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -10,7 +11,6 @@ import { pastelClasses } from "@/components/ui/chip";
 import { Switch } from "@/components/ui/switch";
 import { OccasionIcon } from "@/features/occasions/occasion-icon";
 import { cn } from "@/lib/utils";
-import type { Pastel } from "@/styles/tokens";
 
 import { occasionTitle, typeFor } from "@/features/occasions/types";
 import { GiftIdeasButton } from "@/features/gift-ideas/components/gift-ideas";
@@ -20,16 +20,10 @@ import { usePlans } from "@/features/plans/components/plan-state";
 import { pastPlans, planKey, type PlanTarget, progress, styleFor } from "@/features/plans/steps";
 
 import { setInMemory } from "../actions";
-import type { DayView, PersonView } from "../view";
+import type { FriendWish } from "@/features/reservations/logic";
+import { formatPrice } from "@/features/wishes/schema";
 
-const inkText: Record<Pastel, string> = {
-  peach: "text-peach-ink",
-  lilac: "text-lilac-ink",
-  mint: "text-mint-ink",
-  sky: "text-sky-ink",
-  rose: "text-rose-ink",
-  butter: "text-butter-ink",
-};
+import type { DayView, PersonView } from "../view";
 
 function SectionLabel({ id, children }: { id: string; children: React.ReactNode }) {
   return (
@@ -40,9 +34,11 @@ function SectionLabel({ id, children }: { id: string; children: React.ReactNode 
 }
 
 /**
- * A person's profile (AppPeople.dc.html, right panel): their days with
- * countdowns, the little things they love, and their wishlist (connections
- * come in M3). From 1280px it sits next to the grid; below, it replaces the
+ * A person's profile (AppPeople.dc.html, right panel), top to bottom:
+ * avatar, name and "relation · Connected/Not connected"; their days with
+ * countdown pills; little things (emoji + text); their wishlist (first
+ * items with status and "See all", or "Invite them"); then "Plan their day"
+ * and Edit. From 1280px it sits next to the grid; below, it replaces the
  * grid and "All people" goes back.
  */
 export function PersonPanel({
@@ -53,9 +49,12 @@ export function PersonPanel({
   headingRef,
   today,
   giftIdeas = false,
+  wishlist = null,
   className,
 }: {
   person: PersonView;
+  /** Their shared "My birthday" list, when you're connected (as you see it). */
+  wishlist?: PersonWishlist | null;
   /** Noor's gift ideas are switched on (AI_GIFT_IDEAS_ENABLED). */
   giftIdeas?: boolean;
   /** Today in the user's timezone, "2026-11-17" (past plans are before it). */
@@ -67,7 +66,6 @@ export function PersonPanel({
   className?: string;
 }) {
   const headingId = `person-${person.id}-name`;
-  const ink = inkText[person.color];
   // Gift ideas are for their next day that isn't gentle; never "In memory".
   const giftDay = person.inMemory
     ? undefined
@@ -105,13 +103,11 @@ export function PersonPanel({
           >
             {person.name}
           </h2>
-          {(person.relationLabel || person.connected) && (
-            <span className="truncate text-14 text-sub">
-              {[person.relationLabel, person.connected ? "Connected" : null]
-                .filter(Boolean)
-                .join(" · ")}
-            </span>
-          )}
+          <span className="truncate text-14 text-sub">
+            {[person.relationLabel, person.connected ? "Connected" : "Not connected"]
+              .filter(Boolean)
+              .join(" · ")}
+          </span>
         </div>
       </div>
 
@@ -128,7 +124,12 @@ export function PersonPanel({
                 <span className="text-15 font-bold [overflow-wrap:anywhere]">{d.title}</span>
                 <span className="text-13 text-sub">{d.date}</span>
               </span>
-              <span className={cn("shrink-0 text-13 font-bold", d.gentle ? "text-sub" : ink)}>
+              <span
+                className={cn(
+                  "shrink-0 rounded-pill px-2.5 py-1 text-13 font-bold",
+                  d.gentle ? "bg-card text-sub" : pastelClasses[person.color],
+                )}
+              >
                 {d.when}
               </span>
             </li>
@@ -142,13 +143,14 @@ export function PersonPanel({
           <ul aria-labelledby={`${headingId}-things`} className="flex flex-wrap gap-1.5">
             {person.littleThings.map((t, i) => (
               <li
-                key={`${i}-${t}`}
+                key={`${i}-${t.text}`}
                 className={cn(
-                  "max-w-full rounded-pill px-3 py-[7px] text-13 font-semibold [overflow-wrap:anywhere]",
+                  "inline-flex max-w-full items-center gap-1.5 rounded-pill px-3 py-[7px] text-13 font-semibold [overflow-wrap:anywhere]",
                   pastelClasses[person.color],
                 )}
               >
-                {t}
+                <span aria-hidden>{t.emoji}</span>
+                {t.text}
               </li>
             ))}
           </ul>
@@ -177,28 +179,20 @@ export function PersonPanel({
         {person.inMemory ? (
           <p className="text-14 text-sub">In memory. No gift ideas here.</p>
         ) : person.connected ? (
-          <p className="text-14 text-sub">
-            Connected. Their wishlist shows up here once sharing arrives.
-          </p>
+          <TheirWishlist wishlist={wishlist} name={person.name} />
         ) : (
           <div className="flex flex-col items-start gap-2">
             <p className="text-14 text-sub">Not connected yet, so no shared wishlist.</p>
-            <Button variant="card2" onClick={onInvite} className="max-w-full">
-              <span className="truncate">Invite {person.name} to Remember Me</span>
+            <Button variant="card2" onClick={onInvite}>
+              Invite them<span className="sr-only">: {person.name}</span>
             </Button>
           </div>
         )}
       </div>
 
-      {person.next && <PlanSection person={person} day={person.next} today={today} />}
+      <PlanActions person={person} today={today} onEdit={onEdit} />
 
       <InMemorySwitch person={person} />
-
-      <div className="flex flex-wrap gap-2">
-        <Button variant="card2" onClick={onEdit}>
-          Edit
-        </Button>
-      </div>
     </section>
   );
 }
@@ -264,40 +258,118 @@ export function personPlanTarget(person: PersonView, day: DayView): PlanTarget {
   };
 }
 
+/** As the People page loads it: the friend's id (for "See all") and their wishes. */
+export type PersonWishlist = { friendId: string; wishes: FriendWish[] };
+
+const STATUS: Record<FriendWish["status"], { label: string; className: string }> = {
+  mine: { label: "Reserved by you", className: "bg-mint text-mint-ink" },
+  free: { label: "Free", className: "bg-card text-text" },
+  taken: { label: "Taken", className: "bg-card text-sub" },
+};
+
+/** The first few wishes on their list, with what's free, yours or taken (never by whom). */
+function TheirWishlist({ wishlist, name }: { wishlist: PersonWishlist | null; name: string }) {
+  const wishes = wishlist?.wishes ?? [];
+  if (!wishlist || wishes.length === 0) {
+    return <p className="text-14 text-sub">Nothing on {name}&apos;s wishlist yet.</p>;
+  }
+  return (
+    <div className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-2">
+        {wishes.slice(0, 3).map((w) => {
+          const price = formatPrice(w.price, w.currency);
+          const status = STATUS[w.status];
+          return (
+            <li
+              key={w.id}
+              className="flex min-w-0 items-center gap-3 rounded-[16px] bg-card2 py-2 pr-3 pl-2"
+            >
+              {w.imageUrl ? (
+                // A signed Storage URL, already small: a plain <img> is right here.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={w.imageUrl}
+                  alt=""
+                  className="size-12 shrink-0 rounded-[12px] object-cover"
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="grid size-12 shrink-0 place-items-center rounded-[12px] bg-card"
+                >
+                  <GiftIcon className="size-5 text-sub" />
+                </span>
+              )}
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-15 font-bold">{w.title}</span>
+                {price && <span className="text-13 text-sub">{price}</span>}
+              </span>
+              <span
+                className={cn(
+                  "shrink-0 rounded-pill px-2.5 py-1 text-12 font-bold",
+                  status.className,
+                )}
+              >
+                {status.label}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <Link
+        href={`/wishlists?tab=friends&friend=${wishlist.friendId}`}
+        className="inline-flex min-h-11 items-center self-start text-14 font-semibold text-accent-text underline-offset-4 hover:underline"
+      >
+        See all<span className="sr-only"> of {name}&apos;s wishlist</span>
+      </Link>
+    </div>
+  );
+}
+
 /**
- * "Plan their day" for the next day, and the plans of past years (they stay
- * here; each year starts fresh). Private: only you ever see them.
+ * The panel's actions: "Plan their day" (the plan of their next day, in a
+ * sheet; "Plan the day" when it's gentle) and Edit. Past years' plans stay
+ * here below; private, only you ever see them.
  */
-function PlanSection({ person, day, today }: { person: PersonView; day: DayView; today: string }) {
+function PlanActions({
+  person,
+  today,
+  onEdit,
+}: {
+  person: PersonView;
+  today: string;
+  onEdit: () => void;
+}) {
   const { plans } = usePlans();
   const [open, setOpen] = React.useState(false);
-  const target = personPlanTarget(person, day);
-  const plan = plans.get(target.key) ?? null;
+  const day = person.next;
+  const target = day ? personPlanTarget(person, day) : null;
+  const plan = target ? (plans.get(target.key) ?? null) : null;
   const { done, total } = progress(plan);
   const past = pastPlans(
     [...plans.values()],
     person.days.map((d) => d.id),
     today,
   );
-  const headingId = `person-${person.id}-plan`;
 
   return (
     <div className="flex flex-col gap-2">
-      <SectionLabel id={headingId}>
-        {day.gentle ? "Plan for the day" : "Plan their day"}
-      </SectionLabel>
-      <div className="flex flex-wrap items-center gap-3 rounded-[16px] bg-card2 px-3.5 py-3">
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="text-15 font-bold [overflow-wrap:anywhere]">
-            {day.label} · {day.shortDate}
+      {day && plan && (
+        <div className="flex items-center gap-3 text-13 text-sub">
+          <PlanDots plan={plan} color={person.color} />
+          <span>
+            {day.label} · {day.shortDate}: {done} of {total} done
           </span>
-          <span className="text-13 text-sub">
-            {plan ? `${done} of ${total} done` : "No plan yet"}
-          </span>
-        </span>
-        {plan && <PlanDots plan={plan} color={person.color} />}
-        <Button variant="transparent" onClick={() => setOpen(true)} className="bg-card">
-          {plan ? "Open plan" : day.gentle ? "Plan the day" : "Plan their day"}
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {day && target && (
+          <Button onClick={() => setOpen(true)}>
+            {day.gentle ? "Plan the day" : "Plan their day"}
+          </Button>
+        )}
+        <Button variant="card2" onClick={onEdit}>
+          Edit
         </Button>
       </div>
       {past.length > 0 && (
@@ -334,7 +406,7 @@ function PlanSection({ person, day, today }: { person: PersonView; day: DayView;
           </ul>
         </details>
       )}
-      <PlanSheet target={target} open={open} onOpenChange={setOpen} />
+      {target && <PlanSheet target={target} open={open} onOpenChange={setOpen} />}
     </div>
   );
 }

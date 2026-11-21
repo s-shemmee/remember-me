@@ -8,6 +8,7 @@ import {
   toIsoDate,
   yearsOn,
 } from "@/lib/dates";
+import { type LittleThing, littleThingsOf } from "./little-emoji";
 import { type Pastel, pastels } from "@/styles/tokens";
 
 import { type OccasionKind, type OtherDayKind, typeFor } from "@/features/occasions/types";
@@ -40,6 +41,8 @@ export type PersonRow = {
   color: string;
   group: "family" | "friends" | "work" | "other";
   little_things: string[];
+  /** One per little thing, same order (a heart when missing). */
+  little_thing_emojis?: string[] | null;
   /** Set when they're one of your connections ("This is Khalid"). */
   linked_profile_id?: string | null;
   in_memory?: boolean;
@@ -78,7 +81,7 @@ export type PersonView = {
   inMemory: boolean;
   color: Pastel;
   group: PersonRow["group"];
-  littleThings: string[];
+  littleThings: LittleThing[];
   days: DayView[];
   next: DayView | null;
   /** The edit form, filled in. */
@@ -136,7 +139,7 @@ export function personView(row: PersonRow, today: CalendarDate): PersonView {
     relationLabel: row.relation?.trim() || row.relation_kind || "",
     color: asPastel(row.color ?? RELATION_COLORS[relationKind]),
     group: row.group,
-    littleThings: row.little_things,
+    littleThings: littleThingsOf(row.little_things, row.little_thing_emojis),
     connected: Boolean(row.linked_profile_id),
     inMemory: Boolean(row.in_memory),
     days,
@@ -150,7 +153,7 @@ export function personView(row: PersonRow, today: CalendarDate): PersonView {
       day: birthday?.day ?? null,
       month: birthday?.month ?? null,
       year: birthday?.year ?? null,
-      littleThings: row.little_things,
+      littleThings: littleThingsOf(row.little_things, row.little_thing_emojis),
       days: row.occasions
         .filter((o) => o.kind !== "birthday")
         .map((o) => ({

@@ -50,7 +50,8 @@ export async function savePerson(input: unknown): Promise<SavePersonResult> {
     p_birthday_day: p.day!,
     p_birthday_month: p.month!,
     p_birthday_year: p.year ?? undefined,
-    p_little_things: p.littleThings,
+    p_little_things: p.littleThings.map((t) => t.text),
+    p_little_thing_emojis: p.littleThings.map((t) => t.emoji),
     p_days: p.days.map((d) => ({
       id: d.id,
       kind: d.kind,

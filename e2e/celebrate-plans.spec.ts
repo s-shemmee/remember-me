@@ -110,7 +110,7 @@ test("reserving a friend's gift ticks Gift in my plan for them", async ({ browse
 
   // B remembers Amina and invites her from her profile (so she's linked).
   await addPerson(pageB, "Amina", soon(5));
-  await pageB.getByRole("button", { name: "Invite Amina to Remember Me" }).click();
+  await pageB.getByRole("button", { name: /^Invite them.*Amina/ }).click();
   const url = await pageB
     .getByRole("dialog", { name: "Invite Amina to Remember Me" })
     .getByLabel("Invite link")

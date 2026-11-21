@@ -76,7 +76,7 @@ test("A invites, B accepts, both see the connection; photos lose their location"
   await bday.getByRole("combobox", { name: "Month" }).selectOption("9");
   await person.getByRole("button", { name: "Add Bilal" }).click();
   await expect(person).toBeHidden();
-  await pageA.getByRole("button", { name: "Invite Bilal to Remember Me" }).click();
+  await pageA.getByRole("button", { name: /^Invite them.*Bilal/ }).click();
   const invite = pageA.getByRole("dialog", { name: "Invite Bilal to Remember Me" });
   const inviteUrl = await invite.getByLabel("Invite link").inputValue();
   expect(inviteUrl).toMatch(/\/invite\/[0-9a-f]{64}$/);

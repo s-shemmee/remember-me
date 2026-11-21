@@ -18,6 +18,8 @@ import { SelectField } from "@/components/ui/select-field";
 import { cn } from "@/lib/utils";
 
 import { removePerson, savePerson } from "../actions";
+import { DEFAULT_EMOJI, suggestEmoji } from "../little-emoji";
+import { EmojiPicker } from "./emoji-picker";
 import {
   DAY_TITLE_MAX,
   DESCRIPTION_MAX,
@@ -142,7 +144,11 @@ export function PersonDialog({
   };
 
   // Little things ------------------------------------------------------------------
-  const addThing = (): string[] => {
+  // The draft's emoji follows what's typed (coffee → ☕) until someone picks one.
+  const [draftEmoji, setDraftEmoji] = React.useState(DEFAULT_EMOJI);
+  const [emojiPicked, setEmojiPicked] = React.useState(false);
+  type Thing = PersonFormValues["littleThings"][number];
+  const addThing = (): Thing[] => {
     const t = thingDraft.trim();
     if (!t) return values.littleThings;
     if (values.littleThings.length >= LITTLE_THINGS_LIMIT) {
@@ -150,14 +156,20 @@ export function PersonDialog({
       return values.littleThings;
     }
     setThingDraft("");
+    setDraftEmoji(DEFAULT_EMOJI);
+    setEmojiPicked(false);
     clearError("littleThings");
-    if (values.littleThings.some((x) => x.toLocaleLowerCase() === t.toLocaleLowerCase())) {
+    if (values.littleThings.some((x) => x.text.toLocaleLowerCase() === t.toLocaleLowerCase())) {
       return values.littleThings;
     }
-    const next = [...values.littleThings, t];
+    const next = [...values.littleThings, { text: t, emoji: draftEmoji }];
     update({ littleThings: next });
     return next;
   };
+  const setThingEmoji = (i: number, emoji: string) =>
+    update({
+      littleThings: values.littleThings.map((x, j) => (j === i ? { ...x, emoji } : x)),
+    });
 
   // Other days -----------------------------------------------------------------------
   const setDay = (i: number, patch: Partial<OtherDayValues>) => {
@@ -376,6 +388,15 @@ export function PersonDialog({
                   Little things they love (optional)
                 </label>
                 <div className="flex gap-2">
+                  <EmojiPicker
+                    value={draftEmoji}
+                    label={thingDraft.trim() || "this little thing"}
+                    className="h-[52px] w-[52px]"
+                    onChange={(emoji) => {
+                      setDraftEmoji(emoji);
+                      setEmojiPicked(true);
+                    }}
+                  />
                   <input
                     id="pf-little"
                     autoComplete="off"
@@ -385,8 +406,11 @@ export function PersonDialog({
                     aria-invalid={errors.littleThings ? true : undefined}
                     aria-describedby="pf-little-note"
                     onChange={(e) => {
-                      setThingDraft(e.currentTarget.value);
+                      const text = e.currentTarget.value;
+                      setThingDraft(text);
                       clearError("littleThings");
+                      // Suggest only: never over a hand-picked emoji.
+                      if (!emojiPicked) setDraftEmoji(suggestEmoji(text) ?? DEFAULT_EMOJI);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -406,20 +430,28 @@ export function PersonDialog({
                 </FieldNote>
                 {values.littleThings.length > 0 && (
                   <ul aria-label="Their little things" className="flex flex-wrap gap-1.5 pt-1">
-                    {values.littleThings.map((t) => (
+                    {values.littleThings.map((t, i) => (
                       <li
-                        key={t}
+                        key={t.text}
                         className={cn(
-                          "inline-flex max-w-full min-w-0 items-center gap-1 rounded-pill py-1 pr-1 pl-3 text-13 font-semibold",
+                          "inline-flex max-w-full min-w-0 items-center gap-1 rounded-pill py-1 pr-1 pl-1 text-13 font-semibold",
                           pastelClasses[values.color],
                         )}
                       >
-                        <span className="min-w-0 [overflow-wrap:anywhere]">{t}</span>
+                        <EmojiPicker
+                          value={t.emoji ?? DEFAULT_EMOJI}
+                          label={t.text}
+                          onChange={(emoji) => setThingEmoji(i, emoji)}
+                          className="-my-2 size-11 rounded-pill bg-transparent text-[18px]"
+                        />
+                        <span className="min-w-0 [overflow-wrap:anywhere]">{t.text}</span>
                         <button
                           type="button"
-                          aria-label={`Remove ${t}`}
+                          aria-label={`Remove ${t.text}`}
                           onClick={() => {
-                            update({ littleThings: values.littleThings.filter((x) => x !== t) });
+                            update({
+                              littleThings: values.littleThings.filter((x) => x.text !== t.text),
+                            });
                             requestAnimationFrame(() =>
                               formRef.current?.querySelector<HTMLElement>("#pf-little")?.focus(),
                             );
