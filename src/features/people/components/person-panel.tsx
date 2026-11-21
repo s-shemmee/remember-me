@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
 
 import { occasionTitle, typeFor } from "@/features/occasions/types";
+import { GiftIdeasButton } from "@/features/gift-ideas/components/gift-ideas";
 import { PlanDots } from "@/features/plans/components/plan-dots";
 import { PlanSheet } from "@/features/plans/components/plan-sheet";
 import { usePlans } from "@/features/plans/components/plan-state";
@@ -50,9 +51,12 @@ export function PersonPanel({
   onInvite,
   headingRef,
   today,
+  giftIdeas = false,
   className,
 }: {
   person: PersonView;
+  /** Noor's gift ideas are switched on (AI_GIFT_IDEAS_ENABLED). */
+  giftIdeas?: boolean;
   /** Today in the user's timezone, "2026-11-17" (past plans are before it). */
   today: string;
   onBack: () => void;
@@ -63,6 +67,10 @@ export function PersonPanel({
 }) {
   const headingId = `person-${person.id}-name`;
   const ink = inkText[person.color];
+  // Gift ideas are for their next day that isn't gentle; never "In memory".
+  const giftDay = person.inMemory
+    ? undefined
+    : person.days.find((d) => !d.gentle && Number.isFinite(d.daysUntil));
 
   return (
     <section
@@ -151,6 +159,17 @@ export function PersonPanel({
               ? "Nothing yet."
               : "Nothing yet. Add what they love, so gift ideas come easy."}
           </p>
+        )}
+        {giftIdeas && giftDay && (
+          <GiftIdeasButton
+            className="self-start"
+            target={{
+              personId: person.id,
+              name: person.name,
+              occasionId: giftDay.id,
+              occursOn: giftDay.occursOn,
+            }}
+          />
         )}
       </div>
 

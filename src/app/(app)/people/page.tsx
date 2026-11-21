@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { giftIdeasEnabled } from "@/ai/config";
 import { PeopleScreen } from "@/features/people/components/people-screen";
 import { type PersonRow, peopleView } from "@/features/people/view";
 import { AppMain } from "@/features/shell/app-shell";
@@ -30,7 +31,14 @@ async function People() {
   ]);
   const today = todayIn(profile?.timezone);
   const people = peopleView((rows ?? []) as PersonRow[], today);
-  return <PeopleScreen people={people} plans={plans} today={toIsoDate(today)} />;
+  return (
+    <PeopleScreen
+      people={people}
+      plans={plans}
+      today={toIsoDate(today)}
+      giftIdeas={giftIdeasEnabled()}
+    />
+  );
 }
 
 export default function PeoplePage() {

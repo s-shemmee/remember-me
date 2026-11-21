@@ -60,10 +60,20 @@ function providers(): Provider[] {
   return list;
 }
 
+export type GenerateOptions = {
+  /** Ask one provider only (the caller orders its own retries and fallback). */
+  only?: "groq" | "cloudflare";
+  temperature?: number;
+  maxTokens?: number;
+};
+
 /** The model's raw reply: Groq, then Cloudflare. Throws when none answers. */
-export async function generate(messages: Message[]): Promise<string> {
-  const list = providers();
-  if (list.length === 0) throw new Error("no AI provider configured");
+export async function generate(
+  messages: Message[],
+  { only, temperature = 0.2, maxTokens = 400 }: GenerateOptions = {},
+): Promise<string> {
+  const list = providers().filter((p) => !only || p.name === only);
+  if (list.length === 0) throw new Error(`no AI provider configured${only ? ` (${only})` : ""}`);
   let lastError = "";
   for (const p of list) {
     try {
@@ -73,8 +83,8 @@ export async function generate(messages: Message[]): Promise<string> {
         body: JSON.stringify({
           model: p.model,
           messages,
-          temperature: 0.2,
-          max_tokens: 400,
+          temperature,
+          max_tokens: maxTokens,
           response_format: { type: "json_object" },
         }),
         signal: AbortSignal.timeout(TIMEOUT_MS),

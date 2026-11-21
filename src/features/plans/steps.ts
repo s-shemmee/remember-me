@@ -184,3 +184,15 @@ export function targetFor(e: DayEvent): PlanTarget {
     style: styleFor({ isYou: e.source.isYou, gentle: e.gentle }),
   };
 }
+
+/**
+ * "Add to their plan" from a gift idea: rename the first unticked Gift step
+ * to the idea (so the plan never holds two gifts to pick), or add a new,
+ * unticked Gift step when there's none or the gift is already ticked.
+ */
+export function giftIdeaStep(
+  steps: PlanStep[],
+): { action: "rename"; stepId: string } | { action: "add" } {
+  const open = sortedSteps(steps).find((s) => s.kind === "gift" && !s.done);
+  return open ? { action: "rename", stepId: open.id } : { action: "add" };
+}

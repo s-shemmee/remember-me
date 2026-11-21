@@ -30,6 +30,7 @@ export async function GET() {
     notes,
     sealed,
     connections,
+    giftIdeas,
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -69,6 +70,10 @@ export async function GET() {
     supabase.rpc("my_sealed_note"),
     // First names only, never their email, birth year or timezone.
     supabase.rpc("my_connections"),
+    supabase
+      .from("gift_idea_results")
+      .select("budget, ideas, created_at, people(name)")
+      .order("created_at"),
   ]);
 
   const wishById = new Map((friendWishes.data ?? []).map((w) => [w.id, w]));
@@ -106,6 +111,12 @@ export async function GET() {
       steps: [...p.plan_steps]
         .sort((a, b) => a.position - b.position)
         .map((st) => ({ label: st.label, done: st.done_at !== null })),
+    })),
+    giftIdeas: (giftIdeas.data ?? []).map((g) => ({
+      for: g.people?.name ?? "Someone",
+      budget: g.budget,
+      madeAt: g.created_at,
+      ideas: g.ideas as { title: string; why: string }[],
     })),
     openedNotes: (notes.data ?? []).map((n) => ({
       opensOn: n.opens_on,

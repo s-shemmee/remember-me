@@ -9,3 +9,8 @@ import "server-only";
  */
 export const aiEnabled = () => process.env.AI_ENABLED === "true";
 export const aiMock = () => process.env.AI_MOCK === "1" && !process.env.VERCEL;
+/**
+ * AI_GIFT_IDEAS_ENABLED=true turns on Noor's gift ideas, on its own switch
+ * (so Ask Noor can stay on while gift ideas are off, and the other way round).
+ */
+export const giftIdeasEnabled = () => process.env.AI_GIFT_IDEAS_ENABLED === "true";

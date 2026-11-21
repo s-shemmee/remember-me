@@ -37,8 +37,11 @@ export function PeopleScreen({
   people,
   plans = [],
   today = "",
+  giftIdeas = false,
 }: {
   people: PersonView[];
+  /** Noor's gift ideas are switched on (AI_GIFT_IDEAS_ENABLED). */
+  giftIdeas?: boolean;
   /** Your plans, this year's and past ones (private: only ever yours). */
   plans?: PlanView[];
   /** Today in your timezone, "2026-11-17". */
@@ -247,6 +250,7 @@ export function PeopleScreen({
               person={panelPerson}
               headingRef={headingRef}
               today={today}
+              giftIdeas={giftIdeas}
               onBack={backToList}
               onEdit={() => openEdit(panelPerson)}
               onInvite={() => {

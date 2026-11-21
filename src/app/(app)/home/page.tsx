@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Form from "next/form";
 import { Suspense } from "react";
 
+import { giftIdeasEnabled } from "@/ai/config";
 import { Card } from "@/components/ui/card";
 import { pastelClasses } from "@/components/ui/chip";
 import { SavedThemeToggle } from "@/features/profile/components/saved-theme-toggle";
@@ -111,6 +112,21 @@ async function Dashboard() {
     };
   }
   const month = monthName(today.month);
+  // Gift ideas in the nudge: the next birthday's, never a gentle day.
+  const birthday =
+    giftIdeasEnabled() && nudge.kind === "birthday" && !nudge.gentle && nudge.personId
+      ? events.find(
+          (e) => e.source.personId === nudge.personId && e.source.kind === "birthday" && !e.gentle,
+        )
+      : undefined;
+  const giftIdeas = birthday
+    ? {
+        personId: birthday.source.personId!,
+        name: birthday.source.name,
+        occasionId: birthday.source.id,
+        occursOn: toIsoDate(birthday.on),
+      }
+    : null;
 
   return (
     <>
@@ -164,62 +180,63 @@ async function Dashboard() {
         </div>
       </div>
 
-      <NoorNudge
-        text={nudge.text}
-        personId={nudge.personId}
-        name={nudge.name}
-        isYou={nudge.isYou}
-        offer={offer}
-        today={toIsoDate(today)}
-      />
-      <Notices notices={notices} />
-
-      <ul aria-label="At a glance" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-        <StatCard
-          label="NEXT UP"
-          emoji={next?.emoji ?? "🎂"}
-          value={next ? next.source.name : peopleCount ? "All quiet" : "No one yet"}
-          line={
-            next ? nextUpLine(next) : peopleCount ? "nothing coming up" : "add your first person"
-          }
-          pastel={next?.source.color ?? "butter"}
-        />
-        <StatCard
-          label="THIS MONTH"
-          emoji="🗓️"
-          value={more ? String(more) : "None"}
-          line={
-            more
-              ? `more ${more === 1 ? "day" : "days"} to celebrate in ${month}`
-              : `left to celebrate in ${month}`
-          }
-          pastel="sky"
-        />
-        <StatCard
-          label="YOUR DAY"
-          emoji="🕯️"
-          value={
-            !yourDay
-              ? "Not set"
-              : yourDay.daysUntil === 0
-                ? "Today"
-                : yourDay.daysUntil === 1
-                  ? "Tomorrow"
-                  : `${yourDay.daysUntil} days`
-          }
-          line={yourDay ? `${formatFullDate(yourDay.on)} ✨` : "add it in your profile"}
-          pastel={you?.color ?? "rose"}
-        />
-        <StatCard
-          label="GIFTS SORTED"
-          emoji="🎁"
-          value={gifts.value}
-          line={gifts.line}
-          pastel="mint"
-        />
-      </ul>
-
       <PlansProvider plans={plans}>
+        <NoorNudge
+          text={nudge.text}
+          personId={nudge.personId}
+          name={nudge.name}
+          isYou={nudge.isYou}
+          offer={offer}
+          today={toIsoDate(today)}
+          giftIdeas={giftIdeas}
+        />
+        <Notices notices={notices} />
+
+        <ul aria-label="At a glance" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+          <StatCard
+            label="NEXT UP"
+            emoji={next?.emoji ?? "🎂"}
+            value={next ? next.source.name : peopleCount ? "All quiet" : "No one yet"}
+            line={
+              next ? nextUpLine(next) : peopleCount ? "nothing coming up" : "add your first person"
+            }
+            pastel={next?.source.color ?? "butter"}
+          />
+          <StatCard
+            label="THIS MONTH"
+            emoji="🗓️"
+            value={more ? String(more) : "None"}
+            line={
+              more
+                ? `more ${more === 1 ? "day" : "days"} to celebrate in ${month}`
+                : `left to celebrate in ${month}`
+            }
+            pastel="sky"
+          />
+          <StatCard
+            label="YOUR DAY"
+            emoji="🕯️"
+            value={
+              !yourDay
+                ? "Not set"
+                : yourDay.daysUntil === 0
+                  ? "Today"
+                  : yourDay.daysUntil === 1
+                    ? "Tomorrow"
+                    : `${yourDay.daysUntil} days`
+            }
+            line={yourDay ? `${formatFullDate(yourDay.on)} ✨` : "add it in your profile"}
+            pastel={you?.color ?? "rose"}
+          />
+          <StatCard
+            label="GIFTS SORTED"
+            emoji="🎁"
+            value={gifts.value}
+            line={gifts.line}
+            pastel="mint"
+          />
+        </ul>
+
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
           {peopleCount ? (
             <ComingUp events={peopleEvents} />

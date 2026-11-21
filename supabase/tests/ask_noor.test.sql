@@ -55,6 +55,8 @@ select throws_ok($$ select * from public.help_chunks $$, '42501', null, 'a visit
 reset role;
 
 -- The caps ------------------------------------------------------------------------------------------
+-- The cap is shared by every feature: start from no uses today (rolled back at the end).
+delete from public.ai_usage_daily where day = (now() at time zone 'utc')::date;
 set local role service_role;
 select is(public.claim_ai_use('00000000-0000-0000-0000-00000000a501', 'ask_noor', 2, 3), 'ok', 'first question: ok');
 select is(public.claim_ai_use('00000000-0000-0000-0000-00000000a501', 'ask_noor', 2, 3), 'ok', 'second: ok');

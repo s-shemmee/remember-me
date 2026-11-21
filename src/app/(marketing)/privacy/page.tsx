@@ -77,6 +77,12 @@ const sections: LegalSection[] = [
             many questions you asked today (for the daily limit), never the question or the answer.
             Those counts go after 30 days.
           </li>
+          <li>
+            <strong>Gift ideas:</strong> when you ask Noor for gift ideas, we keep the last ideas
+            for that person, so you can open them again, until you ask for new ones or delete the
+            person. We also count how many times you asked today (for the daily limit). We never
+            keep what was sent to make them.
+          </li>
         </LegalList>
         <p>
           Photos are made smaller and re-saved on your device before they&apos;re uploaded, so
@@ -171,7 +177,11 @@ const sections: LegalSection[] = [
             question, your question and the help text that matches it are sent to them to write
             Noor&apos;s answer. They don&apos;t get your name, email or any of your people, and we
             don&apos;t store the question or the answer. If nothing in our help matches, nothing is
-            sent at all.
+            sent at all. When you ask for gift ideas, they get only that person&apos;s first name,
+            the relation you picked (like Friend or Family), the kind of day, the budget you chose,
+            their little things, and the titles of wishes on their shared list that nobody has
+            reserved. Never emails, birth dates or years, notes, prices, links, or who reserved
+            what.
           </li>
           <li>
             <strong>Your browser&apos;s push service</strong> (Google, Mozilla, Apple or Microsoft):

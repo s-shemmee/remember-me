@@ -12,6 +12,19 @@ vi.mock("@/features/reservations/actions", () => ({
 }));
 const toast = Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() });
 vi.mock("@/components/ui/sonner", () => ({ toast }));
+vi.mock("@/features/gift-ideas/actions", () => ({
+  addGiftIdeaToPlan: vi.fn(),
+  newGiftIdeas: vi.fn(),
+  savedGiftIdeas: vi.fn(async () => null),
+}));
+vi.mock("@/features/plans/actions", () => ({
+  startPlan: vi.fn(),
+  tickStep: vi.fn(),
+  renameStep: vi.fn(),
+  removeStep: vi.fn(),
+  addStep: vi.fn(),
+  saveNote: vi.fn(),
+}));
 
 const { NoorNudge } = await import("./noor-nudge");
 

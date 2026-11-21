@@ -3,7 +3,8 @@
  *
  * Included: profile, reminder settings, devices (labels and dates, never
  * keys), people and their days, your wishlists and wishes, the gifts YOU
- * reserved (friend's first name, wish title, date), your plans, and your
+ * reserved (friend's first name, wish title, date), your plans, Noor's last
+ * gift ideas for each of your people, and your
  * notes to future you (a sealed one only says when it opens: its words stay
  * sealed until then). Never reservations
  * on your own wishes (the database never shows them to you anyway), never
@@ -32,6 +33,13 @@ export type ExportInput = {
   openedNotes?: { opensOn: string; body: string; writtenAt: string }[];
   /** A note still sealed: when it opens, never its words. */
   sealedNote?: { opensOn: string; writtenAt: string } | null;
+  /** Noor's last gift ideas for each of your people (gift_idea_results). */
+  giftIdeas?: {
+    for: string;
+    budget: string | null;
+    madeAt: string;
+    ideas: { title: string; why: string }[];
+  }[];
   /** Your connections: their first name only, and which of your people they are. */
   connections?: { firstName: string; connectedAt: string; yourPerson: string | null }[];
 };
@@ -76,6 +84,12 @@ export function buildExport(input: ExportInput) {
       date: p.occursOn,
       note: p.note,
       steps: p.steps,
+    })),
+    gift_ideas: (input.giftIdeas ?? []).map((g) => ({
+      for: g.for,
+      budget: g.budget,
+      made_on: g.madeAt,
+      ideas: g.ideas,
     })),
     notes_to_future_you: [
       ...(input.openedNotes ?? []).map((n) => ({

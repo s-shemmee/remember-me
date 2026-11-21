@@ -9,8 +9,9 @@ Built in feat/ask-noor-rag (the groundwork every AI feature reuses):
 - **Providers (`supabase/functions/_shared/ai.ts`):** Groq first, Cloudflare Workers AI as fallback. Both speak the OpenAI chat format, so plain `fetch` from Edge Functions, no SDK. JSON mode, temperature 0.2, a 15 s timeout each. Models come from env (`GROQ_MODEL`, default `llama-3.3-70b-versatile`; `CLOUDFLARE_MODEL`, default `@cf/meta/llama-3.3-70b-instruct-fp8-fast`). Keys are Supabase function secrets only, never in the Next app or Vercel. (This replaced the planned an earlier AI SDK integration: free tiers, and the calls belong next to the data.)
 - **Embeddings:** Supabase's built-in **gte-small** (384 dims, mean-pooled and normalised), run inside Edge Functions for free. **gte-small is English-first:** questions in French, Darija or Arabic match less well and may be refused with "I can only help with Remember Me". That's acceptable for now; a multilingual model is the fix if people need it.
 - **Schemas:** Zod for every input and output: `src/ai/ask-noor/answer.ts` (the question; the model's JSON) and `src/features/ask-noor/schema.ts` (the function's response, checked again in Next).
-- **Limits:** `ai_usage_daily` (counts only: user, day, feature) and `claim_ai_use()` (service role): a per-user daily limit (`AI_USER_DAILY_LIMIT`, default 20) and a global daily cap (`AI_GLOBAL_DAILY_CAP`, default 500). Old rows go after 30 days.
-- **Switches:** `AI_ENABLED=true` (server env; off by default, and the app works fully without it). `AI_MOCK=1` gives scripted answers for e2e, and is ignored on Vercel.
+- **Limits:** `ai_usage_daily` (counts only: user, day, feature) and `claim_ai_use()` (service role): a per-user daily limit per feature (Ask Noor `AI_USER_DAILY_LIMIT`, default 20; gift ideas `AI_GIFT_IDEAS_DAILY_LIMIT`, default 5) and **one global daily cap shared by every AI feature** (`AI_GLOBAL_DAILY_CAP`, default 500). Old rows go after 30 days.
+- **Switches:** `AI_ENABLED=true` turns on Ask Noor; `AI_GIFT_IDEAS_ENABLED=true` turns on gift ideas, on its own (server env; both off by default, and the app works fully without them). `AI_MOCK=1` gives scripted answers for e2e, and is ignored on Vercel.
+- **Retry and fallback:** `generate(messages, { only })` can ask one provider, so a feature can order its own attempts. Gift ideas: Groq, Groq again, then Cloudflare.
 - **Later:** prompts as versioned files, Langfuse traces, tools that only propose writes (Phase 1 quick add).
 
 ## Ask Noor (phase 1b, built)
@@ -46,9 +47,36 @@ flowchart LR
 - **Evals:** `docs/ai/evals/ask-noor.json` (15 questions with their expected page, plus 3 that must be refused). `pnpm ai:eval` runs them against the real providers and prints the pass rate (it exits 1 under 80%). **Never in CI.**
 - **Tests:** Vitest (the chunker, sources, threshold refusal, source validation, prompt injection, the Server Action), pgTAP (`supabase/tests/ask_noor.test.sql`: read-only chunks, server-only writes and counts, the caps), Playwright (`e2e/ask-noor.spec.ts` with `AI_MOCK=1`).
 
+## Gift ideas (phase 1, built)
+
+"Ask Noor for gift ideas 💡" on a person's panel, and in Home's nudge when the next day is a birthday. Never for a Remembrance day or someone "In memory" (hidden in the UI, refused by the Server Action and the function). It's for their next day that isn't gentle.
+
+```mermaid
+flowchart LR
+  B[Ask / New ideas<br/>budget chip: small, medium, treat] --> SA[newGiftIdeas Server Action<br/>user + Zod + yours via RLS<br/>+ a day that isn't gentle]
+  SA --> F[gift-ideas function<br/>token, loads the person itself]
+  F --> W[gift_idea_wishes<br/>shared, connected, FREE titles]
+  F --> L[claim_ai_use<br/>gift_ideas 5/day, shared global cap]
+  L --> P[prompt builder<br/>whitelist only]
+  P --> G[Groq ▸ Groq ▸ Cloudflare]
+  G --> V[Zod: 3–5 ideas, title ≤ 60, why ≤ 140<br/>no prices, currencies, links, emails]
+  V -->|valid| S[(gift_idea_results<br/>last ideas per person)]
+  V -->|never valid| U[Noor: I couldn't think of good ideas just now]
+  S --> UI[ideas: Add to their plan · Copy]
+```
+
+- **Whitelist (`src/ai/gift-ideas/prompt.ts`, pure and unit-tested):** the first word of their name, the relation chip (never the free-text relation), the occasion type, the budget word, up to 20 little things, and up to 10 titles of wishes on their shared "My birthday" list **that nobody has reserved** (so Noor never suggests a gift someone else is already giving). Never emails, birth dates or years, notes, prices, links, reservations or anyone else's data. The builder copies those fields one by one, so extra fields on a row can't slip through.
+- **Untrusted data:** little things and wish titles go in a `<data>` block the model is told never to obey; they can't open or close the delimiters.
+- **Output:** JSON `{ ideas: [{ title, why }] }`, checked by Zod (`src/ai/gift-ideas/ideas.ts`) and again in Next. Invalid: Groq once more, then Cloudflare, then Noor's friendly message (never a made-up list).
+- **Saved:** `gift_idea_results` keeps the last ideas per person, so reopening costs nothing. "New ideas" uses one of the day's 5.
+- **Add to their plan:** opens the plan for that day, then **renames its unticked Gift step to the idea**, or adds a new unticked Gift step when there's none or it's already ticked. Never ticked: it's an idea to act on.
+- **Privacy:** prompts and ideas are never logged or sent to Sentry. Groq or Cloudflare see only the whitelist above.
+- **Evals:** `docs/ai/evals/gift-ideas.json` (8 fictional people, one with a prompt injection in a little thing). `pnpm ai:eval gift-ideas` checks 3–5 ideas, the length limits, no prices or links, and that an idea mentions one of their little things. **Never in CI.**
+- **Tests:** Vitest (forbidden fields never sent, free wishes only, delimiters, gentle days, the schema, retry and fallback, the limit messages, the rename-or-add rule), pgTAP (`supabase/tests/gift_ideas.test.sql`: owner-only results, server-only writes, deleted with the person, free and connected wish titles only, the shared cap), Playwright (`e2e/gift-ideas.spec.ts` with `AI_MOCK=1`).
+
 ## Phases
 
-**Phase 1b (built): Ask Noor**, the help assistant above.
+**Phase 1b (built): Ask Noor**, the help assistant above. **Phase 1 gift ideas (built)**, above.
 
 **Phase 0 (v1 launch): no AI.** Noor's messages come from templates in `src/features/noor/messages.ts`. Ship the core app first.
 
@@ -58,7 +86,7 @@ flowchart LR
 - Skills practised: structured output, tool calling, input/output validation, untrusted web content.
 
 **Phase 2: Gift ideas + wish writer (RAG)**
-- *Gift ideas:* retrieve the person's little things, their wishlist, past gifts and your budget → 3–5 ideas with a one-line reason each. Never invent prices; say "around".
+- *Gift ideas:* built in phase 1 (above). Later: past gifts as context.
 - *Wish writer:* a birthday message in your tone; English, French or Darija; length short/medium; never more than 3 emoji.
 - Cache results in Postgres for 24h per person to save cost.
 

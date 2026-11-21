@@ -22,6 +22,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      ai_usage_daily: {
+        Row: {
+          count: number;
+          day: string;
+          feature: string;
+          profile_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          count?: number;
+          day: string;
+          feature: string;
+          profile_id: string;
+        };
+        Update: {
+          count?: number;
+          day?: string;
+          feature?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_daily_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       connections: {
         Row: {
           created_at: string;
@@ -91,6 +121,86 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      gift_idea_results: {
+        Row: {
+          budget: string | null;
+          created_at: string;
+          ideas: NonNullable<Json>;
+          occasion_kind: string;
+          owner_id: string;
+          person_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          budget?: string | null;
+          created_at?: string;
+          ideas: NonNullable<Json>;
+          occasion_kind: string;
+          owner_id: string;
+          person_id: string;
+        };
+        Update: {
+          budget?: string | null;
+          created_at?: string;
+          ideas?: NonNullable<Json>;
+          occasion_kind?: string;
+          owner_id?: string;
+          person_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "gift_idea_results_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "gift_idea_results_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: true;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      help_chunks: {
+        Row: {
+          content: string;
+          content_hash: string;
+          embedding: string;
+          heading: string;
+          key: string;
+          source: string;
+          title: string;
+          updated_at: string;
+          url: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          content: string;
+          content_hash: string;
+          embedding: string;
+          heading: string;
+          key: string;
+          source: string;
+          title: string;
+          updated_at?: string;
+          url: string;
+        };
+        Update: {
+          content?: string;
+          content_hash?: string;
+          embedding?: string;
+          heading?: string;
+          key?: string;
+          source?: string;
+          title?: string;
+          updated_at?: string;
+          url?: string;
+        };
+        Relationships: [];
       };
       invites: {
         Row: {
@@ -782,6 +892,15 @@ export type Database = {
       can_view_avatar: { Args: { p_name: string }; Returns: boolean };
       can_view_wish_image: { Args: { p_name: string }; Returns: boolean };
       claim_account_notice: { Args: { p_email: string; p_hash: string }; Returns: boolean };
+      claim_ai_use: {
+        Args: {
+          p_feature: string;
+          p_global_limit: number;
+          p_profile_id: string;
+          p_user_limit: number;
+        };
+        Returns: string;
+      };
       claim_reminders: {
         Args: { p_batch_id: string; p_channel: string; p_keys: string[]; p_profile_id: string };
         Returns: string[];
@@ -832,6 +951,13 @@ export type Database = {
           url: string;
         }[];
       };
+      gift_idea_wishes: {
+        Args: { p_person_id: string; p_viewer: string };
+        Returns: {
+          status: string;
+          title: string;
+        }[];
+      };
       health_check: { Args: Record<PropertyKey, never>; Returns: boolean };
       invite_preview: {
         Args: { p_token: string };
@@ -842,6 +968,17 @@ export type Database = {
       };
       is_push_endpoint: { Args: { p_endpoint: string }; Returns: boolean };
       link_person: { Args: { p_person_id: string; p_profile_id: string }; Returns: undefined };
+      match_help_chunks: {
+        Args: { p_count: number; p_embedding: string; p_threshold: number };
+        Returns: {
+          content: string;
+          heading: string;
+          key: string;
+          similarity: number;
+          title: string;
+          url: string;
+        }[];
+      };
       my_connections: {
         Args: Record<PropertyKey, never>;
         Returns: {
