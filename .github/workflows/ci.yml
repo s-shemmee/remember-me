@@ -174,27 +174,9 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
 
-  evals:
-    needs: quality
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - name: Only when AI files changed
-        id: ai
-        run: |
-          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -qE '^(src/ai/|evals/)'; then echo "run=true" >> $GITHUB_OUTPUT; fi
-      - uses: pnpm/action-setup@v4
-        if: steps.ai.outputs.run == 'true'
-      - uses: actions/setup-node@v4
-        if: steps.ai.outputs.run == 'true'
-        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
-      - if: steps.ai.outputs.run == 'true'
-        run: pnpm install --frozen-lockfile && pnpm evals
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+  # No AI evals job: `pnpm ai:eval` calls real providers, so the owner runs it
+  # with --remote=<ref> after deploying a function (docs/launch.md). In CI,
+  # src/ai/** is covered by unit tests and the AI_MOCK=1 e2e specs.
 
   secrets-scan:
     runs-on: ubuntu-latest
