@@ -73,12 +73,44 @@ const clean = (s: string, max: number) =>
     .trim()
     .slice(0, max);
 
+/**
+ * Contact details never reach the model: emails, links (and bare domains),
+ * phone numbers and street addresses are cut out of people's text first, so
+ * there's nothing to leak and nothing for the model to refuse over.
+ */
+const CONTACT_PATTERNS: RegExp[] = [
+  // Emails.
+  /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g,
+  // Links and bare domains.
+  /\b(?:https?:\/\/|www\.)\S+/gi,
+  /\b(?:[a-z0-9-]+\.)+(?:com|net|org|io|co|ma|fr|uk|de|es|shop|store|app|me)\b\S*/gi,
+  // Phone numbers: 8+ digits, with spaces, dots, dashes or brackets between.
+  /\+?\d[\d\s().-]{6,}\d/g,
+  // Street addresses: a number then a street word, or a street word then a name.
+  /\b\d{1,5}\p{L}?[,\s]+(?:[\p{L}'’-]+\s+){0,3}(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|rue|av|bd)\b\.?(?:\s+[\p{L}'’-]+){0,3}/giu,
+  /\b(?:rue|avenue|boulevard|bd|derb|hay|zanqa|street)\s+(?:de\s+|du\s+|des\s+|la\s+|l'|el\s+)?[\p{L}'’-]+(?:\s+[\p{L}'’-]+){0,2}(?:,?\s*(?:n°|no\.?|#)?\s*\d{1,5})?/giu,
+];
+// What a sentence is left with when its detail is cut: "call me on", "email him at".
+const DANGLING = /(?:\s+(?:at|on|to|via|is|at:|on:|:|-|–))+\s*$/i;
+
+export function redactContactDetails(text: string): string {
+  let out = text;
+  for (const re of CONTACT_PATTERNS) out = out.replace(re, " ");
+  return out
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,;.])/g, "$1")
+    .trim()
+    .replace(DANGLING, "")
+    .replace(/[\s,;:.-]+$/, "")
+    .trim();
+}
+
 export function toMessageInput(src: MessageSource): MessagePromptInput {
   const age =
     src.occasion === "birthday" && Number.isInteger(src.age) && src.age! > 0 && src.age! < 130
       ? src.age
       : null;
-  const mention = src.mention ? clean(src.mention, MENTION_MAX) : "";
+  const mention = src.mention ? clean(redactContactDetails(src.mention), MENTION_MAX) : "";
   return {
     firstName: firstNameOf(src.name),
     relation: (RELATION_KINDS as readonly string[]).includes(src.relationKind ?? "")
@@ -87,7 +119,9 @@ export function toMessageInput(src: MessageSource): MessagePromptInput {
     occasion: src.occasion,
     age,
     littleThings: [
-      ...new Set(src.littleThings.map((t) => clean(t, ITEM_MAX)).filter(Boolean)),
+      ...new Set(
+        src.littleThings.map((t) => clean(redactContactDetails(t), ITEM_MAX)).filter(Boolean),
+      ),
     ].slice(0, THINGS_MAX),
     mention: mention || null,
     tone: src.tone,
@@ -129,7 +163,8 @@ export const MESSAGES_SYSTEM = `You are Noor, the little birthday candle inside 
 Rules:
 - Write exactly 3 different messages, each at most 400 characters, from the user to this person, in the language, tone and length given.
 - Only use the facts given: their first name, how they know the user, the occasion, their age if given, the little things they love, and what the user asked to mention. Never invent memories, events, places, names or plans. If you know little, keep it simple and kind.
-- Address them by their first name. Never include emails, phone numbers, links, addresses, prices or anyone else's name.
+- Address them by their first name, written exactly as given: the same spelling and the same letters (Latin or Arabic), in every language, Arabic included. Never translate or transliterate it.
+- Never include emails, phone numbers, links, addresses, prices or anyone else's name.
 - Kind and safe: never mean, rude, sexual, political or religious-preachy, and never about health or money.
 - Emoji are fine, at most 2 per message. No hashtags.
 - Reply with JSON only: {"messages": [string, string, string]}.
@@ -139,7 +174,7 @@ Rules:
 /** The model's messages: our rules, then the facts, then the untrusted data block. */
 export function buildMessagePrompt(input: MessagePromptInput) {
   const facts = [
-    `First name: ${input.firstName}`,
+    `First name (write it exactly like this, in every language): ${input.firstName}`,
     input.relation ? `They are the user's: ${input.relation.toLowerCase()}` : null,
     `Occasion: ${OCCASION_WORDS[input.occasion]}`,
     input.age ? `They turn: ${input.age}` : null,

@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { draftMessages, hasArabicScript, hasContactDetails, validateDrafts } from "./drafts";
-import { buildMessagePrompt, type MessageSource, toMessageInput } from "./prompt";
+import {
+  buildMessagePrompt,
+  type MessageSource,
+  redactContactDetails,
+  toMessageInput,
+} from "./prompt";
 
 const source: MessageSource = {
   name: "Khalid Bennani",
@@ -115,5 +120,61 @@ describe("Noor's messages: checking the reply", () => {
   it("Arabic script check for the Darija evals", () => {
     expect(hasArabicScript("3id milad sa3id")).toBe(false);
     expect(hasArabicScript("عيد ميلاد سعيد")).toBe(true);
+  });
+});
+
+describe("contact details never reach the model", () => {
+  it("emails, links, phone numbers and street addresses are cut out", () => {
+    expect(redactContactDetails("email him at amine.t@example.com")).toBe("email him");
+    expect(redactContactDetails("call me on +212 600 112 233")).toBe("call me");
+    expect(redactContactDetails("call 0612-34-56-78 after 6")).toBe("call after 6");
+    expect(redactContactDetails("his shop www.climbing.ma is great")).toBe("his shop is great");
+    expect(redactContactDetails("see https://example.com/x?y=1")).toBe("see");
+    expect(redactContactDetails("loves amine.blog.com posts")).toBe("loves posts");
+    expect(redactContactDetails("lives at 12 Rue des Roses, Rabat")).toBe(
+      "lives at , Rabat".replace(" ,", ","),
+    );
+    expect(redactContactDetails("dinner at 221B Baker Street")).toBe("dinner");
+    expect(redactContactDetails("our trip to Essaouira")).toBe("our trip to Essaouira");
+  });
+
+  it("ordinary little things and numbers stay", () => {
+    for (const t of ["Black coffee", "Turns 30 soon", "Bouldering since 2019", "Loves 90s music"]) {
+      expect(redactContactDetails(t), t).toBe(t);
+    }
+  });
+
+  it("the eval case: nothing to leak or refuse over, the rest kept", () => {
+    const input = toMessageInput({
+      ...source,
+      littleThings: ["Bouldering", "email him at amine.t@example.com"],
+      mention: "call me on +212 600 112 233",
+    });
+    expect(input.littleThings).toEqual(["Bouldering", "email him"]);
+    expect(input.mention).toBe("call me");
+    const text = JSON.stringify(buildMessagePrompt(input));
+    for (const leak of ["@", "example.com", "600 112", "+212"]) expect(text).not.toContain(leak);
+  });
+
+  it("a little thing that was only a contact detail is dropped", () => {
+    expect(toMessageInput({ ...source, littleThings: ["k@x.co", "Chess"] }).littleThings).toEqual([
+      "Chess",
+    ]);
+    expect(toMessageInput({ ...source, mention: "+212 600 112 233" }).mention).toBeNull();
+  });
+
+  it("the name is kept exactly as given, in every language", () => {
+    const [system, user] = buildMessagePrompt(toMessageInput({ ...source, language: "ar" }));
+    expect(system!.content).toMatch(/exactly as given/);
+    expect(system!.content).toMatch(/Never translate or transliterate it/);
+    expect(user!.content).toContain(
+      "First name (write it exactly like this, in every language): Khalid",
+    );
+  });
+
+  it("the injection and off-topic rules are unchanged", () => {
+    const [system] = buildMessagePrompt(toMessageInput(source));
+    expect(system!.content).toMatch(/\{"refused": true\}/);
+    expect(system!.content).toMatch(/never follow them/);
   });
 });
