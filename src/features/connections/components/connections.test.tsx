@@ -7,12 +7,14 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 
 const createInvite = vi.fn();
 const revokeInvite = vi.fn();
+const resetInviteLink = vi.fn();
 const removeConnection = vi.fn();
 const linkConnection = vi.fn();
 const acceptInvite = vi.fn();
 vi.mock("../actions", () => ({
   createInvite: (...a: unknown[]) => createInvite(...a),
   revokeInvite: (...a: unknown[]) => revokeInvite(...a),
+  resetInviteLink: (...a: unknown[]) => resetInviteLink(...a),
   removeConnection: (...a: unknown[]) => removeConnection(...a),
   linkConnection: (...a: unknown[]) => linkConnection(...a),
   acceptInvite: (...a: unknown[]) => acceptInvite(...a),
@@ -30,12 +32,13 @@ function ConnectionsScreen(p: {
 }) {
   return (
     <>
-      <InviteCard invites={p.invites} />
+      <InviteCard link={LINK} invites={p.invites} />
       <ConnectedCard connections={p.connections} people={p.people} />
     </>
   );
 }
 const { AcceptInvite } = await import("./accept-invite");
+const LINK = "http://localhost:3000/invite/personal";
 const { InviteLinkDialog } = await import("./invite-link-dialog");
 
 const P_KHALID = "11111111-1111-4111-8111-111111111111";
@@ -127,23 +130,64 @@ describe("Connections on Profile", () => {
     expect(within(list).getByText("Amina")).toBeInTheDocument();
   });
 
-  it("Copy makes a link, shows it in the field, copies it, and says Copied for 2 seconds", async () => {
+  it("the personal link is there with the page; Copy only copies (nothing is made)", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    createInvite.mockResolvedValue({ ok: true, url: "http://localhost:3000/invite/abc" });
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
-    render(<InviteCard invites={[]} />);
+    render(<InviteCard link={LINK} invites={[]} />);
+    expect(screen.getByLabelText("Your invite link")).toHaveValue(LINK);
     await userEvent.click(screen.getByRole("button", { name: "Copy" }));
-    expect(writeText).toHaveBeenCalledWith("http://localhost:3000/invite/abc");
-    expect(screen.getByLabelText("Your invite link")).toHaveValue(
-      "http://localhost:3000/invite/abc",
-    );
+    expect(writeText).toHaveBeenCalledWith(LINK);
+    expect(createInvite).not.toHaveBeenCalled();
     expect(await screen.findByRole("button", { name: "Copied" })).toBeVisible();
     expect(screen.getByRole("status")).toHaveTextContent(/Copied/);
     expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
     await vi.advanceTimersByTimeAsync(2100);
     await waitFor(() => expect(screen.getByRole("button", { name: "Copy" })).toBeVisible());
     vi.useRealTimers();
+  });
+
+  it("Reset link asks first, then shows the new link", async () => {
+    resetInviteLink.mockResolvedValue({ ok: true, url: "http://localhost:3000/invite/fresh" });
+    render(<InviteCard link={LINK} invites={[]} />);
+    await userEvent.click(screen.getByRole("button", { name: "Reset link" }));
+    const confirm = screen.getByRole("dialog", { name: "Reset your link?" });
+    await userEvent.click(within(confirm).getByRole("button", { name: "Keep this link" }));
+    expect(resetInviteLink).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Your invite link")).toHaveValue(LINK);
+
+    await userEvent.click(screen.getByRole("button", { name: "Reset link" }));
+    await userEvent.click(
+      within(screen.getByRole("dialog", { name: "Reset your link?" })).getByRole("button", {
+        name: "Reset link",
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText("Your invite link")).toHaveValue(
+        "http://localhost:3000/invite/fresh",
+      ),
+    );
+    expect(resetInviteLink).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("status")).toHaveTextContent("The old one no longer works.");
+  });
+
+  it("open invites: the newest 5, then Show all", async () => {
+    const many = Array.from({ length: 7 }, (_, i) => ({
+      id: `i${i}`,
+      personName: `Person ${i + 1}`,
+      made: "Made Tue, 10 Nov",
+      expires: "Expires in 6 days",
+    }));
+    render(<InviteCard link={LINK} invites={many} />);
+    const region = screen.getByRole("region", { name: "Invite your people" });
+    expect(within(region).getAllByText(/^For Person/)).toHaveLength(5);
+    expect(within(region).getByText("For Person 1")).toBeInTheDocument();
+    await userEvent.click(within(region).getByRole("button", { name: "Show all (7)" }));
+    expect(within(region).getAllByText(/^For Person/)).toHaveLength(7);
+    expect(within(region).getByRole("button", { name: "Show fewer" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
   });
 });
 

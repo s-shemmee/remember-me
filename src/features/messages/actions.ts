@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { aiMock, messagesEnabled } from "@/ai/config";
 import { nextGiftDay, type OccasionForGifts } from "@/ai/gift-ideas/prompt";
 import { loadPlan } from "@/features/plans/load";
-import { nextPosition, type PlanView } from "@/features/plans/steps";
+import { messageStepFor, nextPosition, type PlanView } from "@/features/plans/steps";
 import { littleThingsOf } from "@/features/people/little-emoji";
 import { addDays, todayIn } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -169,9 +169,9 @@ export async function saveMessageInPlan(input: unknown): Promise<SaveInPlanResul
   const plan = await loadPlan(supabase, planId);
   if (!plan) return { ok: false, message: OOPS };
 
-  let target = stepId ? plan.steps.find((s) => s.id === stepId) : undefined;
+  // The Message step, ticked or not: a second one would split the plan (and its dots).
+  const target = messageStepFor(plan.steps, stepId ?? null);
   if (stepId && !target) return { ok: false, message: OOPS };
-  target ??= plan.steps.find((s) => s.kind === "message" && !s.done);
   let id = target?.id;
   if (!id) {
     const { data: added, error: addError } = await supabase

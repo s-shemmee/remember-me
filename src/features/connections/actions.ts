@@ -21,7 +21,30 @@ async function signedIn(next = "/profile") {
 
 export type CreateInviteResult = { ok: true; url: string } | { ok: false; message: string };
 
-/** A new invite link (7 days, once). With a person, accepting links them. */
+/** What the invite functions' errors mean, in plain words. */
+function inviteError(message: string | undefined): string {
+  switch (message) {
+    case "too_many_invites":
+      return "You have 20 open invites. Cancel one to make a new link.";
+    case "too_many_invites_today":
+      return "That's a lot of invites for one day. Try again tomorrow.";
+    case "too_many_resets":
+      return "You've reset your link a few times today. Try again tomorrow.";
+    case "already_connected":
+      return "You're already connected.";
+    case "person_not_found":
+      return "I couldn't find them.";
+    default:
+      return OOPS;
+  }
+}
+
+const linkFor = async (token: string) => `${await siteOrigin()}/invite/${token}`;
+
+/**
+ * An invite link. For one of your people: their open invite (7 days, once;
+ * accepting links them), or a new one. Without a person: your personal link.
+ */
 export async function createInvite(personId?: unknown): Promise<CreateInviteResult> {
   const supabase = await signedIn();
   const person = personId == null ? null : idSchema.safeParse(personId);
@@ -29,18 +52,16 @@ export async function createInvite(personId?: unknown): Promise<CreateInviteResu
   const { data, error } = await supabase.rpc("create_invite", {
     p_person_id: person?.data ?? undefined,
   });
-  if (error || !data) {
-    if (error?.message === "too_many_invites") {
-      return { ok: false, message: "You have 20 open invites. Cancel one to make a new link." };
-    }
-    if (error?.message === "already_connected") {
-      return { ok: false, message: "You're already connected." };
-    }
-    if (error?.message === "person_not_found")
-      return { ok: false, message: "I couldn't find them." };
-    return { ok: false, message: OOPS };
-  }
-  return { ok: true, url: `${await siteOrigin()}/invite/${data}` };
+  if (error || !data) return { ok: false, message: inviteError(error?.message) };
+  return { ok: true, url: await linkFor(data) };
+}
+
+/** "Reset link": your personal link stops working; a new one replaces it. */
+export async function resetInviteLink(): Promise<CreateInviteResult> {
+  const supabase = await signedIn();
+  const { data, error } = await supabase.rpc("reset_invite_link");
+  if (error || !data) return { ok: false, message: inviteError(error?.message) };
+  return { ok: true, url: await linkFor(data) };
 }
 
 export type ActionResult = { ok: true } | { ok: false; message: string };

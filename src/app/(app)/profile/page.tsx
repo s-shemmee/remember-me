@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { Card } from "@/components/ui/card";
 import { ConnectedCard, InviteCard } from "@/features/connections/components/connections-screen";
-import { loadConnections } from "@/features/connections/load";
+import { loadConnections, loadInviteLink } from "@/features/connections/load";
 import { asPastel } from "@/features/people/view";
 import { AboutYouForm } from "@/features/profile/components/about-you-form";
 import { AvatarEditor } from "@/features/profile/components/avatar-editor";
@@ -35,7 +35,7 @@ export const metadata: Metadata = { title: "My profile · Remember Me" };
  */
 async function Profile() {
   const supabase = await createSupabaseServerClient();
-  const [{ data: p }, people, wishlists, days, connections] = await Promise.all([
+  const [{ data: p }, people, wishlists, days, connections, inviteLink] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -51,6 +51,8 @@ async function Profile() {
       .select("id, people!inner(archived_at)", { count: "exact", head: true })
       .is("people.archived_at", null),
     loadConnections(supabase),
+    // Your personal link: made the first time, the same link after that.
+    loadInviteLink(supabase),
   ]);
   if (!p) return null;
 
@@ -115,7 +117,7 @@ async function Profile() {
             days={days.count ?? 0}
           />
         </section>
-        <InviteCard invites={connections.invites} />
+        <InviteCard link={inviteLink} invites={connections.invites} />
       </div>
 
       {/* Right: About you, Who can see what, Connected with you. */}

@@ -78,9 +78,14 @@ test("A invites, B accepts, both see the connection; photos lose their location"
   await expect(person).toBeHidden();
   await pageA.getByRole("button", { name: /^Invite them.*Bilal/ }).click();
   const invite = pageA.getByRole("dialog", { name: "Invite Bilal to Remember Me" });
+  await expect(invite.getByLabel("Invite link")).toHaveValue(/\/invite\/[0-9a-f]{64}$/);
   const inviteUrl = await invite.getByLabel("Invite link").inputValue();
   expect(inviteUrl).toMatch(/\/invite\/[0-9a-f]{64}$/);
   await expectAccessible(pageA, "invite dialog");
+  await pageA.keyboard.press("Escape");
+  // Inviting Bilal again reuses his open invite: the same link, not a new one.
+  await pageA.getByRole("button", { name: /^Invite them.*Bilal/ }).click();
+  await expect(invite.getByLabel("Invite link")).toHaveValue(inviteUrl);
   await pageA.keyboard.press("Escape");
 
   // B: opens the link signed out, signs up, confirms, onboards, accepts.
@@ -133,9 +138,9 @@ test("A invites, B accepts, both see the connection; photos lose their location"
   await listA.getByText("Manage connections").click();
   await expect(listA.getByLabel("This is…")).toHaveValue(/[0-9a-f-]{36}/);
   await expect(listA.getByLabel("This is…").locator("option:checked")).toHaveText("Bilal");
-  // The used invite is gone: no open invites listed.
+  // The used invite is gone: no invites for her people listed.
   await expect(
-    pageA.getByRole("region", { name: "Invite your people" }).getByText("Open invites"),
+    pageA.getByRole("region", { name: "Invite your people" }).getByText("Invites for your people"),
   ).toHaveCount(0);
   await expectAccessible(pageA, "profile, A");
 
@@ -146,6 +151,26 @@ test("A invites, B accepts, both see the connection; photos lose their location"
   await pageB.goto(inviteUrl);
   await expect(pageB.getByRole("heading", { level: 1 })).toHaveText(
     /already connected|already been used/,
+  );
+
+  // A's personal link: the same after a reload (made once); Reset link asks
+  // first, then gives a new one, and the old one stops working.
+  await pageA.goto("/profile");
+  const field = pageA.getByLabel("Your invite link");
+  await expect(field).toHaveValue(/\/invite\/[0-9a-f]{64}$/);
+  const personal = await field.inputValue();
+  await pageA.reload();
+  await expect(field).toHaveValue(personal);
+  await pageA.getByRole("button", { name: "Reset link" }).click();
+  const confirm = pageA.getByRole("dialog", { name: "Reset your link?" });
+  await expectAccessible(pageA, "reset link, confirm");
+  await confirm.getByRole("button", { name: "Reset link" }).click();
+  await expect(confirm).toBeHidden();
+  await expect(field).not.toHaveValue(personal);
+  await expect(field).toHaveValue(/\/invite\/[0-9a-f]{64}$/);
+  await pageB.goto(personal);
+  await expect(pageB.getByRole("heading", { level: 1 })).toHaveText(
+    /already connected|was cancelled/,
   );
 
   await a.close();

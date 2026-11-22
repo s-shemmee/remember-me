@@ -105,13 +105,29 @@ export function planLabel(plan: Pick<PlanView, "steps">): string {
   return `Plan ${done} of ${total} done`;
 }
 
-/** One dot per step, filled when done, at most `max` (the rest fold into the last dot's count). */
-export function planDots(plan: Pick<PlanView, "steps">, max = 5): boolean[] {
-  const { done, total } = progress(plan);
-  const shown = Math.min(total, max);
-  // Scale down when there are more steps than dots, so a full plan is all dots.
-  const filled = total <= max ? done : Math.round((done / total) * shown);
-  return Array.from({ length: shown }, (_, i) => i < filled);
+/**
+ * The plan's dots: one per step, in the plan's order (the same steps, in the
+ * same order, as the plan card's ticks), at most `max`; `more` counts the
+ * steps past them. Never scaled: a ticked step is always a filled dot.
+ */
+export function planDots(
+  plan: Pick<PlanView, "steps">,
+  max = 5,
+): { dots: boolean[]; more: number } {
+  const steps = sortedSteps(plan.steps);
+  return { dots: steps.slice(0, max).map((s) => s.done), more: Math.max(0, steps.length - max) };
+}
+
+/**
+ * The step "Use in plan" writes a message to: the one asked for, else the
+ * plan's Message step (an unticked one first, else the first one, ticked or
+ * not). Undefined only when the plan has no Message step: then add one.
+ * Never a second Message step next to a ticked one.
+ */
+export function messageStepFor(steps: PlanStep[], stepId: string | null): PlanStep | undefined {
+  if (stepId) return steps.find((s) => s.id === stepId);
+  const messages = sortedSteps(steps).filter((s) => s.kind === "message");
+  return messages.find((s) => !s.done) ?? messages[0];
 }
 
 /** Steps in order. */

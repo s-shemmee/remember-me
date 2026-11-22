@@ -47,8 +47,8 @@ const sections: LegalSection[] = [
           </li>
           <li>
             <strong>Connections and invites:</strong> who you&apos;re connected with, and the invite
-            links you create (we keep only a scrambled fingerprint of each link, never the link
-            itself).
+            links you create. We keep each link so you can copy it again; only you can see it, and
+            we look links up by a scrambled fingerprint.
           </li>
           <li>
             <strong>Reservations:</strong> which of a friend&apos;s wishes you reserved, and when.
@@ -283,7 +283,10 @@ const sections: LegalSection[] = [
           <li>people you removed: after 30 days;</li>
           <li>wishes you removed: after 30 days, with their photo;</li>
           <li>cancelled reservations: after 10 minutes;</li>
-          <li>invites: a day after they expire (7 days after they&apos;re made);</li>
+          <li>
+            invites: a day after they expire (7 days after they&apos;re made); your personal link, a
+            day after you reset it;
+          </li>
           <li>sign-up notices: after 30 days;</li>
           <li>the reminder log: after 400 days;</li>
           <li>push subscriptions: when you log out on that device or turn push off.</li>

@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 import { SHARE_TEXT } from "../countdown";
 
 /**
- * "Share with my people": makes a fresh invite link (it works once, for one
- * person, for 7 days) and opens the share sheet on phones, or copies the
- * text and link. Nothing is posted anywhere.
+ * "Share with my people": shares your personal invite link (the same one as
+ * My profile; anyone with it can connect) through the share sheet on phones,
+ * or copies the text and link. Nothing is posted anywhere.
  */
 export function ShareWishlistButton() {
   const [busy, setBusy] = React.useState(false);
@@ -32,7 +32,7 @@ export function ShareWishlistButton() {
     if (phone && typeof navigator.share === "function") {
       try {
         await navigator.share({ text: SHARE_TEXT, url: result.url });
-        setMessage("Shared. That link works for one person, for 7 days.");
+        setMessage("Shared. It's your personal link: anyone with it can connect with you.");
         return;
       } catch (error) {
         // Closed the share sheet: nothing to say.
@@ -41,7 +41,7 @@ export function ShareWishlistButton() {
     }
     try {
       await navigator.clipboard.writeText(full);
-      setMessage("Link copied. It works for one person, for 7 days.");
+      setMessage("Link copied. It's your personal link: anyone with it can connect with you.");
     } catch {
       // No clipboard (permissions, an old browser): show it to copy by hand.
       setFallback(full);

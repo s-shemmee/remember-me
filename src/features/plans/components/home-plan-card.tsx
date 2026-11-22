@@ -7,7 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { type PlanTarget, previewSteps, progress, STEP_EMOJI } from "../steps";
+import { type PlanTarget, previewSteps, progress, sortedSteps, STEP_EMOJI } from "../steps";
 import { PlanSheet } from "./plan-sheet";
 import { usePlanActions } from "./plan-state";
 
@@ -20,7 +20,8 @@ import { usePlanActions } from "./plan-state";
 export function HomePlanCard({ target }: { target: PlanTarget }) {
   const actions = usePlanActions(target);
   const { plan, message } = actions;
-  const steps = plan?.steps ?? previewSteps(target.style);
+  // The same steps, in the same order, as the dots on Home's "Coming up".
+  const steps = plan ? sortedSteps(plan.steps) : previewSteps(target.style);
   const { done, total } = progress({ steps });
   const [open, setOpen] = React.useState(false);
   const headingId = React.useId();

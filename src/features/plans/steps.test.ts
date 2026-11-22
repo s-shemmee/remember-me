@@ -6,6 +6,7 @@ import { type DaySource, upcoming } from "@/features/days/days";
 
 import {
   byKey,
+  messageStepFor,
   pastPlans,
   planDots,
   planKey,
@@ -151,18 +152,51 @@ describe("one plan per year", () => {
 
 describe("plan dots", () => {
   it("one per step, filled when done, with a label", () => {
-    expect(planDots(plan())).toEqual([true, false, false, false]);
+    expect(planDots(plan()).dots).toEqual([true, false, false, false]);
     expect(planLabel(plan())).toBe("Plan 1 of 4 done");
   });
 
-  it("at most five dots: a long plan scales down", () => {
-    const long = plan({ steps: Array.from({ length: 10 }, (_, i) => step(i < 10, i)) });
-    expect(planDots(long)).toEqual([true, true, true, true, true]);
-    const half = plan({ steps: Array.from({ length: 10 }, (_, i) => step(i < 5, i)) });
-    expect(planDots(half).filter(Boolean)).toHaveLength(3);
+  it("at most five dots, never scaled: the rest is '+N'", () => {
+    const long = plan({ steps: Array.from({ length: 10 }, (_, i) => step(i < 5, i)) });
+    expect(planDots(long)).toEqual({ dots: [true, true, true, true, true], more: 5 });
+  });
+
+  it("the dots are the plan card's steps, in its order: 4 ticked pills are 4 filled dots", () => {
+    // Gift, Message, Call, Cake ticked; Something else and a gift idea not.
+    const kinds = ["gift", "message", "call", "cake", "other", "gift"] as const;
+    const steps = kinds.map((kind, i) => ({ ...step(i < 4, i), kind }));
+    // Stored out of order: both read them by position.
+    const { dots, more } = planDots(plan({ steps: [...steps].reverse() }));
+    expect(dots).toEqual([true, true, true, true, false]);
+    expect(more).toBe(1);
+    expect(dots.filter(Boolean)).toHaveLength(4);
   });
 
   it("an empty plan has no dots", () => {
-    expect(planDots(plan({ steps: [] }))).toEqual([]);
+    expect(planDots(plan({ steps: [] }))).toEqual({ dots: [], more: 0 });
+  });
+});
+
+describe("Use in plan: which step gets the message", () => {
+  const msg = (id: string, done: boolean, position: number): PlanStep => ({
+    ...step(done, position),
+    id,
+    kind: "message",
+    label: "Message",
+  });
+
+  it("the step asked for, if it's in the plan", () => {
+    expect(messageStepFor([msg("m1", false, 1)], "m1")?.id).toBe("m1");
+    expect(messageStepFor([msg("m1", false, 1)], "nope")).toBeUndefined();
+  });
+
+  it("the Message step even when it's ticked: never a second one", () => {
+    const steps = [step(true, 0), msg("m1", true, 1), step(false, 2)];
+    expect(messageStepFor(steps, null)?.id).toBe("m1");
+  });
+
+  it("an unticked Message step first; none at all means add one", () => {
+    expect(messageStepFor([msg("m1", true, 1), msg("m2", false, 5)], null)?.id).toBe("m2");
+    expect(messageStepFor([step(false, 0)], null)).toBeUndefined();
   });
 });

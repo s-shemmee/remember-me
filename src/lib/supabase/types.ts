@@ -247,9 +247,12 @@ export type Database = {
           expires_at: string;
           id: string;
           inviter_id: string;
+          kind: string;
           person_id: string | null;
           revoked_at: string | null;
+          token: string | null;
           token_hash: string;
+          use_count: number;
           used_at: string | null;
           used_by: string | null;
         };
@@ -259,9 +262,12 @@ export type Database = {
           expires_at?: string;
           id?: string;
           inviter_id: string;
+          kind?: string;
           person_id?: string | null;
           revoked_at?: string | null;
+          token?: string | null;
           token_hash: string;
+          use_count?: number;
           used_at?: string | null;
           used_by?: string | null;
         };
@@ -270,9 +276,12 @@ export type Database = {
           expires_at?: string;
           id?: string;
           inviter_id?: string;
+          kind?: string;
           person_id?: string | null;
           revoked_at?: string | null;
+          token?: string | null;
           token_hash?: string;
+          use_count?: number;
           used_at?: string | null;
           used_by?: string | null;
         };
@@ -1079,6 +1088,7 @@ export type Database = {
           status: string;
         }[];
       };
+      invites_rate_check: { Args: { p_kind: string; p_uid: string }; Returns: undefined };
       is_little_emoji: { Args: { p_emoji: string }; Returns: boolean };
       is_push_endpoint: { Args: { p_endpoint: string }; Returns: boolean };
       link_person: { Args: { p_person_id: string; p_profile_id: string }; Returns: undefined };
@@ -1144,6 +1154,7 @@ export type Database = {
           wish_count: number;
         }[];
       };
+      my_invite_link: { Args: Record<PropertyKey, never>; Returns: string };
       my_sealed_note: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -1238,6 +1249,7 @@ export type Database = {
       remove_connection: { Args: { p_connection_id: string }; Returns: undefined };
       reorder_wishes: { Args: { p_ids: string[]; p_wishlist_id: string }; Returns: undefined };
       reserve_wish: { Args: { p_wish_id: string }; Returns: undefined };
+      reset_invite_link: { Args: Record<PropertyKey, never>; Returns: string };
       revoke_invite: { Args: { p_invite_id: string }; Returns: undefined };
       run_cleanup: { Args: Record<PropertyKey, never>; Returns: Json };
       save_person: {

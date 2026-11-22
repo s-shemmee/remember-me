@@ -6,11 +6,15 @@ Connect with the people you love who also use Remember Me, to see each other's b
 
 You can invite someone from:
 
-- **My profile → Invite your people**, with **Copy** next to your link;
+- **My profile → Invite your people**: your personal link, with **Copy** next to it;
 - a person's profile in People, with **Invite [their name] to Remember Me** (once they accept, they're linked to that person);
-- **Celebrate Me → Share with my people**, to share your birthday wishlist.
+- **Celebrate Me → Share with my people**, which shares your personal link with your birthday wishlist.
 
-Each invite is a private link. It works for one person, for 7 days. Send it however you like: a message, an email, WhatsApp.
+**Your personal link** stays the same, doesn't expire, and anyone you send it to can connect with you. If it ends up somewhere you didn't mean, use **Reset link**: the old link stops working at once and you get a new one.
+
+**An invite for one of your people** works once, for 7 days, and links them to that person when they accept. Inviting the same person again gives you the same link while it's still open.
+
+Send links however you like: a message, an email, WhatsApp.
 
 ## Accept an invite
 

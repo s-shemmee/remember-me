@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, ChevronDownIcon, LinkIcon, UsersIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, LinkIcon, RotateCcwIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -18,7 +18,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { toast } from "@/components/ui/sonner";
 import type { Pastel } from "@/styles/tokens";
 
-import { createInvite, linkConnection, removeConnection, revokeInvite } from "../actions";
+import { linkConnection, removeConnection, resetInviteLink, revokeInvite } from "../actions";
 
 export type PendingInvite = {
   id: string;
@@ -41,42 +41,61 @@ export type Connection = {
 
 export type LinkablePerson = { id: string; name: string; linkedProfileId: string | null };
 
+/** Open invites shown before "Show all". */
+const INVITES_SHOWN = 5;
+
 /**
- * Profile → "Invite your people": Copy makes a new link (7
- * days, once) and copies it ("Copied" for 2 seconds, announced). Your open
- * invites are listed with Cancel.
+ * Profile → "Invite your people": your personal link (made once, loaded with
+ * the page, the same every time; anyone with it can connect), Copy (only
+ * copies) and "Reset link" (asks first; the old link stops working). Below,
+ * your open invites for your people (7 days, once), newest 5 then "Show
+ * all", each with Cancel.
  */
-export function InviteCard({ invites }: { invites: PendingInvite[] }) {
+export function InviteCard({
+  link: initialLink,
+  invites,
+}: {
+  link: string | null;
+  invites: PendingInvite[];
+}) {
   const router = useRouter();
   const [pending, startTransition] = React.useTransition();
+  const [link, setLink] = React.useState(initialLink);
   const [status, setStatus] = React.useState("");
   const [copied, setCopied] = React.useState(false);
-  /** The last link made here (links are stored hashed, so an older one can't be shown again). */
-  const [link, setLink] = React.useState("");
+  const [confirmReset, setConfirmReset] = React.useState(false);
+  const [showAll, setShowAll] = React.useState(false);
   const field = React.useRef<HTMLInputElement>(null);
   const copyButton = React.useRef<HTMLButtonElement>(null);
   const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   React.useEffect(() => () => clearTimeout(timer.current), []);
 
-  const copy = () =>
+  const copy = async () => {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setStatus("Copied. Your invite link is ready to paste.");
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        setCopied(false);
+        setStatus("");
+      }, 2000);
+    } catch {
+      // No clipboard (an old browser, or permission refused): copy it from the field.
+      setStatus("Copy it from the box.");
+      field.current?.select();
+    }
+  };
+
+  const reset = () =>
     startTransition(async () => {
-      const result = await createInvite();
+      const result = await resetInviteLink();
+      setConfirmReset(false);
       if (!result.ok) return void setStatus(result.message);
       setLink(result.url);
-      try {
-        await navigator.clipboard.writeText(result.url);
-        setCopied(true);
-        setStatus("Copied. Your invite link is ready to paste.");
-        clearTimeout(timer.current);
-        timer.current = setTimeout(() => {
-          setCopied(false);
-          setStatus("");
-        }, 2000);
-      } catch {
-        // No clipboard (an old browser, or permission refused): copy it from the field.
-        setStatus("Here's your link. Copy it from the box.");
-        requestAnimationFrame(() => field.current?.select());
-      }
+      setCopied(false);
+      setStatus("New link ready. The old one no longer works.");
       router.refresh();
     });
 
@@ -89,6 +108,8 @@ export function InviteCard({ invites }: { invites: PendingInvite[] }) {
       copyButton.current?.focus();
     });
 
+  const shown = showAll ? invites : invites.slice(0, INVITES_SHOWN);
+
   return (
     <section
       aria-labelledby="invite-heading"
@@ -98,7 +119,9 @@ export function InviteCard({ invites }: { invites: PendingInvite[] }) {
         <h2 id="invite-heading" className="text-22 font-extrabold tracking-[-0.02em]">
           Invite your people
         </h2>
-        <p className="text-15 text-sub">A link to add their birthday and wishlist, and connect.</p>
+        <p className="text-15 text-sub">
+          Anyone with your link can connect and share their wishlist.
+        </p>
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="invite-link" className="text-14 font-semibold">
@@ -109,25 +132,42 @@ export function InviteCard({ invites }: { invites: PendingInvite[] }) {
             ref={field}
             id="invite-link"
             readOnly
-            value={link}
-            placeholder="Copy to make a link"
+            value={link ?? ""}
+            placeholder="Your link isn't ready yet"
             onFocus={(e) => e.currentTarget.select()}
             className="min-h-11 w-full min-w-0 flex-1 truncate rounded-input border-[1.5px] border-line bg-card2 px-4 text-15 placeholder:text-sub"
           />
-          <Button ref={copyButton} onClick={copy} disabled={pending} className="shrink-0">
+          <Button
+            ref={copyButton}
+            onClick={() => void copy()}
+            disabled={!link}
+            className="shrink-0"
+          >
             {copied ? <CheckIcon aria-hidden /> : <LinkIcon aria-hidden />}
             {copied ? "Copied" : "Copy"}
           </Button>
         </div>
         <p role="status" aria-live="polite" className="text-14 text-sub empty:hidden">
-          {status}
+          {status || (link ? "" : "I couldn't make your link just now. Try again later.")}
         </p>
+        {link && (
+          <Button
+            variant="transparent"
+            onClick={() => setConfirmReset(true)}
+            disabled={pending}
+            className="self-start px-3 text-accent-text"
+          >
+            <RotateCcwIcon aria-hidden className="size-4" /> Reset link
+          </Button>
+        )}
       </div>
       {invites.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-12 font-bold tracking-[.05em] text-sub uppercase">Open invites</h3>
+          <h3 className="text-12 font-bold tracking-[.05em] text-sub uppercase">
+            Invites for your people
+          </h3>
           <ul className="flex flex-col gap-2">
-            {invites.map((i) => (
+            {shown.map((i) => (
               <li
                 key={i.id}
                 className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 rounded-[16px] bg-card2 py-2 pr-2 pl-4"
@@ -152,8 +192,43 @@ export function InviteCard({ invites }: { invites: PendingInvite[] }) {
               </li>
             ))}
           </ul>
+          {invites.length > INVITES_SHOWN && (
+            <Button
+              variant="transparent"
+              aria-expanded={showAll}
+              onClick={() => setShowAll((v) => !v)}
+              className="self-start px-3 text-accent-text"
+            >
+              {showAll ? "Show fewer" : `Show all (${invites.length})`}
+            </Button>
+          )}
         </div>
       )}
+
+      <Dialog open={confirmReset} onOpenChange={(o) => !pending && setConfirmReset(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset your link?</DialogTitle>
+            <DialogDescription>
+              Your current link stops working right away. Anyone who hasn&apos;t used it yet will
+              need the new one.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button
+              variant="card2"
+              onClick={() => setConfirmReset(false)}
+              disabled={pending}
+              autoFocus
+            >
+              Keep this link
+            </Button>
+            <Button onClick={reset} aria-disabled={pending || undefined}>
+              {pending ? "Resetting…" : "Reset link"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

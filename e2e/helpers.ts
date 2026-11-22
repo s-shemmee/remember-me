@@ -92,8 +92,9 @@ export async function signUpAndOnboard(
 }
 
 /**
- * Profile → Invite your people → "Copy": makes a new link and copies it; returns the
- * link read back from the clipboard (permissions granted for this page).
+ * Profile → Invite your people → "Copy": copies your personal link (anyone
+ * with it can connect, any number of times); returns it read back from the
+ * clipboard (permissions granted for this page).
  */
 export async function profileInviteLink(page: Page): Promise<string> {
   await page.goto("/profile");
