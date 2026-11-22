@@ -40,6 +40,7 @@ import { addDays, formatFullDate, toIsoDate } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import type { Pastel } from "@/styles/tokens";
+import { looksByPerson } from "@/features/people/looks";
 
 export const metadata: Metadata = { title: "Home · Remember Me" };
 
@@ -84,7 +85,12 @@ async function Dashboard() {
     loadDays(supabase),
     loadFriends(supabase),
   ]);
-  const { sources, today, firstName, peopleCount } = data;
+  const { today, firstName, peopleCount } = data;
+  // Connected people show their own photo or character (Coming up, the plan card).
+  const looks = looksByPerson(friends);
+  const sources = data.sources.map((s) =>
+    s.personId && looks.has(s.personId) ? { ...s, look: looks.get(s.personId) } : s,
+  );
   // This year's plans (a day stays "upcoming" until the day after).
   const plans = await loadPlans(supabase, { from: toIsoDate(addDays(today, -1)) });
 

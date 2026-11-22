@@ -74,7 +74,14 @@ export function ComingUp({ events }: { events: DayEvent[] }) {
                 href={`/people?person=${e.source.personId}`}
                 className="flex min-w-0 items-center gap-3.5 rounded-[18px] hover-tint p-3 transition-colors duration-200 ease-soft"
               >
-                <Avatar name={e.source.name} pastel={e.source.color} decorative />
+                <Avatar
+                  name={e.source.name}
+                  pastel={e.source.color}
+                  src={e.source.look?.photoUrl}
+                  character={e.source.look?.character}
+                  className={e.source.look?.character ? "text-[24px]" : undefined}
+                  decorative
+                />
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="truncate text-16 font-bold">{e.source.name}</span>
                   <span className="truncate text-14 text-sub">

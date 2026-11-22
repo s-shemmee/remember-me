@@ -100,8 +100,10 @@ export function PersonPanel({
         <Avatar
           name={person.name}
           pastel={person.color}
+          src={person.look?.photoUrl}
+          character={person.look?.character}
           decorative
-          className="size-[68px] text-22"
+          className={cn("size-[68px]", person.look?.character ? "text-[36px]" : "text-22")}
         />
         <div className="flex min-w-0 flex-col gap-0.5">
           <h2

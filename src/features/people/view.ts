@@ -15,6 +15,7 @@ import { type OccasionKind, type OtherDayKind, typeFor } from "@/features/occasi
 
 import { isRelation, type Relation, RELATION_COLORS } from "./constants";
 import type { PersonFormValues } from "./schema";
+import type { Look } from "./looks";
 
 /**
  * Turns people rows into what the People screen shows: days sorted by how
@@ -72,6 +73,8 @@ export type DayView = {
 
 export type PersonView = {
   id: string;
+  /** Their account's photo or character, when connected (see looks.ts). */
+  look?: Look | null;
   name: string;
   /** What to show under their name: their description, else the chip. */
   relationLabel: string;

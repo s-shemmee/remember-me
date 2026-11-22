@@ -11,6 +11,7 @@ import type { DayEvent } from "@/features/days/days";
 import type { CalendarDate } from "@/lib/dates";
 import { toIsoDate } from "@/lib/dates";
 import type { Pastel } from "@/styles/tokens";
+import type { Look } from "@/features/people/looks";
 
 export type StepKind =
   "gift" | "message" | "call" | "cake" | "kind_word" | "visit" | "friends" | "treat" | "other";
@@ -180,6 +181,8 @@ export type PlanTarget = {
   date: string;
   name: string;
   color: Pastel;
+  /** A connected person's own photo or character. */
+  look?: Look | null;
   style: PlanStyle;
 };
 
@@ -199,6 +202,7 @@ export function targetFor(e: DayEvent): PlanTarget {
     date: e.shortDate,
     name: e.source.name,
     color: e.source.color,
+    look: e.source.look ?? null,
     style: styleFor({ isYou: e.source.isYou, gentle: e.gentle }),
   };
 }

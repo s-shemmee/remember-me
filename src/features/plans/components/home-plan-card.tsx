@@ -35,8 +35,10 @@ export function HomePlanCard({ target }: { target: PlanTarget }) {
         <Avatar
           name={target.name}
           pastel={target.color}
+          src={target.look?.photoUrl}
+          character={target.look?.character}
           decorative
-          className="size-[42px] text-14"
+          className={cn("size-[42px]", target.look?.character ? "text-[22px]" : "text-14")}
         />
         <div className="flex min-w-0 flex-col">
           <h2 id={headingId} className="truncate text-17 font-bold">

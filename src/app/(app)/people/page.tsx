@@ -12,6 +12,7 @@ import { loadPlans } from "@/features/plans/load";
 import { todayIn, toIsoDate } from "@/lib/dates";
 import { notificationsInboxEnabled } from "@/lib/flags";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { looksByPerson } from "@/features/people/looks";
 
 export const metadata: Metadata = { title: "People · Remember Me" };
 
@@ -40,7 +41,12 @@ async function People() {
     if (f.linkedPersonId) wishlists[f.linkedPersonId] = { friendId: f.profileId, wishes: f.wishes };
   }
   const today = todayIn(profile?.timezone);
-  const people = peopleView((rows ?? []) as PersonRow[], today);
+  // Connected people show their own photo or character; everything else stays yours.
+  const looks = looksByPerson(friends);
+  const people = peopleView((rows ?? []) as PersonRow[], today).map((p) => ({
+    ...p,
+    look: looks.get(p.id) ?? null,
+  }));
   return (
     <PeopleScreen
       people={people}

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { characterEmoji } from "@/features/onboarding/constants";
+import { AVATARS_BUCKET } from "@/features/profile/constants";
 import { asPastel } from "@/features/people/view";
 import { formatShortDate } from "@/lib/dates";
 import { siteOrigin } from "@/lib/site-origin";
@@ -37,22 +38,38 @@ export async function loadConnections(
   supabase: Supabase,
   now: number = Date.now(),
 ): Promise<{ invites: PendingInvite[]; connections: Connection[]; people: LinkablePerson[] }> {
-  const [{ data: invites }, { data: connections }, { data: people }] = await Promise.all([
-    supabase
-      .from("invites")
-      .select("id, created_at, expires_at, person:people(name)")
-      .eq("kind", "once")
-      .is("used_at", null)
-      .is("revoked_at", null)
-      .gt("expires_at", new Date(now).toISOString())
-      .order("created_at", { ascending: false }),
-    supabase.rpc("my_connections"),
-    supabase
-      .from("people")
-      .select("id, name, linked_profile_id")
-      .is("archived_at", null)
-      .order("name"),
-  ]);
+  const [{ data: invites }, { data: connections }, { data: people }, { data: friends }] =
+    await Promise.all([
+      supabase
+        .from("invites")
+        .select("id, created_at, expires_at, person:people(name)")
+        .eq("kind", "once")
+        .is("used_at", null)
+        .is("revoked_at", null)
+        .gt("expires_at", new Date(now).toISOString())
+        .order("created_at", { ascending: false }),
+      supabase.rpc("my_connections"),
+      supabase
+        .from("people")
+        .select("id, name, linked_profile_id")
+        .is("archived_at", null)
+        .order("name"),
+      // Their current photo's path, when it's their avatar (connections only).
+      supabase.rpc("my_friends"),
+    ]);
+
+  // Signed with your session: Storage allows only a connection's current photo.
+  const paths = new Map<string, string>();
+  for (const f of friends ?? []) {
+    if (f.avatar_kind === "photo" && f.avatar_path) paths.set(f.profile_id, f.avatar_path);
+  }
+  const signed = new Map<string, string>();
+  if (paths.size) {
+    const { data } = await supabase.storage
+      .from(AVATARS_BUCKET)
+      .createSignedUrls([...paths.values()], 3600);
+    for (const s of data ?? []) if (s.path && s.signedUrl) signed.set(s.path, s.signedUrl);
+  }
 
   return {
     invites: (invites ?? []).map((i) => ({
@@ -68,6 +85,7 @@ export async function loadConnections(
       color: asPastel(c.avatar_color),
       character:
         c.avatar_kind === "character" ? (characterEmoji(c.avatar_character) ?? null) : null,
+      photoUrl: signed.get(paths.get(c.profile_id) ?? "") ?? null,
       linkedPersonId: c.linked_person_id,
       since: formatShortDate(asDate(c.connected_at)).split(", ")[1]!,
     })),

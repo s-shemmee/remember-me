@@ -200,7 +200,13 @@ export function FriendsWishlists({
                         : "hover-tint",
                     )}
                   >
-                    <Avatar name={f.name} pastel={f.pastel} character={f.character} decorative />
+                    <Avatar
+                      name={f.name}
+                      pastel={f.pastel}
+                      src={f.photoUrl}
+                      character={f.character}
+                      decorative
+                    />
                     <span className="flex min-w-0 flex-col">
                       <span className="max-w-[18ch] truncate text-15 font-bold">{f.name}</span>
                       <span className="text-13 whitespace-nowrap text-sub">

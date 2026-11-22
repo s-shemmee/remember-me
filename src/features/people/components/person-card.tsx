@@ -41,8 +41,10 @@ export function PersonCard({
         <Avatar
           name={person.name}
           pastel={person.color}
+          src={person.look?.photoUrl}
+          character={person.look?.character}
           decorative
-          className="size-[52px] text-16"
+          className={cn("size-[52px]", person.look?.character ? "text-[28px]" : "text-16")}
         />
         {person.connected && (
           <span

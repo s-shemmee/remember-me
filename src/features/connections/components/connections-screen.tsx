@@ -35,6 +35,8 @@ export type Connection = {
   name: string;
   color: Pastel;
   character: string | null;
+  /** A signed URL for their photo, when that's their avatar. */
+  photoUrl?: string | null;
   linkedPersonId: string | null;
   since: string;
 };
@@ -305,6 +307,7 @@ export function ConnectedCard({
                   <Avatar
                     name={c.name}
                     pastel={c.color}
+                    src={c.photoUrl}
                     character={c.character}
                     size="sm"
                     decorative
@@ -330,7 +333,13 @@ export function ConnectedCard({
                   return (
                     <li key={c.id} className="flex flex-col gap-3 rounded-[16px] bg-card p-4">
                       <div className="flex min-w-0 items-center gap-3">
-                        <Avatar name={c.name} pastel={c.color} character={c.character} decorative />
+                        <Avatar
+                          name={c.name}
+                          pastel={c.color}
+                          src={c.photoUrl}
+                          character={c.character}
+                          decorative
+                        />
                         <span className="flex min-w-0 flex-1 flex-col">
                           <span className="truncate text-16 font-bold">{c.name}</span>
                           <span className="text-13 text-sub">Connected since {c.since}</span>

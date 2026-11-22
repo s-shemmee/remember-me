@@ -14,6 +14,7 @@ import {
 import type { Pastel } from "@/styles/tokens";
 
 import { type OccasionKind, occasionTitle, occasionType, typeFor } from "../occasions/types";
+import type { Look } from "@/features/people/looks";
 
 /**
  * Every day worth remembering, from your people and your own birthday, and
@@ -29,6 +30,8 @@ export type DayKind = OccasionKind;
 
 /** One remembered day: an occasion of one of your people, or your own birthday. */
 export type DaySource = {
+  /** A connected person's own photo or character (Home's avatars). */
+  look?: Look | null;
   /** Occasion id, or "you" for your own birthday. */
   id: string;
   /** The person's id; null for your own day. */
