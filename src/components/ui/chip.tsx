@@ -54,6 +54,20 @@ function Chip({ className, size, pastel, ...props }: React.ComponentProps<"span"
  * A filter chip: a real toggle button, 44px tall. Selected = text fill with
  * bg-coloured text, announced with aria-pressed.
  */
+/**
+ * A toggle chip (filters, "Before each day"), keyed on aria-pressed. Light:
+ * off is white with a 1.5px line (card2 on the page background is too close
+ * to it), hover adds an accent border at 40% and a 6% accent tint, pressed is
+ * the text colour. Dark, as before: card2, tinted on hover.
+ */
+const chipToggleClass = [
+  "transition-[background-color,box-shadow] duration-200 ease-soft",
+  "bg-card text-text shadow-[inset_0_0_0_1.5px_var(--line)]",
+  "not-aria-pressed:hover:bg-[color-mix(in_srgb,var(--accent)_6%,var(--card))] not-aria-pressed:hover:shadow-[inset_0_0_0_1.5px_color-mix(in_srgb,var(--accent)_40%,transparent)]",
+  "aria-pressed:bg-text aria-pressed:text-bg aria-pressed:shadow-none aria-pressed:hover-tint",
+  "dark:not-aria-pressed:bg-card2 dark:not-aria-pressed:shadow-none dark:not-aria-pressed:hover:bg-[var(--card2)] dark:not-aria-pressed:hover:shadow-none dark:not-aria-pressed:hover-tint",
+].join(" ");
+
 function FilterChip({
   className,
   selected = false,
@@ -66,9 +80,8 @@ function FilterChip({
       aria-pressed={selected}
       className={cn(
         chipVariants({ size: "lg" }),
-        "cursor-pointer transition-colors duration-200 ease-soft",
-        "hover-tint",
-        selected ? "bg-text text-bg" : "bg-card2 text-text",
+        "cursor-pointer",
+        chipToggleClass,
         "disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
@@ -77,4 +90,4 @@ function FilterChip({
   );
 }
 
-export { Chip, chipVariants, FilterChip, pastelClasses };
+export { Chip, chipToggleClass, chipVariants, FilterChip, pastelClasses };

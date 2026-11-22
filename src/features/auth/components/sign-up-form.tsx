@@ -24,7 +24,6 @@ export function SignUpForm() {
       <form action={logInWithGoogle}>
         <SocialButton provider="google" />
       </form>
-      <ConsentNote />
 
       <OrDivider />
 
@@ -64,12 +63,12 @@ export function SignUpForm() {
         <Button type="submit" size="lg" className="w-full" aria-disabled={pending || undefined}>
           {pending ? "Creating your account…" : "Create my account"}
         </Button>
-        <ConsentNote />
       </form>
 
       <AuthSwitch question="Already have an account?" href="/log-in">
         Log in
       </AuthSwitch>
+      <ConsentNote />
     </>
   );
 }

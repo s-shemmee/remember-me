@@ -39,29 +39,21 @@ describe("SignUpForm", () => {
     );
   });
 
-  it("consent: under Google and under Create my account, with links, and no checkbox", () => {
-    render(<SignUpForm />);
-    const notes = screen.getAllByText(/By creating an account, you agree to our/);
-    expect(notes).toHaveLength(2);
-    // Each note follows the button it's about.
-    const google = screen.getByRole("button", { name: "Continue with Google" });
-    const create = screen.getByRole("button", { name: "Create my account" });
-    expect(
-      google.compareDocumentPosition(notes[0]!) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-    expect(
-      create.compareDocumentPosition(notes[1]!) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-    for (const note of notes) {
-      expect(note).toHaveTextContent(
-        "By creating an account, you agree to our Terms and Privacy Policy.",
-      );
-      expect(within(note).getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
-      expect(within(note).getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(
-        "href",
-        "/privacy",
-      );
-    }
+  it("consent: one line, at the very bottom (after the Log in link), with links, no checkbox", () => {
+    const { container } = render(<SignUpForm />);
+    const notes = screen.getAllByText(/By continuing, you agree to our/);
+    expect(notes).toHaveLength(1);
+    const note = notes[0]!;
+    expect(note).toHaveTextContent("By continuing, you agree to our Terms and Privacy Policy.");
+    expect(within(note).getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
+    expect(within(note).getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(
+      "href",
+      "/privacy",
+    );
+    // heading → Google → or with email → form → button → switch link → consent.
+    const logIn = screen.getByRole("link", { name: "Log in" });
+    expect(logIn.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(container.lastElementChild).toBe(note);
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
@@ -108,17 +100,17 @@ describe("SignUpForm", () => {
 });
 
 describe("LogInForm", () => {
-  it("Google on log in can create an account, so it carries the consent too", () => {
-    render(<LogInForm />);
-    const note = screen.getByText(/New here\? Continuing with Google creates an account/);
-    expect(note).toHaveTextContent(
-      "New here? Continuing with Google creates an account, and you agree to our Terms and Privacy Policy.",
-    );
-    expect(within(note).getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
-    expect(within(note).getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(
+  it("the same single consent line, last, under 'New here? Create a free account'", () => {
+    const { container } = render(<LogInForm />);
+    const notes = screen.getAllByText(/By continuing, you agree to our/);
+    expect(notes).toHaveLength(1);
+    expect(notes[0]).toHaveTextContent("By continuing, you agree to our Terms and Privacy Policy.");
+    expect(within(notes[0]!).getByRole("link", { name: "Terms" })).toHaveAttribute(
       "href",
-      "/privacy",
+      "/terms",
     );
+    expect(screen.queryByText(/Continuing with Google creates an account/)).toBeNull();
+    expect(container.lastElementChild).toBe(notes[0]);
   });
 
   it("story: email, password with a Forgot password link, and a way to sign up", () => {

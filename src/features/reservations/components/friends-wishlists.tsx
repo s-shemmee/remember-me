@@ -192,8 +192,12 @@ export function FriendsWishlists({
                     aria-pressed={on}
                     onClick={() => onFriendChange(f.profileId)}
                     className={cn(
-                      "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-[20px] hover-tint px-3 py-2.5 text-left",
-                      on && "bg-card shadow-card",
+                      "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-[20px] px-3 py-2.5 text-left transition-[box-shadow] duration-200 ease-soft",
+                      // The chosen friend is a white card: a stronger shadow on hover in
+                      // light (a tint would turn it card2-grey); dark tints as before.
+                      on
+                        ? "bg-card shadow-card hover:shadow-[var(--card-shadow-hover)] dark:hover-tint"
+                        : "hover-tint",
                     )}
                   >
                     <Avatar name={f.name} pastel={f.pastel} character={f.character} decorative />

@@ -222,7 +222,7 @@ export function Faq() {
           <details
             key={f.question}
             open={i === 0}
-            className="group rounded-[22px] bg-card2 hover-tint px-6 py-5 transition-colors duration-200"
+            className="group rounded-[22px] bg-card px-6 py-5 shadow-card transition-[box-shadow] duration-200 hover:shadow-[var(--card-shadow-hover)] dark:bg-card2 dark:hover-tint dark:shadow-none"
           >
             <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-[12px] text-17 font-bold [&::-webkit-details-marker]:hidden">
               {f.question}

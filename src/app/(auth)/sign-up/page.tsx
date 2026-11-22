@@ -11,6 +11,7 @@ export default function SignUpPage() {
     <AuthShell panel={<SignUpPanel />} panelClassName={signUpPanelClass}>
       <AuthHeading
         accent="someone"
+        after="🕯️"
         lead="Create your free account. Your first person is one minute away."
       >
         Let&apos;s remember

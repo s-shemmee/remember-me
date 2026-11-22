@@ -41,7 +41,7 @@ export default function HelpIndexPage() {
               <li key={a.slug}>
                 <Link
                   href={`/help/${a.slug}`}
-                  className="flex h-full flex-col gap-2 rounded-card bg-card hover-tint p-5 shadow-card transition-transform duration-200 ease-soft hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                  className="flex h-full card-lift flex-col gap-2 rounded-card bg-card p-5 shadow-card dark:hover-tint"
                 >
                   <h2 className="text-19 font-extrabold tracking-[-0.02em]">{a.title}</h2>
                   <p className="line-clamp-3 text-15 leading-normal text-sub">{a.description}</p>

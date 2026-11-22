@@ -89,7 +89,7 @@ export function InboxBell() {
   const trigger = (
     <Button
       ref={bellRef}
-      variant="card2"
+      variant="page"
       size="icon"
       aria-label={label}
       className="relative"

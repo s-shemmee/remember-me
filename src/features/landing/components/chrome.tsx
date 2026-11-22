@@ -40,7 +40,7 @@ export function LandingHeader() {
           </ul>
         </nav>
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <ThemeToggle className="hidden sm:inline-flex" />
+          <ThemeToggle variant="card2" className="hidden sm:inline-flex" />
           <Button asChild variant="transparent" className="px-3 sm:px-[18px]">
             <Link href="/log-in">Log in</Link>
           </Button>
@@ -69,7 +69,7 @@ export function LandingFooter() {
           <p className="text-15 leading-normal text-sub">
             Because everyone deserves to be remembered. Including you.
           </p>
-          <ThemeToggle className="sm:hidden" />
+          <ThemeToggle variant="card2" className="sm:hidden" />
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-12 gap-y-6">
           <FooterColumn title="Product">

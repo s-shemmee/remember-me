@@ -43,7 +43,7 @@ export function HeaderSearch({
         {children}
       </div>
       <Button
-        variant="card2"
+        variant="page"
         size="icon"
         aria-label={label}
         aria-expanded={open}

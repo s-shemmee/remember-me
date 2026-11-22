@@ -30,7 +30,9 @@ export function PersonCard({
       className={cn(
         // A compact row in a narrow list (phones), the design's tall card from 30rem.
         "flex h-full min-w-0 items-center gap-3.5 rounded-card bg-card p-4 shadow-card @[30rem]:flex-col @[30rem]:items-start @[30rem]:gap-2.5 @[30rem]:p-[18px]",
-        "hover-tint transition-[transform,box-shadow] duration-200 ease-soft hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
+        // Light: lift and a stronger shadow (a tint would turn it card2-grey on the
+        // page background); dark keeps its tint.
+        "card-lift dark:hover-tint",
         current === "page" && "ring-2 ring-accent",
         current === "implicit" && "xl:ring-2 xl:ring-accent",
       )}

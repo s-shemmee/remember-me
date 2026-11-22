@@ -20,8 +20,12 @@ const isCurrent = (pathname: string, href: string) =>
 
 const navItemClass = (current: boolean) =>
   cn(
-    "hover-tint flex min-h-11 items-center gap-3 rounded-item px-3.5 text-15 font-semibold transition-colors duration-200 ease-soft",
-    current ? "bg-card text-text shadow-card" : "text-sub hover:text-text",
+    "flex min-h-11 items-center gap-3 rounded-item px-3.5 text-15 font-semibold transition-[color,box-shadow] duration-200 ease-soft",
+    current
+      ? // The white current item: a stronger shadow on hover in light (a tint
+        // would turn it card2-grey on the page background); dark tints.
+        "bg-card text-text shadow-card hover:shadow-[var(--card-shadow-hover)] dark:hover-tint"
+      : "text-sub hover-tint hover:text-text",
   );
 
 /** Sidebar links: the five sections. The current page is marked aria-current. */

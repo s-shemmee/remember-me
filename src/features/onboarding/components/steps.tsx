@@ -13,7 +13,7 @@ import * as React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ChoiceGroup, ChoiceItem } from "@/components/ui/choice-group";
-import { pastelClasses } from "@/components/ui/chip";
+import { chipToggleClass, pastelClasses } from "@/components/ui/chip";
 import { Field } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import { TruncatedName } from "@/components/ui/truncated-name";
@@ -424,7 +424,10 @@ export function StepReminders({
               type="button"
               aria-pressed={value.offsets.includes(o.days)}
               onClick={() => toggle(o.days)}
-              className="inline-flex min-h-11 cursor-pointer items-center rounded-pill bg-card2 hover-tint px-4 text-15 font-semibold text-text transition-colors duration-200 ease-soft aria-pressed:bg-text aria-pressed:text-bg"
+              className={cn(
+                "inline-flex min-h-11 cursor-pointer items-center rounded-pill px-4 text-15 font-semibold",
+                chipToggleClass,
+              )}
             >
               {o.label}
             </button>

@@ -42,8 +42,12 @@ describe("Chip", () => {
     }
     render(<Filters />);
     const all = screen.getByRole("button", { name: "All", pressed: true });
-    expect(all).toHaveClass("bg-text", "text-bg", "min-h-11");
-    expect(screen.getByRole("button", { name: "Family", pressed: false })).toHaveClass("bg-card2");
+    // Pressed: the text colour. Off: white with a line in light (never card2 on the page).
+    expect(all).toHaveClass("aria-pressed:bg-text", "aria-pressed:text-bg", "min-h-11");
+    expect(screen.getByRole("button", { name: "Family", pressed: false })).toHaveClass(
+      "bg-card",
+      "shadow-[inset_0_0_0_1.5px_var(--line)]",
+    );
     await userEvent.tab();
     expect(all).toHaveFocus();
   });

@@ -49,7 +49,7 @@ export function AccountMenu({
         {variant === "chip" ? (
           <button
             type="button"
-            className="flex w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-[16px] bg-card hover-tint px-3 py-2.5 text-left transition-colors duration-200 ease-soft"
+            className="flex w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-[16px] bg-card px-3 py-2.5 text-left shadow-card transition-[box-shadow] duration-200 ease-soft hover:shadow-[var(--card-shadow-hover)] dark:hover-tint"
           >
             <Avatar
               name={name}

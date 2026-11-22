@@ -101,20 +101,18 @@ test("linked from the landing footer, sign-up, log-in, and the sitemap", async (
     .click();
   await expect(page).toHaveURL(/\/terms$/);
 
+  // One consent line per auth page, last.
   await page.goto("/sign-up");
-  const consent = page
-    .getByText("By creating an account, you agree to our")
-    .filter({ visible: true });
-  await expect(consent).toHaveCount(2);
+  const consent = page.getByText("By continuing, you agree to our").filter({ visible: true });
+  await expect(consent).toHaveCount(1);
   await expect(page.getByRole("checkbox")).toHaveCount(0);
-  await consent.first().getByRole("link", { name: "Privacy Policy" }).click();
+  await consent.getByRole("link", { name: "Privacy Policy" }).click();
   await expect(page).toHaveURL(/\/privacy$/);
 
   await page.goto("/log-in");
-  const google = page
-    .getByText(/New here\? Continuing with Google creates an account/)
-    .filter({ visible: true });
-  await google.getByRole("link", { name: "Terms" }).click();
+  const logInConsent = page.getByText("By continuing, you agree to our").filter({ visible: true });
+  await expect(logInConsent).toHaveCount(1);
+  await logInConsent.getByRole("link", { name: "Terms" }).click();
   await expect(page).toHaveURL(/\/terms$/);
 
   const sitemap = await (await request.get("/sitemap.xml")).text();

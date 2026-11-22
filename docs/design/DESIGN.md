@@ -63,6 +63,11 @@ Shadow (light): `0 1px 2px rgba(28,27,31,.04), 0 10px 28px rgba(28,27,31,.07)`. 
 
 - **Primary** (accent): accent fill, onAccent text, always. Disabled is the same accent at 45% with a not-allowed cursor; never grey.
 - **Secondary** never matches the surface it sits on: `card2` on card surfaces, `card` on card2 and pastel surfaces (Noor's peach blocks, pastel idea cards, the mint "sent" panel). Hover tints the button's own colour (`hover-tint`); the `card` variant hovers with a light accent wash, since a grey one would land between bg and card2.
+- **Light-mode hover on the page background**: never card2 there (too close to the background).
+  - **Cards** on the page (people cards, help topics, help center articles, the landing FAQ): stay white; hover lifts 2px with a stronger shadow (`card-lift`, `--card-shadow-hover`); selected is a 2px accent ring. White selected items (current sidebar item, account button, chosen friend) get the stronger shadow on hover instead of a tint.
+  - **Toggle chips** (filters and every chip group, `chipToggleClass`): off is white with a 1.5px line; hover adds an accent border at 40% and a 6% accent tint; pressed is the text colour with bg-colour text.
+  - **Icon buttons on the page** (header search, theme, bell): the `page` button, white with the accent wash.
+  - Rows inside a white card may keep a card2 hover. Dark mode is unchanged (card2 chips and buttons, tints).
 - **Scrollbars**: 8px, rounded thumb in `line`, `sub` on hover, accent-tinted while something inside has focus, no track; Firefox gets `scrollbar-width: thin` + `scrollbar-color`. In rounded containers the track stops 14px short of the corners.
 
 ## Page header (shared `<PageHeader>`)

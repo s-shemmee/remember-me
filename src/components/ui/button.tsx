@@ -33,6 +33,10 @@ const buttonVariants = cva(
         // Hover is a light accent wash: a grey one would land between bg and
         // card2 and vanish into one of them (e2e/ui-buttons.spec.ts).
         card: "bg-card text-text [--hover-tint-color:var(--accent)] [--hover-tint:10%]",
+        // A secondary button right on the page background (header icon
+        // buttons): white with the accent wash in light (card2 there is too
+        // close to the background); card2 with the usual tint in dark.
+        page: "bg-card text-text [--hover-tint-color:var(--accent)] [--hover-tint:10%] dark:bg-card2 dark:[--hover-tint-color:var(--text)] dark:[--hover-tint:9%]",
         transparent: "bg-transparent text-text",
       },
       size: {

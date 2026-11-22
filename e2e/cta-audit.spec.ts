@@ -47,6 +47,8 @@ function snapshot(selector: string) {
     return {
       i: e.dataset.audit!,
       ownBg: own[3]! > 0,
+      // Outlined (an inset ring or a border): it keeps its edge even on a same-colour surface.
+      outlined: cs.boxShadow.includes("inset") || parseFloat(cs.borderTopWidth) > 0,
       bg: over(own, surface),
       surface,
       gradient,
@@ -182,7 +184,7 @@ async function auditPage(page: Page, where: string): Promise<Finding[]> {
   for (const c of controls) {
     const b = before.get(c.i);
     if (!b || !c.button) continue;
-    if (b.ownBg && !b.gradient && gap(b.bg, b.surface) < 12)
+    if (b.ownBg && !b.gradient && !b.outlined && gap(b.bg, b.surface) < 12)
       findings.push(`${name(c)}: its background matches the surface (lost background)`);
     if (c.disabled) continue;
     const a = after.get(c.i);

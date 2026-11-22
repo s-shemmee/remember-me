@@ -64,7 +64,6 @@ export function LogInForm({
         {hiddenNext}
         <SocialButton provider="google" />
       </form>
-      <ConsentNote newWithGoogle />
 
       <OrDivider />
 
@@ -136,6 +135,7 @@ export function LogInForm({
       <AuthSwitch question="New here?" href="/sign-up">
         Create a free account
       </AuthSwitch>
+      <ConsentNote />
     </>
   );
 }

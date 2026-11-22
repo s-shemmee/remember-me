@@ -16,6 +16,7 @@ const CASES = [
   { name: "accent", className: buttonVariants({ variant: "accent" }) },
   { name: "card2", className: buttonVariants({ variant: "card2" }) },
   { name: "card", className: buttonVariants({ variant: "card" }) },
+  { name: "page", className: buttonVariants({ variant: "page" }) },
   { name: "transparent", className: buttonVariants({ variant: "transparent" }) },
   {
     name: "transparent on bg-card (People: Plan their day)",
@@ -115,7 +116,7 @@ for (const theme of ["light", "dark"] as const) {
  */
 const STATES = ["default", "hover", "focus-visible", "active", "disabled", "loading"] as const;
 const SIZES = ["default", "lg", "icon"] as const;
-const VARIANTS = ["accent", "card2", "card", "transparent"] as const;
+const VARIANTS = ["accent", "card2", "card", "page", "transparent"] as const;
 
 for (const theme of ["light", "dark"] as const) {
   test(`button matrix: variant × size × state × surface (${theme})`, async ({ page }, testInfo) => {

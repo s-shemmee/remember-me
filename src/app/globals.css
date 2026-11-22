@@ -52,6 +52,8 @@
   --rose2: #ffc7d8;
 
   --card-shadow: 0 1px 2px rgba(28, 27, 31, 0.04), 0 10px 28px rgba(28, 27, 31, 0.07);
+  /* A card lifted on hover (card-lift): the same shadow, a little stronger. */
+  --card-shadow-hover: 0 2px 4px rgba(28, 27, 31, 0.06), 0 16px 36px rgba(28, 27, 31, 0.12);
   /* Menus and popovers (account menu in the approved screens) */
   --popover-shadow: 0 18px 40px rgba(28, 27, 31, 0.18), 0 0 0 1px var(--line);
   /* Dialog backdrop */
@@ -106,6 +108,8 @@
 
   /* Dark mode uses a 1px ring instead of a shadow. */
   --card-shadow: 0 0 0 1px #26262b;
+  /* Dark cards keep their ring on hover (they tint instead). */
+  --card-shadow-hover: 0 0 0 1px #26262b;
   --popover-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--line);
   --overlay: rgba(0, 0, 0, 0.6);
 
@@ -455,6 +459,27 @@
  * It darkens in light and lightens in dark, on any variant and any surface,
  * so a hovered button never matches the card behind it.
  */
+/*
+ * A white card on the page background (people cards, help topics): on hover
+ * it lifts 2px with a stronger shadow and stays white. A grey tint there
+ * lands on card2, too close to the page background in light mode. Dark mode
+ * adds `dark:hover-tint` where it had it.
+ */
+@utility card-lift {
+  transition:
+    transform 200ms var(--ease-soft),
+    box-shadow 200ms var(--ease-soft);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
 @utility hover-tint {
   &:hover {
     background-image: linear-gradient(

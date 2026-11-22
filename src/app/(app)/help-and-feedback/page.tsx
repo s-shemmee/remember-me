@@ -120,7 +120,7 @@ export default function HelpAndFeedbackPage() {
               <li key={slug} className="flex">
                 <Link
                   href={`/help/${slug}`}
-                  className="flex min-h-11 w-full gap-3 rounded-[22px] bg-card hover-tint p-4 shadow-card transition-transform duration-200 ease-soft hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                  className="flex min-h-11 w-full card-lift gap-3 rounded-[22px] bg-card p-4 shadow-card dark:hover-tint"
                 >
                   <span className="grid size-9 shrink-0 place-items-center rounded-[12px] bg-[color-mix(in_srgb,var(--accent)_12%,var(--card))]">
                     <Icon aria-hidden className="size-[18px] text-accent-text" />
