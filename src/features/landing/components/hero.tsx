@@ -207,9 +207,6 @@ function HeroCollage() {
         <Noor size={52} />
       </div>
 
-      <figcaption className="text-13 text-sub lg:absolute lg:bottom-0 lg:left-[70px]">
-        Example: a reminder, a secretly reserved gift and a happy friend.
-      </figcaption>
     </figure>
   );
 }
