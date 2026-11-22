@@ -84,7 +84,7 @@ test("add a person and see them in People", async ({ page }) => {
   await expect(page.getByRole("link", { name: /^Yasmine/ })).toBeVisible();
 
   // Remove, then Undo.
-  await page.getByRole("button", { name: "Edit" }).click();
+  await page.getByRole("button", { name: "Edit Yasmine" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Remove", exact: true }).click();
   await page
     .getByRole("dialog", { name: "Remove Yasmine?" })

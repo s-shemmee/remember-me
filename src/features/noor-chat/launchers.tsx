@@ -32,12 +32,12 @@ export function PersonChatButtons({ person }: { person: ChatPerson }) {
   return (
     <div className="flex flex-wrap gap-2">
       {flags.gifts && (
-        <Button variant="card2" onClick={() => openChat({ person, start: "gifts" })}>
+        <Button variant="card" onClick={() => openChat({ person, start: "gifts" })}>
           <LightbulbIcon aria-hidden /> Gift ideas
         </Button>
       )}
       {flags.messages && (
-        <Button variant="card2" onClick={() => openChat({ person, start: "message" })}>
+        <Button variant="card" onClick={() => openChat({ person, start: "message" })}>
           <PenLineIcon aria-hidden /> Write a message
         </Button>
       )}
@@ -45,7 +45,10 @@ export function PersonChatButtons({ person }: { person: ChatPerson }) {
   );
 }
 
-/** Help & feedback: the Ask Noor box opens the chat with your question. */
+/**
+ * Help & feedback: the Ask Noor card (peach, on the page's section). Asking,
+ * or a popular question, opens the chat with it.
+ */
 export function AskNoorChatBox() {
   const { openChat } = useNoorChat();
   const [question, setQuestion] = React.useState("");
@@ -54,37 +57,22 @@ export function AskNoorChatBox() {
     if (q.trim()) openChat({ question: q.trim() });
   };
   return (
-    <div id="ask-noor" className="flex w-full flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <Noor size={44} />
-        <div>
+    <div id="ask-noor" className="flex w-full min-w-0 gap-4 sm:gap-5">
+      <Noor size={56} animated className="shrink-0" />
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="flex flex-col gap-0.5">
           <h2 className="text-22 font-extrabold tracking-[-0.02em]">Ask Noor</h2>
-          <p className="text-14 text-sub">I answer from our help articles, in a chat.</p>
+          <label htmlFor={id} className="text-15 text-sub">
+            Ask me anything about Remember Me.
+          </label>
         </div>
-      </div>
-      <div role="group" aria-label="Suggested questions" className="flex flex-wrap gap-2">
-        {HELP_CHIPS.map((q) => (
-          <Button
-            key={q}
-            variant="card2"
-            onClick={() => ask(q)}
-            className="h-auto max-w-full py-2.5 text-left whitespace-normal"
-          >
-            {q}
-          </Button>
-        ))}
-      </div>
-      <form
-        className="flex flex-col gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          ask(question);
-        }}
-      >
-        <label htmlFor={id} className="text-15 font-semibold">
-          Your question
-        </label>
-        <div className="flex gap-2">
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            ask(question);
+          }}
+        >
           <input
             id={id}
             value={question}
@@ -96,8 +84,21 @@ export function AskNoorChatBox() {
           <Button type="submit" disabled={!question.trim()}>
             Ask
           </Button>
+        </form>
+        <div role="group" aria-label="Popular questions" className="flex flex-wrap gap-2">
+          {HELP_CHIPS.map((q) => (
+            <Button
+              key={q}
+              variant="card"
+              onClick={() => ask(q)}
+              className="h-auto max-w-full py-2.5 text-left text-14 whitespace-normal"
+            >
+              {q}
+            </Button>
+          ))}
         </div>
-      </form>
+        <p className="text-13 text-sub">Asking opens the Noor chat.</p>
+      </div>
     </div>
   );
 }

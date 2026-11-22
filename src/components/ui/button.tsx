@@ -12,13 +12,17 @@ import { cn } from "@/lib/utils";
  * Hover tints the button's own colour (`hover-tint`, globals.css) instead of
  * switching to a surface colour, so it never disappears into the card behind
  * it (e2e/ui-buttons.spec.ts checks every variant on every surface).
+ *
+ * Secondary buttons never match the surface they sit on: `card2` on card
+ * surfaces, `card` on card2 and pastel ones. Disabled keeps its colour at
+ * 45% (an accent button never turns grey) with a not-allowed cursor.
  */
 const buttonVariants = cva(
   [
     "inline-flex shrink-0 items-center justify-center gap-2 rounded-pill font-semibold whitespace-nowrap select-none",
     "transition-[transform,background-color,color] duration-200 ease-soft",
-    "hover-tint hover:-translate-y-px active:scale-[.97] active:translate-y-0",
-    "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
+    "not-disabled:not-aria-disabled:hover-tint not-disabled:not-aria-disabled:hover:-translate-y-px not-disabled:not-aria-disabled:active:scale-[.97] active:translate-y-0",
+    "disabled:cursor-not-allowed disabled:opacity-45 aria-disabled:pointer-events-none aria-disabled:opacity-45",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   ],
   {
@@ -26,6 +30,9 @@ const buttonVariants = cva(
       variant: {
         accent: "bg-accent text-on-accent",
         card2: "bg-card2 text-text",
+        // Hover is a light accent wash: a grey one would land between bg and
+        // card2 and vanish into one of them (e2e/ui-buttons.spec.ts).
+        card: "bg-card text-text [--hover-tint-color:var(--accent)] [--hover-tint:10%]",
         transparent: "bg-transparent text-text",
       },
       size: {

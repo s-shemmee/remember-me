@@ -191,7 +191,10 @@ describe("Noor's chat", () => {
         <AskNoorChatBox />
       </NoorChatProvider>,
     );
-    await userEvent.type(screen.getByLabelText("Your question"), "How do invites work?");
+    await userEvent.type(
+      screen.getByLabelText("Ask me anything about Remember Me."),
+      "How do invites work?",
+    );
     await userEvent.click(screen.getByRole("button", { name: "Ask" }));
     expect(await within(log()).findByText("How do invites work?")).toBeVisible();
     expect(await within(log()).findByText(/work once, for 7 days/)).toBeVisible();

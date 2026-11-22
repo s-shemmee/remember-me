@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, PencilIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -8,6 +8,7 @@ import * as React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { pastelClasses } from "@/components/ui/chip";
+import { Noor } from "@/components/ui/noor";
 import { Switch } from "@/components/ui/switch";
 import { OccasionEmoji } from "@/features/occasions/occasion-emoji";
 import { cn } from "@/lib/utils";
@@ -41,10 +42,11 @@ function SectionLabel({ id, children }: { id: string; children: React.ReactNode 
 /**
  * A person's profile (AppPeople.dc.html, right panel), top to bottom:
  * avatar, name and "relation · Connected/Not connected"; their days with
- * countdown pills; little things (emoji + text); their wishlist (first
- * items with status and "See all", or "Invite them"); then "Plan their day"
- * and Edit. From 1280px it sits next to the grid; below, it replaces the
- * grid and "All people" goes back.
+ * countdowns; little things (emoji + text); "Noor can help" (gift ideas,
+ * a message); their wishlist (first items with status and "See all", or
+ * "Invite them"); then "Plan their day". Edit is the pencil at the top
+ * right. From 1280px it sits next to the grid; below, it replaces the grid
+ * and "All people" goes back.
  */
 export function PersonPanel({
   person,
@@ -116,6 +118,21 @@ export function PersonPanel({
               .join(" · ")}
           </span>
         </div>
+        {/* A 36px pencil circle to the eye, inside a 44px target. */}
+        <Button
+          variant="transparent"
+          size="icon"
+          onClick={onEdit}
+          aria-label={`Edit ${person.name}`}
+          className="group -mt-1 -mr-1 ml-auto self-start [--hover-tint:0%]"
+        >
+          <span
+            aria-hidden="true"
+            className="grid size-9 place-items-center rounded-full bg-card2 transition-colors group-hover:bg-[color-mix(in_srgb,var(--text)_9%,var(--card2))]"
+          >
+            <PencilIcon className="size-4" />
+          </span>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -168,37 +185,56 @@ export function PersonPanel({
               : "Nothing yet. Add what they love, so gift ideas come easy."}
           </p>
         )}
-        {giftDay && chat.enabled ? (
-          <PersonChatButtons
-            person={{
-              personId: person.id,
-              name: person.name,
-              occasionId: giftDay.id,
-              occursOn: giftDay.occursOn,
-            }}
-          />
-        ) : (
-          <>
-            {messages && giftDay && (
-              <WriteMessageButton
-                className="self-start"
-                target={{ name: person.name, occasionId: giftDay.id, occursOn: giftDay.occursOn }}
-              />
-            )}
-            {giftIdeas && giftDay && (
-              <GiftIdeasButton
-                className="self-start"
-                target={{
-                  personId: person.id,
-                  name: person.name,
-                  occasionId: giftDay.id,
-                  occursOn: giftDay.occursOn,
-                }}
-              />
-            )}
-          </>
-        )}
       </div>
+
+      {giftDay && (chat.enabled ? chat.gifts || chat.messages : messages || giftIdeas) && (
+        <section
+          aria-labelledby={`${headingId}-noor`}
+          className="flex flex-col gap-3 rounded-[20px] bg-[linear-gradient(160deg,var(--peach),var(--peach2))] p-4"
+        >
+          <div className="flex items-center gap-2.5">
+            <Noor size={32} />
+            <h3 id={`${headingId}-noor`} className="text-15 font-bold">
+              Noor can help
+            </h3>
+          </div>
+          {chat.enabled ? (
+            <PersonChatButtons
+              person={{
+                personId: person.id,
+                name: person.name,
+                occasionId: giftDay.id,
+                occursOn: giftDay.occursOn,
+              }}
+            />
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {giftIdeas && (
+                <GiftIdeasButton
+                  label="Gift ideas"
+                  variant="card"
+                  target={{
+                    personId: person.id,
+                    name: person.name,
+                    occasionId: giftDay.id,
+                    occursOn: giftDay.occursOn,
+                  }}
+                />
+              )}
+              {messages && (
+                <WriteMessageButton
+                  variant="card"
+                  target={{
+                    name: person.name,
+                    occasionId: giftDay.id,
+                    occursOn: giftDay.occursOn,
+                  }}
+                />
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
@@ -230,7 +266,7 @@ export function PersonPanel({
         )}
       </div>
 
-      <PlanActions person={person} today={today} onEdit={onEdit} />
+      <PlanActions person={person} today={today} />
 
       <InMemorySwitch person={person} />
     </section>
@@ -354,19 +390,11 @@ function TheirWishlist({ wishlist, name }: { wishlist: PersonWishlist | null; na
 }
 
 /**
- * The panel's actions: "Plan their day" (the plan of their next day, in a
- * sheet; "Plan the day" when it's gentle) and Edit. Past years' plans stay
+ * The panel's action: "Plan their day" (the plan of their next day, in a
+ * sheet; "Plan the day" when it's gentle), full width on phones. Past years' plans stay
  * here below; private, only you ever see them.
  */
-function PlanActions({
-  person,
-  today,
-  onEdit,
-}: {
-  person: PersonView;
-  today: string;
-  onEdit: () => void;
-}) {
+function PlanActions({ person, today }: { person: PersonView; today: string }) {
   const { plans } = usePlans();
   const [open, setOpen] = React.useState(false);
   const day = person.next;
@@ -389,16 +417,11 @@ function PlanActions({
           </span>
         </div>
       )}
-      <div className="flex flex-wrap gap-2">
-        {day && target && (
-          <Button onClick={() => setOpen(true)}>
-            {day.gentle ? "Plan the day" : "Plan their day"}
-          </Button>
-        )}
-        <Button variant="card2" onClick={onEdit}>
-          Edit
+      {day && target && (
+        <Button onClick={() => setOpen(true)} className="w-full sm:w-auto sm:self-start">
+          {day.gentle ? "Plan the day" : "Plan their day"}
         </Button>
-      </div>
+      )}
       {past.length > 0 && (
         <details className="group rounded-[16px] px-1">
           <summary className="flex min-h-11 cursor-pointer items-center text-14 font-semibold text-accent-text">

@@ -29,10 +29,10 @@ describe("hover rule", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("hover-tint is a 9% text-colour overlay", () => {
+  it("hover-tint is a 9% text-colour overlay by default (a variant may tune it)", () => {
     const css = readFileSync(path.join(SRC, "app/globals.css"), "utf8");
     expect(css).toMatch(
-      /@utility hover-tint[\s\S]*?color-mix\(in srgb, var\(--text\) 9%, transparent\)/,
+      /@utility hover-tint[\s\S]*?color-mix\(in srgb, var\(--hover-tint-color, var\(--text\)\) var\(--hover-tint, 9%\), transparent\)/,
     );
   });
 });

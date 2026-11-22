@@ -88,7 +88,7 @@ test("opens only from the three entry points and reuses Noor's existing actions"
   await chat.getByRole("button", { name: "Close" }).click();
 
   await page.goto("/help-and-feedback");
-  await page.getByLabel("Your question").fill("How do invites work?");
+  await page.getByLabel("Ask me anything about Remember Me.").fill("How do invites work?");
   await page.getByRole("button", { name: "Ask", exact: true }).click();
   chat = page.getByRole("dialog", { name: "Noor" });
   // Your question in the thread (the same words may also be a suggestion chip).
@@ -102,7 +102,7 @@ test("opens only from the three entry points and reuses Noor's existing actions"
   await page.evaluate(() => window.localStorage.setItem("rm-theme", "dark"));
   await page.reload();
   await expect(page.locator("html")).toHaveClass(/dark/);
-  await page.getByLabel("Your question").fill("How do invites work?");
+  await page.getByLabel("Ask me anything about Remember Me.").fill("How do invites work?");
   await page.getByRole("button", { name: "Ask", exact: true }).click();
   chat = page.getByRole("dialog", { name: "Noor" });
   await expect(chat.getByText(/Reminders arrive at 9:00 in the morning/)).toBeVisible();

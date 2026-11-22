@@ -19,7 +19,7 @@ function SocialButton({
         "inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-pill border-[1.5px] border-line bg-card px-6 text-16 font-semibold text-text",
         // As in the screens: lift 1px with a sub-coloured border on hover, .98 when pressed.
         "transition-[transform,border-color] duration-200 ease-soft hover:-translate-y-px hover:border-sub active:translate-y-0 active:scale-[.98]",
-        "disabled:pointer-events-none disabled:opacity-50",
+        "disabled:cursor-not-allowed disabled:opacity-45",
         className,
       )}
       {...props}

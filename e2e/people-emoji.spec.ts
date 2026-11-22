@@ -4,8 +4,8 @@ import { expectAccessible, signUpAndOnboard } from "./helpers";
 
 /**
  * feat/people-parity-likes-emoji: an emoji per little thing (suggested
- * while typing, picked from the grid by mouse or keyboard, typed by hand,
- * reset to the heart), shown on the profile; choosing people on desktop;
+ * while typing, picked from the full picker by mouse or keyboard, reset to
+ * the heart), shown on the profile; choosing people on desktop;
  * opening one on a phone and going back.
  */
 async function addPerson(page: Page, name: string, things: string[] = []) {
@@ -41,13 +41,20 @@ for (const theme of ["light", "dark"] as const) {
     const draft = dialog.getByRole("button", { name: "Choose an emoji for black coffee" });
     await expect(draft).toHaveText("☕");
 
-    // A hand-picked emoji is never replaced by a suggestion.
+    // A hand-picked emoji is never replaced by a suggestion. The picker opens
+    // on its search field; picking closes it and focus goes back.
     await draft.click();
-    const grid = page.getByRole("group", { name: "Common emoji" });
-    await expect(grid.getByRole("button")).toHaveCount(48);
+    const picker = page.getByRole("dialog", { name: "Emoji for black coffee" });
+    const search = picker.getByLabel("Search emoji");
+    await expect(search).toBeFocused();
+    await expect(picker.getByRole("button", { name: /^Change skin tone/ })).toBeVisible();
+    await expect(
+      picker.getByRole("gridcell", { name: "Grinning face", exact: true }),
+    ).toBeVisible();
     await expectAccessible(page, `emoji picker open, ${theme}`);
-    await grid.getByRole("button", { name: "cake" }).click();
-    await expect(grid).toBeHidden();
+    await search.fill("shortcake");
+    await picker.getByRole("gridcell", { name: "Shortcake" }).click();
+    await expect(picker).toBeHidden();
     await expect(draft).toBeFocused();
     await field.fill("black coffee and tea");
     await expect(
@@ -55,33 +62,26 @@ for (const theme of ["light", "dark"] as const) {
     ).toHaveText("🍰");
     await field.press("Enter");
 
-    // Another one, then change its emoji by keyboard: arrows move, Enter picks.
+    // Another one, then change its emoji by keyboard: search, arrows, Enter.
     await field.fill("Loves football");
     await field.press("Enter");
     const football = dialog.getByRole("button", { name: "Choose an emoji for Loves football" });
     await expect(football).toHaveText("⚽");
     await football.click();
-    await expect(grid.getByRole("button", { name: "football" })).toBeFocused();
-    await page.keyboard.press("ArrowRight");
-    await expect(grid.getByRole("button", { name: "basketball" })).toBeFocused();
+    const footballPicker = page.getByRole("dialog", { name: "Emoji for Loves football" });
+    await footballPicker.getByLabel("Search emoji").fill("basketball");
+    await expect(footballPicker.getByRole("gridcell", { name: "Basketball" })).toBeVisible();
+    await page.keyboard.press("ArrowDown");
     await page.keyboard.press("Enter");
     await expect(football).toHaveText("🏀");
 
     // Escape closes and returns focus.
     await football.click();
     await page.keyboard.press("Escape");
-    await expect(grid).toBeHidden();
+    await expect(footballPicker).toBeHidden();
     await expect(football).toBeFocused();
 
-    // Any emoji, typed (exactly one), and back to the heart.
-    await football.click();
-    const custom = page.getByLabel("Or type any emoji");
-    await custom.fill("ok");
-    await custom.press("Enter");
-    await expect(page.getByText("Type or paste one emoji.")).toBeVisible();
-    await custom.fill("🦉");
-    await custom.press("Enter");
-    await expect(football).toHaveText("🦉");
+    // Back to the heart.
     await football.click();
     await page.getByRole("button", { name: "Reset to heart" }).click();
     await expect(football).toHaveText("❤️");

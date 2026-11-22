@@ -34,9 +34,14 @@ const BUDGET_CHOICES = Object.keys(BUDGET_LABELS) as BudgetChoice[];
  */
 export function GiftIdeasButton({
   target,
+  label = "Ask Noor for gift ideas",
+  variant = "card2",
   className,
 }: {
   target: GiftIdeasTarget;
+  label?: string;
+  /** `card` on card2 or pastel surfaces (a person's "Noor can help" block). */
+  variant?: "card2" | "card";
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
@@ -44,11 +49,11 @@ export function GiftIdeasButton({
   return (
     <>
       <Button
-        variant="card2"
+        variant={variant}
         onClick={() => setOpen(true)}
         className={cn("h-auto max-w-full py-2.5 whitespace-normal", className)}
       >
-        <LightbulbIcon aria-hidden /> Ask Noor for gift ideas
+        <LightbulbIcon aria-hidden /> {label}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent

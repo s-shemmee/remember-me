@@ -103,7 +103,7 @@ test("on the person's panel, and hidden for someone In memory", async ({ page })
 
   // Adding someone opens their panel.
   const profile = page.getByRole("region", { name: "Sara" });
-  const ask = profile.getByRole("button", { name: /Ask Noor for gift ideas/ });
+  const ask = profile.getByRole("button", { name: "Gift ideas", exact: true });
   await expect(ask).toBeVisible();
 
   await profile.getByRole("switch", { name: "In memory" }).click();

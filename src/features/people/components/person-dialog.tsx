@@ -246,7 +246,16 @@ export function PersonDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !pending && onOpenChange(o)}>
-      <DialogContent className="max-w-xl gap-6" onCloseAutoFocus={onCloseAutoFocus}>
+      <DialogContent
+        className={cn(
+          "gap-6",
+          // Edit and add: wide and short on desktop; a full-screen sheet on phones.
+          !confirmRemove &&
+            "flex max-w-[760px] flex-col max-sm:fixed max-sm:inset-0 max-sm:max-h-none max-sm:rounded-none",
+          confirmRemove && "max-w-xl",
+        )}
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
         {confirmRemove ? (
           <>
             <DialogHeader>
@@ -286,102 +295,115 @@ export function PersonDialog({
               </DialogDescription>
             </DialogHeader>
 
-            <form ref={formRef} noValidate onSubmit={onSubmit} className="grid gap-5">
-              <Field
-                id="pf-name"
-                label="Their name"
-                placeholder="e.g. Sara"
-                autoComplete="off"
-                maxLength={NAME_MAX}
-                value={values.name}
-                onChange={(e) => {
-                  update({ name: e.currentTarget.value });
-                  clearError("name");
-                }}
-                error={errors.name}
-              />
+            <form
+              ref={formRef}
+              noValidate
+              onSubmit={onSubmit}
+              className="flex min-h-0 flex-1 flex-col gap-5"
+            >
+              {/* Desktop: who they are | their days; little things below; phones: one column. */}
+              <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:gap-x-8">
+                <div className="grid content-start gap-5">
+                  <div className="grid gap-2">
+                    <span id="pf-color-label" className="text-14 font-semibold">
+                      Their colour
+                    </span>
+                    <ColorSwatches
+                      labelId="pf-color-label"
+                      surface="card"
+                      value={values.color}
+                      onChange={(color) => {
+                        setColorPicked(true);
+                        update({ color });
+                      }}
+                    />
+                  </div>
 
-              <div className="grid gap-2">
-                <span id="pf-relation-label" className="text-14 font-semibold">
-                  Who are they to you?
-                </span>
-                <RelationChips
-                  labelId="pf-relation-label"
-                  value={values.relationKind}
-                  onChange={(relationKind) =>
-                    update({
-                      relationKind,
-                      ...(colorPicked ? {} : { color: RELATION_COLORS[relationKind] }),
-                    })
-                  }
-                />
-              </div>
-
-              <Field
-                id="pf-description"
-                label="How you'd describe them (optional)"
-                placeholder="e.g. Little sister"
-                autoComplete="off"
-                maxLength={DESCRIPTION_MAX}
-                value={values.description}
-                onChange={(e) => {
-                  update({ description: e.currentTarget.value });
-                  clearError("description");
-                }}
-                error={errors.description}
-              />
-
-              <div className="grid gap-2">
-                <span id="pf-color-label" className="text-14 font-semibold">
-                  Their colour
-                </span>
-                <ColorSwatches
-                  labelId="pf-color-label"
-                  surface="card"
-                  value={values.color}
-                  onChange={(color) => {
-                    setColorPicked(true);
-                    update({ color });
-                  }}
-                />
-              </div>
-
-              <DateFields
-                idPrefix="pf-bday"
-                legend="Their birthday"
-                value={values}
-                onChange={(patch) => {
-                  update(patch);
-                  clearError(...Object.keys(patch));
-                }}
-                errors={{ day: errors.day, month: errors.month, year: errors.year }}
-              />
-
-              <fieldset className="grid gap-3">
-                <legend className="mb-1 text-14 font-semibold">Other days (optional)</legend>
-                {values.days.map((d, i) => (
-                  <OtherDayRow
-                    key={d.id ?? `new-${i}`}
-                    index={i}
-                    value={d}
-                    errors={errors}
-                    onChange={(patch) => setDay(i, patch)}
-                    onRemove={() => removeDay(i)}
+                  <Field
+                    id="pf-name"
+                    label="Their name"
+                    placeholder="e.g. Sara"
+                    autoComplete="off"
+                    maxLength={NAME_MAX}
+                    value={values.name}
+                    onChange={(e) => {
+                      update({ name: e.currentTarget.value });
+                      clearError("name");
+                    }}
+                    error={errors.name}
                   />
-                ))}
-                {values.days.length < OTHER_DAYS_LIMIT && (
-                  <Button
-                    id="pf-add-day"
-                    type="button"
-                    variant="card2"
-                    onClick={addDay}
-                    className="w-fit"
-                  >
-                    <PlusIcon aria-hidden />{" "}
-                    {values.days.length ? "Add another day" : "Add an anniversary or another day"}
-                  </Button>
-                )}
-              </fieldset>
+
+                  <div className="grid gap-2">
+                    <span id="pf-relation-label" className="text-14 font-semibold">
+                      Who are they to you?
+                    </span>
+                    <RelationChips
+                      labelId="pf-relation-label"
+                      value={values.relationKind}
+                      onChange={(relationKind) =>
+                        update({
+                          relationKind,
+                          ...(colorPicked ? {} : { color: RELATION_COLORS[relationKind] }),
+                        })
+                      }
+                    />
+                  </div>
+
+                  <Field
+                    id="pf-description"
+                    label="How you'd describe them (optional)"
+                    placeholder="e.g. Little sister"
+                    autoComplete="off"
+                    maxLength={DESCRIPTION_MAX}
+                    value={values.description}
+                    onChange={(e) => {
+                      update({ description: e.currentTarget.value });
+                      clearError("description");
+                    }}
+                    error={errors.description}
+                  />
+                </div>
+                <div className="grid content-start gap-5">
+                  <DateFields
+                    idPrefix="pf-bday"
+                    legend="Their birthday"
+                    value={values}
+                    onChange={(patch) => {
+                      update(patch);
+                      clearError(...Object.keys(patch));
+                    }}
+                    errors={{ day: errors.day, month: errors.month, year: errors.year }}
+                  />
+
+                  <fieldset className="grid gap-3">
+                    <legend className="mb-1 text-14 font-semibold">Other days (optional)</legend>
+                    {values.days.map((d, i) => (
+                      <OtherDayRow
+                        key={d.id ?? `new-${i}`}
+                        index={i}
+                        value={d}
+                        errors={errors}
+                        onChange={(patch) => setDay(i, patch)}
+                        onRemove={() => removeDay(i)}
+                      />
+                    ))}
+                    {values.days.length < OTHER_DAYS_LIMIT && (
+                      <Button
+                        id="pf-add-day"
+                        type="button"
+                        variant="card2"
+                        onClick={addDay}
+                        className="w-fit"
+                      >
+                        <PlusIcon aria-hidden />{" "}
+                        {values.days.length
+                          ? "Add another day"
+                          : "Add an anniversary or another day"}
+                      </Button>
+                    )}
+                  </fieldset>
+                </div>
+              </div>
 
               <div className="grid gap-1.5">
                 <label htmlFor="pf-little" className="text-14 font-semibold">
@@ -466,11 +488,12 @@ export function PersonDialog({
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5 border-t border-line pt-5">
+              {/* Stays in view while the body scrolls inside the dialog. */}
+              <div className="sticky -bottom-6 -mx-6 mt-auto -mb-6 flex flex-wrap items-center gap-2.5 border-t border-line bg-card px-6 py-4 sm:-bottom-8 sm:-mx-8 sm:-mb-8 sm:px-8">
                 <p
                   id="pf-message"
                   aria-live="polite"
-                  className="min-w-[min(100%,12rem)] flex-1 text-13 font-semibold text-accent-text"
+                  className="basis-full text-13 font-semibold text-accent-text empty:hidden"
                 >
                   {message}
                 </p>
@@ -483,11 +506,20 @@ export function PersonDialog({
                       setConfirmRemove(true);
                     }}
                     disabled={pending}
-                    className="text-accent-text"
+                    className="mr-auto px-3 text-accent-text"
                   >
                     Remove
                   </Button>
                 )}
+                <Button
+                  type="button"
+                  variant="card2"
+                  onClick={() => onOpenChange(false)}
+                  disabled={pending}
+                  className="ml-auto"
+                >
+                  Cancel
+                </Button>
                 <Button type="submit" aria-disabled={pending || undefined}>
                   {pending
                     ? "Saving…"

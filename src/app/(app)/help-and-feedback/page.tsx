@@ -16,7 +16,6 @@ import { FeedbackForm } from "@/features/feedback/components/feedback-form";
 import type { HelpSlug } from "@/features/help/slugs";
 import { AppMain } from "@/features/shell/app-shell";
 import { PageHeader, PageHeaderFallback } from "@/features/shell/page-header";
-import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/contact";
 import { notificationsInboxEnabled } from "@/lib/flags";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -81,11 +80,12 @@ async function Header() {
 
 /**
  * Help & feedback (from the account menu; /help for signed-in people, see
- * src/proxy.ts): Ask Noor, six help topics, and Send feedback (saved in
- * `feedback`, emailed to us). Signed-out visitors get the public help center.
+ * src/proxy.ts): Ask Noor (peach card), Browse help (six topic cards on the
+ * page background), Send feedback (saved in `feedback`, emailed to us) and a
+ * footer (name, version, Privacy, Terms). Signed-out visitors get the public
+ * help center.
  */
 export default function HelpAndFeedbackPage() {
-  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7);
   return (
     <AppMain>
       <Suspense fallback={<PageHeaderFallback title="Help & feedback" />}>
@@ -94,7 +94,10 @@ export default function HelpAndFeedbackPage() {
 
       <div className="grid max-w-3xl min-w-0 gap-6">
         <Suspense fallback={null}>
-          <section aria-label="Ask Noor" className={`${cardClass} empty:hidden`}>
+          <section
+            aria-label="Ask Noor"
+            className="flex min-w-0 flex-col gap-4 rounded-card-lg bg-[linear-gradient(160deg,var(--peach),var(--card))] p-6 shadow-card empty:hidden sm:p-8"
+          >
             <AskNoorSection />
           </section>
         </Suspense>
@@ -142,23 +145,18 @@ export default function HelpAndFeedbackPage() {
           <FeedbackForm />
         </section>
 
-        <footer className="flex flex-wrap items-center gap-x-4 gap-y-1 text-14 text-sub">
-          <a
-            href={CONTACT_MAILTO}
-            className="inline-flex min-h-11 items-center font-semibold text-accent-text underline-offset-4 hover:underline"
-          >
-            {CONTACT_EMAIL}
-          </a>
-          <span>
-            Version {pkg.version}
-            {sha ? ` (${sha})` : ""}
-          </span>
+        <footer className="flex flex-wrap items-center gap-x-2 text-14 text-sub">
+          <span>Remember Me</span>
+          <span aria-hidden="true">·</span>
+          <span>Version {pkg.version}</span>
+          <span aria-hidden="true">·</span>
           <Link
             href="/privacy"
             className="inline-flex min-h-11 items-center underline-offset-4 hover:underline"
           >
             Privacy
           </Link>
+          <span aria-hidden="true">·</span>
           <Link
             href="/terms"
             className="inline-flex min-h-11 items-center underline-offset-4 hover:underline"

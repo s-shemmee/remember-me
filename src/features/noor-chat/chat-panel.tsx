@@ -16,6 +16,9 @@ import { BUDGET_LABELS, type BudgetChoice } from "@/features/gift-ideas/schema";
 import { InlineText } from "@/features/help/help-content";
 import { draftNoorMessages, saveMessageInPlan } from "@/features/messages/actions";
 import { LANGUAGE_LABELS, TONE_LABELS } from "@/features/messages/schema";
+import { suggestEmoji } from "@/features/people/little-emoji";
+import type { Pastel } from "@/styles/tokens";
+import { pastelClasses } from "@/components/ui/chip";
 import { cn } from "@/lib/utils";
 
 import type { ChatFlags, ChatPerson } from "./chat-context";
@@ -311,7 +314,7 @@ export function NoorChatPanel({
             "sm:inset-x-auto sm:right-6 sm:bottom-6 sm:h-[min(620px,calc(100dvh-48px))] sm:w-[400px] sm:rounded-[28px]",
           )}
         >
-          <header className="flex items-center gap-3 border-b border-line px-4 py-3">
+          <header className="flex items-center gap-3 bg-[linear-gradient(160deg,var(--peach),var(--peach2))] px-4 py-3">
             <Noor size={36} mood="smiling" className="shrink-0" />
             <div className="flex min-w-0 flex-1 flex-col">
               <DialogPrimitive.Title className="text-16 font-bold">Noor</DialogPrimitive.Title>
@@ -344,11 +347,21 @@ export function NoorChatPanel({
                     {item.ideas.map((idea, i) => {
                       const key = `${item.id}-${i}`;
                       return (
-                        <li key={key} className="flex flex-col gap-1.5 rounded-[16px] bg-card p-3">
-                          <span className="text-14 font-bold">{idea.title}</span>
-                          <span className="text-13 text-sub">{idea.why}</span>
+                        <li
+                          key={key}
+                          className={cn(
+                            "flex flex-col gap-1.5 rounded-[16px] p-3",
+                            pastelClasses[IDEA_PASTELS[i % IDEA_PASTELS.length]!],
+                          )}
+                        >
+                          <span aria-hidden="true" className="text-[24px] leading-none">
+                            {suggestEmoji(idea.title) ?? "🎁"}
+                          </span>
+                          <span className="text-15 font-bold">{idea.title}</span>
+                          <span className="text-13">{idea.why}</span>
                           <div className="flex flex-wrap gap-1.5">
                             <ChatAction
+                              primary
                               label={done[key] === "added" ? "In the plan" : "Add to plan"}
                               name={idea.title}
                               done={done[key] === "added"}
@@ -379,6 +392,7 @@ export function NoorChatPanel({
                           </span>
                           <div className="flex flex-wrap gap-1.5">
                             <ChatAction
+                              on="card"
                               label={done[key] === "added" ? "In the plan" : "Use in plan"}
                               name={`draft ${i + 1}`}
                               done={done[key] === "added"}
@@ -386,6 +400,7 @@ export function NoorChatPanel({
                               onClick={() => void saveDraft(key, draft)}
                             />
                             <ChatAction
+                              on="card"
                               label={done[`${key}-c`] === "copied" ? "Copied" : "Copy"}
                               name={`draft ${i + 1}`}
                               done={false}
@@ -423,7 +438,7 @@ export function NoorChatPanel({
                   key={c.label}
                   type="button"
                   onClick={c.onPick}
-                  className="min-h-11 cursor-pointer rounded-pill bg-card2 hover-tint px-3.5 text-13 font-semibold"
+                  className="min-h-11 cursor-pointer rounded-pill bg-card hover-tint px-3.5 text-13 font-semibold shadow-[inset_0_0_0_1.5px_var(--line)] active:bg-accent active:text-on-accent"
                 >
                   {c.label}
                 </button>
@@ -509,22 +524,31 @@ function Bubble({ item, children }: { item: Item; children?: React.ReactNode }) 
   );
 }
 
+/** Gift idea cards cycle through these pastels (text in the pastel's ink). */
+const IDEA_PASTELS: Pastel[] = ["peach", "mint", "sky", "lilac", "butter"];
+
+/** "Add to plan" is the accent pill on a gift idea; the rest are `card` pills. */
 function ChatAction({
   label,
   name,
   done,
   icon,
   onClick,
+  primary = false,
+  on = "pastel",
 }: {
   label: string;
   name: string;
   done: boolean;
   icon: React.ReactNode;
   onClick: () => void;
+  primary?: boolean;
+  /** The surface it sits on: a pastel idea card (default) or a white draft card. */
+  on?: "pastel" | "card";
 }) {
   return (
     <Button
-      variant="card2"
+      variant={primary ? "accent" : on === "card" ? "card2" : "card"}
       disabled={done}
       onClick={onClick}
       aria-label={`${label}: ${name}`}

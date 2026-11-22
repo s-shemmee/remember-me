@@ -15,6 +15,7 @@ const SURFACES = ["bg-bg", "bg-card", "bg-card2"] as const;
 const CASES = [
   { name: "accent", className: buttonVariants({ variant: "accent" }) },
   { name: "card2", className: buttonVariants({ variant: "card2" }) },
+  { name: "card", className: buttonVariants({ variant: "card" }) },
   { name: "transparent", className: buttonVariants({ variant: "transparent" }) },
   {
     name: "transparent on bg-card (People: Plan their day)",
@@ -114,7 +115,7 @@ for (const theme of ["light", "dark"] as const) {
  */
 const STATES = ["default", "hover", "focus-visible", "active", "disabled", "loading"] as const;
 const SIZES = ["default", "lg", "icon"] as const;
-const VARIANTS = ["accent", "card2", "transparent"] as const;
+const VARIANTS = ["accent", "card2", "card", "transparent"] as const;
 
 for (const theme of ["light", "dark"] as const) {
   test(`button matrix: variant × size × state × surface (${theme})`, async ({ page }, testInfo) => {
@@ -143,7 +144,7 @@ for (const theme of ["light", "dark"] as const) {
             });
 
     await page.evaluate(
-      ({ theme, cells, states }) => {
+      ({ theme, cells, states, perSurface }) => {
         document.documentElement.classList.toggle("dark", theme === "dark");
         document.documentElement.style.colorScheme = theme;
         const board = document.createElement("div");
@@ -156,7 +157,7 @@ for (const theme of ["light", "dark"] as const) {
         let row: HTMLDivElement | null = null;
         let section: HTMLDivElement | null = null;
         cells.forEach((c, i) => {
-          if (i % (states.length * 9) === 0) {
+          if (i % (states.length * perSurface) === 0) {
             section = document.createElement("div");
             section.className = `${c.surface} rounded-[16px] p-4 mb-3`;
             section.innerHTML = `<div style="font-weight:700;margin-bottom:8px">${c.surface}</div>`;
@@ -184,7 +185,7 @@ for (const theme of ["light", "dark"] as const) {
         });
         document.body.append(board);
       },
-      { theme, cells, states: [...STATES] },
+      { theme, cells, states: [...STATES], perSurface: VARIANTS.length * SIZES.length },
     );
 
     // Force the pseudo-states.
@@ -241,6 +242,7 @@ for (const theme of ["light", "dark"] as const) {
           scale: cs.scale,
           opacity: Number(cs.opacity),
           pointer: cs.pointerEvents,
+          cursor: cs.cursor,
         };
       });
     }, cells);
@@ -254,7 +256,9 @@ for (const theme of ["light", "dark"] as const) {
         problems.push(`${at}: icon not square`);
       if (r.state === "disabled" || r.state === "loading") {
         if (r.opacity > 0.6) problems.push(`${at}: not dimmed`);
-        if (r.pointer !== "none") problems.push(`${at}: still clickable`);
+        // Native disabled buttons can't be clicked; they show not-allowed.
+        if (r.pointer !== "none" && r.cursor !== "not-allowed")
+          problems.push(`${at}: still clickable`);
         continue;
       }
       if (r.contrast < 4.5) problems.push(`${at}: text contrast ${r.contrast.toFixed(2)}`);

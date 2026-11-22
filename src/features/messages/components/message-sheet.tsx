@@ -47,7 +47,7 @@ export function WriteMessageButton({
   target: MessageTarget;
   label?: string;
   className?: string;
-  variant?: "card2" | "transparent";
+  variant?: "card2" | "card" | "transparent";
 }) {
   const [open, setOpen] = React.useState(false);
   const opener = React.useRef<HTMLElement | null>(null);

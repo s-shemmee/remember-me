@@ -197,14 +197,14 @@ test("Help & feedback: send, the email to us, and 5 a day", async ({ page }) => 
   const form = page.getByRole("region", { name: "Send feedback" });
   const token = `e2e-${Date.now()}`;
   const send = async (text: string) => {
-    await form.getByRole("radio", { name: "An idea" }).click();
+    await form.getByRole("radio", { name: "Something's broken" }).click();
     await form.getByLabel("Your message").fill(text);
-    await form.getByRole("button", { name: "Send" }).click();
+    await form.getByRole("button", { name: "Send feedback" }).click();
   };
   await send(`${token} a dark calendar, please`);
   await expect(form.getByRole("heading", { name: /Thank you/ })).toBeVisible();
 
-  // The email reaches us (Mailpit locally and in CI), with only the allowed info.
+  // The email reaches us (Mailpit locally and in CI); "broken" attaches only the allowed info.
   let found: { ID: string } | undefined;
   for (let i = 0; i < 40 && !found; i++) {
     const res = await fetch(

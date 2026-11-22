@@ -188,7 +188,7 @@ describe("People screen", () => {
   });
 
   it("gift ideas: only when switched on, and never for a Remembrance day or someone In memory", () => {
-    const ask = /Ask Noor for gift ideas/;
+    const ask = /^Gift ideas$/;
     window.history.replaceState(null, "", `/people?person=${KH}`);
     const { unmount } = render(<PeopleScreen people={people} />);
     expect(screen.queryByRole("button", { name: ask })).not.toBeInTheDocument();
@@ -433,7 +433,7 @@ describe("Add and edit dialog", () => {
     });
     window.history.replaceState(null, "", `/people?person=${KH}`);
     render(<PeopleScreen people={people} />);
-    await userEvent.click(screen.getByRole("button", { name: "Edit" }));
+    await userEvent.click(screen.getByRole("button", { name: "Edit Khalid" }));
     const dialog = screen.getByRole("dialog", { name: "Edit person" });
     expect(within(dialog).getByLabelText("Their name")).toHaveValue("Khalid");
     expect(within(dialog).getByLabelText("How you'd describe them (optional)")).toHaveValue(
@@ -453,7 +453,7 @@ describe("Add and edit dialog", () => {
     restorePerson.mockResolvedValue({ ok: true });
     window.history.replaceState(null, "", `/people?person=${OM}`);
     render(<PeopleScreen people={people} />);
-    await userEvent.click(screen.getByRole("button", { name: "Edit" }));
+    await userEvent.click(screen.getByRole("button", { name: "Edit Omar" }));
     await userEvent.click(
       within(screen.getByRole("dialog")).getByRole("button", { name: /^Remove$/ }),
     );
