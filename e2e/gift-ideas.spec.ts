@@ -10,8 +10,10 @@ import { expectAccessible, signUpAndOnboard } from "./helpers";
  * panel the button is there, and "In memory" hides it. axe at 390px.
  */
 test.skip(
-  process.env.AI_MOCK !== "1" || process.env.AI_GIFT_IDEAS_ENABLED !== "true",
-  "needs a server started with AI_GIFT_IDEAS_ENABLED=true AI_MOCK=1",
+  process.env.AI_MOCK !== "1" ||
+    process.env.AI_GIFT_IDEAS_ENABLED !== "true" ||
+    process.env.NOOR_CHAT_ENABLED === "true",
+  "needs AI_GIFT_IDEAS_ENABLED=true AI_MOCK=1 with the Noor chat flag off",
 );
 
 test.use({ timezoneId: "Europe/London" });

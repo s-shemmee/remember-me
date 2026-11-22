@@ -11,6 +11,7 @@ Built in feat/ask-noor-rag (the groundwork every AI feature reuses):
 - **Schemas:** Zod for every input and output: `src/ai/ask-noor/answer.ts` (the question; the model's JSON) and `src/features/ask-noor/schema.ts` (the function's response, checked again in Next).
 - **Limits:** `ai_usage_daily` (counts only: user, day, feature) and `claim_ai_use()` (service role): a per-user daily limit per feature (Ask Noor `AI_USER_DAILY_LIMIT`, default 20; gift ideas `AI_GIFT_IDEAS_DAILY_LIMIT`, default 5) and **one global daily cap shared by every AI feature** (`AI_GLOBAL_DAILY_CAP`, default 500). Old rows go after 30 days.
 - **Switches:** `AI_ENABLED=true` turns on Ask Noor; `AI_GIFT_IDEAS_ENABLED=true` turns on gift ideas, on its own (server env; both off by default, and the app works fully without them). `AI_MOCK=1` gives scripted answers for e2e, and is ignored on Vercel.
+- **Unified chat:** `NOOR_CHAT_ENABLED=true` replaces the separate Ask Noor and gift/message entry points with one panel from Home, a person's page and Help & feedback. It requires `AI_ENABLED`; gift ideas and message drafts still require their existing feature flags. It adds no provider or AI function.
 - **Retry and fallback:** `generate(messages, { only })` can ask one provider, so a feature can order its own attempts. Gift ideas: Groq, Groq again, then Cloudflare.
 - **Later:** prompts as versioned files, Langfuse traces, tools that only propose writes (Phase 1 quick add).
 

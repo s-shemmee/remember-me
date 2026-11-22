@@ -60,7 +60,7 @@ const TOPICS: { slug: HelpSlug; title: string; line: string; Icon: LucideIcon }[
   },
 ];
 
-const cardClass = "flex flex-col gap-4 rounded-card-lg bg-card p-6 shadow-card sm:p-8";
+const cardClass = "flex min-w-0 flex-col gap-4 rounded-card-lg bg-card p-6 shadow-card sm:p-8";
 
 async function Header() {
   // The bell switch is read per request, after the session.
@@ -88,7 +88,7 @@ export default function HelpAndFeedbackPage() {
         <Header />
       </Suspense>
 
-      <div className="grid max-w-3xl gap-6">
+      <div className="grid max-w-3xl min-w-0 gap-6">
         <Suspense fallback={null}>
           <section aria-label="Ask Noor" className={`${cardClass} empty:hidden`}>
             <AskNoorSection />

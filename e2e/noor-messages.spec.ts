@@ -9,7 +9,10 @@ import { expectAccessible, signUpAndOnboard } from "./helpers";
  * drafts, edit one, Copy, and "Use in plan" (saved on the Message step, which
  * is ticked); then from the plan's Message step itself. axe at 1440 and 390.
  */
-test.skip(process.env.AI_MOCK !== "1", "needs a server started with AI_MOCK=1 and the flags on");
+test.skip(
+  process.env.AI_MOCK !== "1" || process.env.NOOR_CHAT_ENABLED === "true",
+  "needs AI_MOCK=1 with the Noor chat flag off",
+);
 
 /** A day and month `n` days from today (UTC; far enough from midnight to be safe). */
 function inDays(n: number) {

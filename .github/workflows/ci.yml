@@ -91,6 +91,7 @@ jobs:
             echo "AI_GIFT_IDEAS_ENABLED=true"
             echo "AI_MESSAGES_ENABLED=true"
             echo "AI_MOCK=1"
+            echo "NOOR_CHAT_ENABLED=true"
             # The notification inbox behind the bell (e2e/notifications-inbox.spec.ts).
             echo "NOTIFICATIONS_INBOX_ENABLED=true"
           } >> "$GITHUB_ENV"
@@ -126,6 +127,7 @@ jobs:
             -e CI=true \
             -e NEXT_PUBLIC_SUPABASE_URL -e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY -e MAILPIT_URL \
             -e NEXT_PUBLIC_VAPID_PUBLIC_KEY -e ACCOUNT_NOTICE_SECRET -e AI_ENABLED -e AI_MOCK \
+            -e NOOR_CHAT_ENABLED \
             -e AI_GIFT_IDEAS_ENABLED -e AI_MESSAGES_ENABLED -e NOTIFICATIONS_INBOX_ENABLED \
             "mcr.microsoft.com/playwright:v$PLAYWRIGHT_VERSION-noble" \
             node_modules/.bin/playwright test

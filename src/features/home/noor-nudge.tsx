@@ -5,6 +5,8 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Noor } from "@/components/ui/noor";
+import { useNoorChat } from "@/features/noor-chat/chat-context";
+import { AskNoorButton } from "@/features/noor-chat/launchers";
 import { GiftIdeasButton, type GiftIdeasTarget } from "@/features/gift-ideas/components/gift-ideas";
 import { useReserve } from "@/features/reservations/components/use-reserve";
 
@@ -57,6 +59,7 @@ export function NoorNudge({
   giftIdeas?: GiftIdeasTarget | null;
 }) {
   const { reserve, busy } = useReserve();
+  const { flags: chat } = useNoorChat();
   const later = React.useSyncExternalStore(subscribe, readLater, () => null);
   const [state, setState] = React.useState<"offer" | "reserved" | "taken" | "later">("offer");
   const [reservedFor, setReservedFor] = React.useState<NudgeOffer | null>(null);
@@ -121,7 +124,8 @@ export function NoorNudge({
           {said}
         </p>
       </div>
-      {giftIdeas && <GiftIdeasButton target={giftIdeas} className="bg-card" />}
+      <AskNoorButton />
+      {!chat.enabled && giftIdeas && <GiftIdeasButton target={giftIdeas} className="bg-card" />}
       {offering ? (
         <div className="flex flex-wrap gap-2">
           <Button disabled={busy === offer.wishId} onClick={() => void onReserve()}>

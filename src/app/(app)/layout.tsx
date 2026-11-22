@@ -10,7 +10,10 @@ import { asPastel } from "@/features/people/view";
 import { InstallPromptListener } from "@/features/notifications/components/install-prompt-listener";
 import { ThemeSync } from "@/features/profile/components/theme-sync";
 import { AVATARS_BUCKET } from "@/features/profile/constants";
+import { NoorChatProvider } from "@/features/noor-chat/chat-context";
 import { AppShell } from "@/features/shell/app-shell";
+import { giftIdeasEnabled, messagesEnabled } from "@/ai/config";
+import { noorChatEnabled } from "@/lib/flags";
 import { parseThemeChoice } from "@/lib/theme";
 import { daysBetween, formatShortDate, nextOccurrence, todayIn, toIsoDate } from "@/lib/dates";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -81,22 +84,30 @@ async function Shell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AppShell
-      account={{
-        firstName: profile?.first_name ?? "",
-        color: asPastel(profile?.avatar_color),
-        character:
-          profile?.avatar_kind === "character"
-            ? (characterEmoji(profile.avatar_character) ?? null)
-            : null,
-        photoUrl,
-        peopleCount: count ?? 0,
+    <NoorChatProvider
+      flags={{
+        enabled: noorChatEnabled(),
+        gifts: giftIdeasEnabled(),
+        messages: messagesEnabled(),
       }}
-      yourDay={on ? { daysUntil: daysBetween(today, on), date: formatShortDate(on), plan } : null}
     >
-      <ThemeSync theme={parseThemeChoice(profile?.theme)} userId={userId} />
-      {children}
-    </AppShell>
+      <AppShell
+        account={{
+          firstName: profile?.first_name ?? "",
+          color: asPastel(profile?.avatar_color),
+          character:
+            profile?.avatar_kind === "character"
+              ? (characterEmoji(profile.avatar_character) ?? null)
+              : null,
+          photoUrl,
+          peopleCount: count ?? 0,
+        }}
+        yourDay={on ? { daysUntil: daysBetween(today, on), date: formatShortDate(on), plan } : null}
+      >
+        <ThemeSync theme={parseThemeChoice(profile?.theme)} userId={userId} />
+        {children}
+      </AppShell>
+    </NoorChatProvider>
   );
 }
 

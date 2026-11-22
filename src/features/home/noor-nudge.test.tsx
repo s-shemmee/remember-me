@@ -3,6 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const refresh = vi.fn();
+vi.mock("@/features/messages/actions", () => ({
+  draftNoorMessages: vi.fn(),
+  saveMessageInPlan: vi.fn(),
+  messageContext: vi.fn(),
+}));
+vi.mock("@/features/ask-noor/actions", () => ({ askNoor: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 const reserveWish = vi.fn();
 vi.mock("@/features/reservations/actions", () => ({

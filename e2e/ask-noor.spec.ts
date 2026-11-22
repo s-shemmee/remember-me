@@ -8,7 +8,10 @@ import { expectAccessible, signUpAndOnboard } from "./helpers";
  * suggested question, see the answer and its source link to the help center;
  * an off-topic question gets Noor's fixed reply; axe at 390px.
  */
-test.skip(process.env.AI_MOCK !== "1", "needs a server started with AI_ENABLED=true AI_MOCK=1");
+test.skip(
+  process.env.AI_MOCK !== "1" || process.env.NOOR_CHAT_ENABLED === "true",
+  "needs AI_MOCK=1 with the Noor chat flag off",
+);
 
 test("ask a question and see the answer with its source", async ({ page }) => {
   test.setTimeout(120_000);
