@@ -120,6 +120,8 @@ test("desktop: choosing a person shows their profile next to the list; phone: op
     const dialog = await addPerson(page, name);
     await dialog.getByRole("button", { name: `Add ${name}` }).click();
     await expect(dialog).toBeHidden();
+    // Adding opens them; let that settle before choosing someone else.
+    await expect(page.getByRole("region", { name })).toBeVisible();
   }
 
   await page.getByRole("link", { name: /^Omar/ }).click();

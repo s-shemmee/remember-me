@@ -37,7 +37,8 @@ export const PROTECTED_PREFIXES = [
 /**
  * /help is two pages: the public help center for visitors, and Help &
  * feedback (Ask Noor, topics, Send feedback) inside the app for signed-in
- * people, at the same address. Articles (/help/<slug>) stay public for all.
+ * people, at the same address. Articles (/help/<slug>) stay public for all,
+ * and so does the help center itself at /help?center ("Open help center").
  */
 export const IN_APP_HELP_PATH = "/help-and-feedback";
 
@@ -64,7 +65,11 @@ export function decideRoute(pathname: string, search: string, signedIn: boolean)
   if (signedIn && GUEST_ONLY_PATHS.some((p) => matchesPrefix(pathname, p))) {
     return { action: "redirect", to: HOME_PATH };
   }
-  if (signedIn && (pathname === "/help" || pathname === "/help/")) {
+  if (
+    signedIn &&
+    (pathname === "/help" || pathname === "/help/") &&
+    !new URLSearchParams(search).has("center")
+  ) {
     return { action: "rewrite", to: `${IN_APP_HELP_PATH}${search}` };
   }
   return { action: "continue" };

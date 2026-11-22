@@ -138,9 +138,9 @@ describe("People screen", () => {
     expect(screen.getByRole("heading", { level: 1, name: "People" })).toBeInTheDocument();
     expect(screen.getByText("3 people")).toBeInTheDocument();
     expect(cards()).toEqual([
-      "KHKhalidBrother from uniBirthday · in 2 days",
-      "MDMom & DadFamilyAnniversary · in 12 days",
-      "OMOmarColleagueBirthday · in 28 days",
+      "KHKhalidBrother from uni🎂Birthday · in 2 days",
+      "MDMom & DadFamily💍Anniversary · in 12 days",
+      "OMOmarColleague🎂Birthday · in 28 days",
     ]);
     expect(screen.getByText("Birthday · in 2 days")).toHaveClass("bg-butter", "text-butter-ink");
   });
@@ -149,8 +149,8 @@ describe("People screen", () => {
     render(<PeopleScreen people={people} />);
     await userEvent.type(screen.getByRole("searchbox", { name: "Search people" }), "om");
     expect(cards()).toEqual([
-      "MDMom & DadFamilyAnniversary · in 12 days",
-      "OMOmarColleagueBirthday · in 28 days",
+      "MDMom & DadFamily💍Anniversary · in 12 days",
+      "OMOmarColleague🎂Birthday · in 28 days",
     ]);
     expect(screen.getByText("2 people shown")).toBeInTheDocument();
   });
@@ -161,7 +161,7 @@ describe("People screen", () => {
     await userEvent.click(work);
     expect(work).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "false");
-    expect(cards()).toEqual(["OMOmarColleagueBirthday · in 28 days"]);
+    expect(cards()).toEqual(["OMOmarColleague🎂Birthday · in 28 days"]);
     await userEvent.type(screen.getByRole("searchbox"), "khalid");
     expect(
       screen.getByText("No one here yet. Try another filter, or add someone."),

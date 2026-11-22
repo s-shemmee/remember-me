@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon, GiftIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -21,6 +21,8 @@ import { PlanDots } from "@/features/plans/components/plan-dots";
 import { PlanSheet } from "@/features/plans/components/plan-sheet";
 import { usePlans } from "@/features/plans/components/plan-state";
 import { pastPlans, planKey, type PlanTarget, progress, styleFor } from "@/features/plans/steps";
+
+import { inkText } from "@/features/days/colors";
 
 import { setInMemory } from "../actions";
 import type { FriendWish } from "@/features/reservations/logic";
@@ -131,8 +133,8 @@ export function PersonPanel({
               </span>
               <span
                 className={cn(
-                  "shrink-0 rounded-pill px-2.5 py-1 text-13 font-bold",
-                  d.gentle ? "bg-card text-sub" : pastelClasses[person.color],
+                  "shrink-0 text-right text-13 font-bold",
+                  d.gentle ? "text-sub" : inkText[person.color],
                 )}
               >
                 {d.when}
@@ -199,18 +201,32 @@ export function PersonPanel({
       </div>
 
       <div className="flex flex-col gap-2">
-        <SectionLabel id={`${headingId}-wishlist`}>Their wishlist</SectionLabel>
+        <div className="flex items-center justify-between gap-3">
+          <SectionLabel id={`${headingId}-wishlist`}>Their wishlist</SectionLabel>
+          {!person.inMemory && person.connected && wishlist && wishlist.wishes.length > 0 && (
+            <Link
+              href={`/wishlists?tab=friends&friend=${wishlist.friendId}`}
+              className="inline-flex min-h-11 items-center text-14 font-semibold text-accent-text underline-offset-4 hover:underline"
+            >
+              See all<span className="sr-only"> of {person.name}&apos;s wishlist</span>
+            </Link>
+          )}
+        </div>
         {person.inMemory ? (
           <p className="text-14 text-sub">In memory. No gift ideas here.</p>
         ) : person.connected ? (
           <TheirWishlist wishlist={wishlist} name={person.name} />
         ) : (
-          <div className="flex flex-col items-start gap-2">
-            <p className="text-14 text-sub">Not connected yet, so no shared wishlist.</p>
-            <Button variant="card2" onClick={onInvite}>
+          <p className="flex flex-wrap items-center gap-x-2 text-14 text-sub">
+            Not connected yet, so no shared wishlist.
+            <button
+              type="button"
+              onClick={onInvite}
+              className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-accent-text underline-offset-4 hover:underline"
+            >
               Invite them<span className="sr-only">: {person.name}</span>
-            </Button>
-          </div>
+            </button>
+          </p>
         )}
       </div>
 
@@ -286,9 +302,9 @@ export function personPlanTarget(person: PersonView, day: DayView): PlanTarget {
 export type PersonWishlist = { friendId: string; wishes: FriendWish[] };
 
 const STATUS: Record<FriendWish["status"], { label: string; className: string }> = {
-  mine: { label: "Reserved by you", className: "bg-mint text-mint-ink" },
-  free: { label: "Free", className: "bg-card text-text" },
-  taken: { label: "Taken", className: "bg-card text-sub" },
+  mine: { label: "Reserved by you", className: "text-mint-ink" },
+  free: { label: "Free", className: "text-sub" },
+  taken: { label: "Taken", className: "text-sub" },
 };
 
 /** The first few wishes on their list, with what's free, yours or taken (never by whom). */
@@ -298,55 +314,42 @@ function TheirWishlist({ wishlist, name }: { wishlist: PersonWishlist | null; na
     return <p className="text-14 text-sub">Nothing on {name}&apos;s wishlist yet.</p>;
   }
   return (
-    <div className="flex flex-col gap-2">
-      <ul className="flex flex-col gap-2">
-        {wishes.slice(0, 3).map((w) => {
-          const price = formatPrice(w.price, w.currency);
-          const status = STATUS[w.status];
-          return (
-            <li
-              key={w.id}
-              className="flex min-w-0 items-center gap-3 rounded-[16px] bg-card2 py-2 pr-3 pl-2"
-            >
-              {w.imageUrl ? (
-                // A signed Storage URL, already small: a plain <img> is right here.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={w.imageUrl}
-                  alt=""
-                  className="size-12 shrink-0 rounded-[12px] object-cover"
-                />
-              ) : (
-                <span
-                  aria-hidden
-                  className="grid size-12 shrink-0 place-items-center rounded-[12px] bg-card"
-                >
-                  <GiftIcon className="size-5 text-sub" />
-                </span>
-              )}
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-15 font-bold">{w.title}</span>
-                {price && <span className="text-13 text-sub">{price}</span>}
-              </span>
+    <ul className="flex flex-col gap-2">
+      {wishes.slice(0, 3).map((w) => {
+        const price = formatPrice(w.price, w.currency);
+        const status = STATUS[w.status];
+        return (
+          <li
+            key={w.id}
+            className="flex min-w-0 items-center gap-3 rounded-[16px] border-[1.5px] border-line px-3 py-2.5"
+          >
+            {w.imageUrl ? (
+              // A signed Storage URL, already small: a plain <img> is right here.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={w.imageUrl}
+                alt=""
+                className="size-10 shrink-0 rounded-[10px] object-cover"
+              />
+            ) : (
               <span
-                className={cn(
-                  "shrink-0 rounded-pill px-2.5 py-1 text-12 font-bold",
-                  status.className,
-                )}
+                aria-hidden="true"
+                className="grid size-10 shrink-0 place-items-center text-[24px] leading-none"
               >
-                {status.label}
+                🎁
               </span>
-            </li>
-          );
-        })}
-      </ul>
-      <Link
-        href={`/wishlists?tab=friends&friend=${wishlist.friendId}`}
-        className="inline-flex min-h-11 items-center self-start text-14 font-semibold text-accent-text underline-offset-4 hover:underline"
-      >
-        See all<span className="sr-only"> of {name}&apos;s wishlist</span>
-      </Link>
-    </div>
+            )}
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-14 font-bold">{w.title}</span>
+              {price && <span className="text-12 text-sub">{price}</span>}
+            </span>
+            <span className={cn("shrink-0 text-right text-12 font-bold", status.className)}>
+              {status.label}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

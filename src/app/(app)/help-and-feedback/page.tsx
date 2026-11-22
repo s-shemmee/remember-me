@@ -1,6 +1,5 @@
 import {
   BellRingIcon,
-  ChevronRightIcon,
   GiftIcon,
   KeyRoundIcon,
   type LucideIcon,
@@ -30,32 +29,37 @@ const TOPICS: { slug: HelpSlug; title: string; line: string; Icon: LucideIcon }[
   {
     slug: "getting-started",
     title: "Getting started",
-    line: "Your first people and days",
+    line: "Add people, dates and your first wish",
     Icon: SparklesIcon,
   },
-  { slug: "reminders", title: "Reminders", line: "When and how I remind you", Icon: BellRingIcon },
+  {
+    slug: "reminders",
+    title: "Reminders",
+    line: "When and how Noor nudges you",
+    Icon: BellRingIcon,
+  },
   {
     slug: "wishlists-and-reservations",
     title: "Wishlists and reservations",
-    line: "Wishes, and keeping surprises",
+    line: "How secret reservations stay secret",
     Icon: GiftIcon,
   },
   {
     slug: "invites-and-connections",
     title: "Invites and connections",
-    line: "Connect with your people",
+    line: "Bring your people in",
     Icon: UsersIcon,
   },
   {
     slug: "your-data-and-privacy",
     title: "Privacy and your data",
-    line: "Who sees what, and your data",
+    line: "Who sees what, export, delete",
     Icon: ShieldIcon,
   },
   {
     slug: "account-and-settings",
     title: "Account and sign-in",
-    line: "Email, password and Google",
+    line: "Email, password, Google",
     Icon: KeyRoundIcon,
   },
 ];
@@ -95,25 +99,33 @@ export default function HelpAndFeedbackPage() {
           </section>
         </Suspense>
 
-        <section aria-labelledby="browse-help" className={cardClass}>
-          <h2 id="browse-help" className="text-22 font-extrabold tracking-[-0.02em]">
-            Browse help
-          </h2>
-          <ul className="grid gap-3 sm:grid-cols-2">
+        {/* On the page background, not in a card: the topics are the cards. */}
+        <section aria-labelledby="browse-help" className="flex min-w-0 flex-col gap-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+            <h2 id="browse-help" className="text-[20px] font-extrabold tracking-[-0.02em]">
+              Browse help
+            </h2>
+            <Link
+              href="/help?center"
+              className="inline-flex min-h-11 items-center text-14 font-bold text-accent-text underline-offset-4 hover:underline"
+            >
+              Open help center
+            </Link>
+          </div>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {TOPICS.map(({ slug, title, line, Icon }) => (
-              <li key={slug}>
+              <li key={slug} className="flex">
                 <Link
                   href={`/help/${slug}`}
-                  className="flex min-h-[72px] items-center gap-3.5 rounded-[20px] bg-card2 hover-tint px-4 py-3"
+                  className="flex min-h-11 w-full gap-3 rounded-[22px] bg-card hover-tint p-4 shadow-card transition-transform duration-200 ease-soft hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                 >
-                  <span className="grid size-10 shrink-0 place-items-center rounded-[12px] bg-card">
-                    <Icon aria-hidden className="size-5 text-accent-text" />
+                  <span className="grid size-9 shrink-0 place-items-center rounded-[12px] bg-[color-mix(in_srgb,var(--accent)_12%,var(--card))]">
+                    <Icon aria-hidden className="size-[18px] text-accent-text" />
                   </span>
-                  <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="text-15 font-bold">{title}</span>
                     <span className="text-13 text-sub">{line}</span>
                   </span>
-                  <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-sub" />
                 </Link>
               </li>
             ))}

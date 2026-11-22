@@ -1,15 +1,14 @@
-import { LinkIcon } from "lucide-react";
-
 import { Avatar } from "@/components/ui/avatar";
 import { pastelClasses } from "@/components/ui/chip";
+import { OccasionEmoji } from "@/features/occasions/occasion-emoji";
 import { cn } from "@/lib/utils";
 
 import type { PersonView } from "../view";
 
 /**
  * A person on the People grid (AppPeople.dc.html): avatar in their colour
- * (a small link badge when you're connected), name and relation, and a pill
- * in their colour with their next day.
+ * with a "Connected" badge on the right when you're connected, name and
+ * relation, and a pill in their colour with their next day ("🎂 Birthday · in 2 days").
  * A link to their profile (?person=id), marked aria-current when shown.
  */
 export function PersonCard({
@@ -32,11 +31,11 @@ export function PersonCard({
         // A compact row in a narrow list (phones), the design's tall card from 30rem.
         "flex h-full min-w-0 items-center gap-3.5 rounded-card bg-card p-4 shadow-card @[30rem]:flex-col @[30rem]:items-start @[30rem]:gap-2.5 @[30rem]:p-[18px]",
         "hover-tint transition-[transform,box-shadow] duration-200 ease-soft hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
-        current === "page" && "ring-[2.5px] ring-accent",
-        current === "implicit" && "xl:ring-[2.5px] xl:ring-accent",
+        current === "page" && "ring-2 ring-accent",
+        current === "implicit" && "xl:ring-2 xl:ring-accent",
       )}
     >
-      <span className="relative shrink-0">
+      <span className="flex shrink-0 items-start justify-between gap-2 @[30rem]:w-full">
         <Avatar
           name={person.name}
           pastel={person.color}
@@ -44,18 +43,33 @@ export function PersonCard({
           className="size-[52px] text-16"
         />
         {person.connected && (
-          <span className="absolute -right-0.5 -bottom-0.5 grid size-5 place-items-center rounded-full bg-accent text-on-accent ring-2 ring-card">
-            <LinkIcon aria-hidden className="size-3" strokeWidth={2.5} />
+          <span
+            aria-hidden="true"
+            className="hidden rounded-pill bg-card2 px-2.5 py-1 text-12 font-semibold @[30rem]:inline"
+          >
+            Connected
           </span>
         )}
       </span>
       <span className="flex w-full min-w-0 flex-1 flex-col items-start gap-2 @[30rem]:gap-2.5">
         <span className="flex w-full min-w-0 flex-col gap-0.5">
           <span className="truncate text-17 font-bold">{person.name}</span>
-          {person.relationLabel && (
-            <span className="truncate text-14 text-sub">{person.relationLabel}</span>
+          {(person.relationLabel || person.connected) && (
+            <span className="truncate text-14 text-sub">
+              {person.relationLabel}
+              {/* Narrow rows have no badge: say it here (the badge is aria-hidden). */}
+              {person.connected && (
+                <>
+                  <span className="@[30rem]:hidden">
+                    {person.relationLabel ? " · " : ""}Connected
+                  </span>
+                  <span className="sr-only hidden @[30rem]:inline">
+                    {person.relationLabel ? ", " : ""}Connected
+                  </span>
+                </>
+              )}
+            </span>
           )}
-          {person.connected && <span className="sr-only">Connected</span>}
         </span>
         {person.next && (
           <span
@@ -64,6 +78,7 @@ export function PersonCard({
               person.next.gentle ? "bg-card2 text-text" : pastelClasses[person.color],
             )}
           >
+            <OccasionEmoji kind={person.next.kind} gentle={person.next.gentle} className="mr-1.5" />
             {person.next.label} · {person.next.when}
           </span>
         )}

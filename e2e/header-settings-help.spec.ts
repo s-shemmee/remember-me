@@ -185,7 +185,9 @@ test("Help & feedback: send, the email to us, and 5 a day", async ({ page }) => 
   await page.getByRole("menuitem", { name: "Help & feedback" }).click();
   await expect(page).toHaveURL(/\/help$/);
   await expect(page.getByRole("heading", { level: 1, name: "Help & feedback" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Browse help" }).getByRole("link")).toHaveCount(6);
+  await expect(page.getByRole("region", { name: "Browse help" }).getByRole("listitem")).toHaveCount(
+    6,
+  );
   await expect(page.getByRole("link", { name: "contact@shemme.codes" })).toHaveAttribute(
     "href",
     "mailto:contact@shemme.codes",

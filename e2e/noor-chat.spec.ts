@@ -91,7 +91,10 @@ test("opens only from the three entry points and reuses Noor's existing actions"
   await page.getByLabel("Your question").fill("How do invites work?");
   await page.getByRole("button", { name: "Ask", exact: true }).click();
   chat = page.getByRole("dialog", { name: "Noor" });
-  await expect(chat.getByText("How do invites work?")).toBeVisible();
+  // Your question in the thread (the same words may also be a suggestion chip).
+  await expect(
+    chat.getByRole("log", { name: "Conversation with Noor" }).getByText("How do invites work?"),
+  ).toBeVisible();
   await expect(chat.getByText(/Reminders arrive at 9:00 in the morning/)).toBeVisible();
   await expectAccessible(page, "Noor chat from Help & feedback, phone, light");
 

@@ -16,6 +16,16 @@ async function connect(pageA: Page, page: Page) {
  * RSC response). C sees "Already taken", never who. A removes the wish, and
  * B gets a quiet note.
  */
+/**
+ * The bell's unread count loads after the page (NOTIFICATIONS_INBOX_ENABLED):
+ * wait for it before reading A's page, so both reads see the same thing.
+ * A has exactly B's and C's "invite accepted": a reservation adds nothing.
+ */
+async function bellSettled(page: Page) {
+  if (process.env.NOTIFICATIONS_INBOX_ENABLED !== "true") return;
+  await expect(page.getByRole("button", { name: "Notifications, 2 unread" })).toBeVisible();
+}
+
 test("B reserves A's wish in secret; A sees nothing; C sees it's taken", async ({ browser }) => {
   test.setTimeout(240_000);
   const [a, b, c] = await Promise.all([
@@ -42,6 +52,7 @@ test("B reserves A's wish in secret; A sees nothing; C sees it's taken", async (
   await pageA.reload();
   const cardA = pageA.locator("[data-wish-id]").filter({ hasText: "Little olive tree" });
   await expect(cardA).toBeVisible();
+  await bellSettled(pageA);
   const before = await cardA.evaluate((el) => el.outerHTML);
   const mainBefore = await pageA.locator("main").filter({ visible: true }).innerText();
 
@@ -71,6 +82,7 @@ test("B reserves A's wish in secret; A sees nothing; C sees it's taken", async (
   });
   await pageA.reload();
   await expect(cardA).toBeVisible();
+  await bellSettled(pageA);
   expect(await cardA.evaluate((el) => el.outerHTML)).toBe(before);
   expect(await pageA.locator("main").filter({ visible: true }).innerText()).toBe(mainBefore);
   await pageA.getByRole("tab", { name: "Friends' wishlists" }).click();

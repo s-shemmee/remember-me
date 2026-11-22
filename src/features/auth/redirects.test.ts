@@ -80,6 +80,8 @@ describe("decideRoute", () => {
   it("/help: the public help center for visitors, Help & feedback in the app for signed-in people", () => {
     expect(decideRoute("/help", "", false)).toEqual({ action: "continue" });
     expect(decideRoute("/help", "", true)).toEqual({ action: "rewrite", to: "/help-and-feedback" });
+    // "Open help center" from Help & feedback: the public index, signed in too.
+    expect(decideRoute("/help", "?center", true)).toEqual({ action: "continue" });
     expect(decideRoute("/help/", "?x=1", true)).toEqual({
       action: "rewrite",
       to: "/help-and-feedback?x=1",

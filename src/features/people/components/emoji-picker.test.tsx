@@ -54,7 +54,9 @@ describe("EmojiPicker", () => {
     await userEvent.click(trigger());
     const field = await screen.findByLabelText("Or type any emoji");
     await userEvent.type(field, "tea{Enter}");
-    expect(field).toHaveAccessibleDescription("Error: Type or paste one emoji.");
+    await waitFor(() =>
+      expect(field).toHaveAccessibleDescription("Error: Type or paste one emoji."),
+    );
     expect(value()).toBe("⚽");
     await userEvent.clear(field);
     await userEvent.type(field, "🦉{Enter}");
