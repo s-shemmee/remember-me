@@ -47,7 +47,7 @@ export function DateFields({
   return (
     <fieldset className="grid gap-1.5">
       <legend className="mb-1.5 text-14 font-semibold text-text">{legend}</legend>
-      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1.2fr)] gap-2">
+      <div className="grid grid-cols-[minmax(5rem,1fr)_minmax(0,2fr)_minmax(0,1fr)] gap-2">
         <SelectField
           id={`${idPrefix}-day`}
           aria-label="Day"

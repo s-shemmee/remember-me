@@ -127,21 +127,22 @@ describe("Connections on Profile", () => {
     expect(within(list).getByText("Amina")).toBeInTheDocument();
   });
 
-  it("Copy invite link makes a link, copies it, and says Copied for 2 seconds", async () => {
+  it("Copy makes a link, shows it in the field, copies it, and says Copied for 2 seconds", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     createInvite.mockResolvedValue({ ok: true, url: "http://localhost:3000/invite/abc" });
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     render(<InviteCard invites={[]} />);
-    await userEvent.click(screen.getByRole("button", { name: "Copy invite link" }));
+    await userEvent.click(screen.getByRole("button", { name: "Copy" }));
     expect(writeText).toHaveBeenCalledWith("http://localhost:3000/invite/abc");
+    expect(screen.getByLabelText("Your invite link")).toHaveValue(
+      "http://localhost:3000/invite/abc",
+    );
     expect(await screen.findByRole("button", { name: "Copied" })).toBeVisible();
     expect(screen.getByRole("status")).toHaveTextContent(/Copied/);
     expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
     await vi.advanceTimersByTimeAsync(2100);
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Copy invite link" })).toBeVisible(),
-    );
+    await waitFor(() => expect(screen.getByRole("button", { name: "Copy" })).toBeVisible());
     vi.useRealTimers();
   });
 });

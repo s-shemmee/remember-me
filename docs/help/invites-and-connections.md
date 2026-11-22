@@ -6,7 +6,7 @@ Connect with the people you love who also use Remember Me, to see each other's b
 
 You can invite someone from:
 
-- **My profile → Invite your people**, with **Copy invite link**;
+- **My profile → Invite your people**, with **Copy** next to your link;
 - a person's profile in People, with **Invite [their name] to Remember Me** (once they accept, they're linked to that person);
 - **Celebrate Me → Share with my people**, to share your birthday wishlist.
 

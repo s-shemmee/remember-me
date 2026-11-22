@@ -43,9 +43,14 @@ Shadow (light): `0 1px 2px rgba(28,27,31,.04), 0 10px 28px rgba(28,27,31,.07)`. 
 
 ## Icons and emoji
 
-- Lucide icons only, stroke 2, 18–20px. Where an icon must stand out (Settings tabs and list, Help topics, My profile rows), tint it with `accentText`, on its own or inside a 12px-radius `card2`/`card` square.
-- **No emoji in app UI**: headings, nav, buttons, labels, tiles, empty-state titles, settings rows, menus.
-- Emoji ARE allowed in: Noor's own messages and nudges; user-written content (wish titles, "little things", notes); the character avatars people pick. "Little things" each carry a user-chosen emoji (default ❤️). Occasion types, plan steps and wish priorities use Lucide icon maps in the UI; their emoji are only for Noor's messages, emails and push.
+- **Icons (Lucide) for app controls**: sidebar nav, header buttons, account menu, all of Settings (tabs, section headings, rows), Help topic cards, buttons, form controls, toasts. Stroke 2, 18–20px; where one must stand out (Settings, Help topics), tint it with `accentText`, alone or in a 12px-radius `card2`/`card` square.
+- **Emoji for content and feeling**:
+  - Home: the stat tiles (Next up 🎂, This month 🗓️, Your day 🕯️, Gifts sorted 🎁) and the birthday plan steps (`STEP_EMOJI`: Gift 🎁, Message 💌, Call 📞, Cake 🎂…).
+  - Occasion types, wherever a day is shown (People "Days to remember", Calendar, Home "Coming up" and Next up): birthday 🎂, anniversary 💍, graduation 🎓, work milestone 💼, remembrance 🕊️, something else ✨; your own day ✨. One map: `OCCASION_TYPES` in `src/features/occasions/types.ts`, shown with `<OccasionEmoji>`.
+  - My profile: the birthday pill (🎂 22 November · in 18 days) and Who can see what (🎂 Your birthday, 🎁 Birthday wishlist, 🔒 Treat yourself).
+  - Noor's messages and nudges; user content (wish titles, little things with their emoji, default ❤️; notes); the character avatars people pick.
+- No emoji in page titles or the Home greeting, or in the controls listed above (the "Kind of day" select stays text; "Add Gift" style buttons keep their Lucide step icons).
+- An emoji next to text is decorative: `<span aria-hidden="true">`, so screen readers read only the label.
 
 ## App shell
 
@@ -74,7 +79,9 @@ Theme toggle: moon in light, sun in dark ("Switch to dark mode" / "Switch to lig
 - **Home**: header → Noor nudge card (candle + iMessage-style bubble + actions) → 4 pastel stat tiles (Next up, This month, Your day, Gifts sorted) → "Coming up" list with filter chips and plan dots, beside the next person's birthday plan (4 steps) and a mini month calendar.
 - **People**: filter chips → desktop (from 1280px) two columns: people cards (left) and the selected person's panel (right: Days to remember with countdown pills, Little things chips with emoji, Their wishlist with thumbnails and status, or "Not connected yet" + Invite them; actions Plan their day / Edit). Connected cards carry a small link badge. Below 1280px: list → person page ("All people" goes back). No pending-request banner: connections are made only by accepting an invite link.
 - **Wishlists**: tabs My wishlists / Friends' wishlists → list chips → item cards (image, title, price · shop; on friends' lists a status: Reserved by you / Already taken / Reserve it). The owner never sees anything about reservations on their own wishes (not even that one exists), and nobody sees who reserved.
-- **My profile**: header card (avatar, name, @handle · City, birthday countdown, little line) → 3 stat tiles → Invite your people (copy link) → About you form → Who can see what → Connected with you.
+- **My profile**: from 1024px two columns (1/3 and 2/3, both aligned to the top, 24px gap); narrower, one column in the same order.
+  - Left: **Your card** (rose gradient, centered: 112px avatar with an accent edit button bottom right, full name, "@handle · City", birthday pill "🎂 22 November · in 18 days", the little line in quotes in Kalam, then 3 number tiles inside the card: people, wishlists, days remembered) → **Invite your people** (one line, the link in a read-only field, Copy).
+  - Right: **About you** (First name | Last name, Birthday | City, then "A little line about you" and Time zone full width; Save changes → Saved) → **Who can see what** ("Privacy settings" link; 3 pastel tiles in a row: 🎂 Your birthday, 🎁 Birthday wishlist, 🔒 Treat yourself, each with who) → **Connected with you** ("All people" link; avatar + name chips that wrap; an empty state when none).
 - **Settings**: /settings/{reminders,notifications,privacy,appearance,account}; /settings opens Reminders on desktop. Desktop: title, "Saved automatically as you go", pill tab bar (links, `aria-current`), one section at a time as cards. Phone: grouped list → drill-in pages with a back button. Account ends with the delete card, then an outlined "Log out".
 - **Help & feedback** (/help when signed in; visitors get the public help center there): Ask Noor card (only when `AI_ENABLED`) → 6 help topic cards → Send feedback form (type, message, device-info switch; 5 a day) → footer (contact, version, Privacy, Terms).
 

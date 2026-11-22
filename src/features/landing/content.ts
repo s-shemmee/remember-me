@@ -68,7 +68,7 @@ export const DEMO_REMINDERS = [
     pastel: "butter",
   },
   {
-    emoji: "💞",
+    emoji: "💍",
     when: "9:00",
     title: "Mom & Dad's anniversary is in 7 days",
     line: "32 years together",

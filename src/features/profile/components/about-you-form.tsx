@@ -89,57 +89,60 @@ export function AboutYouForm({ initial }: { initial: AboutYou }) {
         About you
       </h2>
       <form onSubmit={(e) => void save(e)} noValidate className="flex flex-col gap-6">
-        <Field
-          id="profile-first-name"
-          label="First name"
-          value={value.firstName}
-          maxLength={FIRST_NAME_MAX}
-          autoComplete="given-name"
-          error={errors.firstName}
-          onChange={(e) => {
-            const firstName = e.currentTarget.value;
-            edit((v) => ({ ...v, firstName }));
-          }}
-        />
+        {/* First name | Last name, Birthday | City; one column on phones. */}
+        <div className="grid items-start gap-6 md:grid-cols-2">
+          <Field
+            id="profile-first-name"
+            label="First name"
+            value={value.firstName}
+            maxLength={FIRST_NAME_MAX}
+            autoComplete="given-name"
+            error={errors.firstName}
+            onChange={(e) => {
+              const firstName = e.currentTarget.value;
+              edit((v) => ({ ...v, firstName }));
+            }}
+          />
 
-        <Field
-          id="profile-last-name"
-          label="Last name"
-          value={value.lastName}
-          maxLength={LAST_NAME_MAX}
-          autoComplete="family-name"
-          error={errors.lastName}
-          onChange={(e) => {
-            const lastName = e.currentTarget.value;
-            edit((v) => ({ ...v, lastName }));
-          }}
-        />
+          <Field
+            id="profile-last-name"
+            label="Last name"
+            value={value.lastName}
+            maxLength={LAST_NAME_MAX}
+            autoComplete="family-name"
+            error={errors.lastName}
+            onChange={(e) => {
+              const lastName = e.currentTarget.value;
+              edit((v) => ({ ...v, lastName }));
+            }}
+          />
 
-        <DateFields
-          idPrefix="profile-birthday"
-          legend="Your birthday"
-          hint="Year is private. Only day and month are shown."
-          value={value.birthday}
-          onChange={(patch) => edit((v) => ({ ...v, birthday: { ...v.birthday, ...patch } }))}
-          errors={{ day: errors.birthday }}
-        />
+          <DateFields
+            idPrefix="profile-birthday"
+            legend="Your birthday"
+            hint="Year is private. Only day and month are shown."
+            value={value.birthday}
+            onChange={(patch) => edit((v) => ({ ...v, birthday: { ...v.birthday, ...patch } }))}
+            errors={{ day: errors.birthday }}
+          />
 
-        <Field
-          id="profile-city"
-          label="City"
-          value={value.city}
-          maxLength={CITY_MAX}
-          autoComplete="address-level2"
-          error={errors.city}
-          onChange={(e) => {
-            const city = e.currentTarget.value;
-            edit((v) => ({ ...v, city }));
-          }}
-        />
+          <Field
+            id="profile-city"
+            label="City"
+            value={value.city}
+            maxLength={CITY_MAX}
+            autoComplete="address-level2"
+            error={errors.city}
+            onChange={(e) => {
+              const city = e.currentTarget.value;
+              edit((v) => ({ ...v, city }));
+            }}
+          />
+        </div>
 
         <Field
           id="profile-bio"
-          label="Your little line"
+          label="A little line about you"
           helper="A few words your people see on your profile."
           value={value.bio}
           maxLength={LITTLE_LINE_MAX}
@@ -185,7 +188,7 @@ export function AboutYouForm({ initial }: { initial: AboutYou }) {
 
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={busy}>
-            {busy ? "Saving…" : status === SAVED ? "Saved" : "Save"}
+            {busy ? "Saving…" : status === SAVED ? "Saved" : "Save changes"}
           </Button>
           <p
             role="status"

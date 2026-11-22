@@ -78,10 +78,10 @@ describe("Coming up", () => {
     render(<ComingUp events={upcoming(people, today)} />);
     const rows = () => screen.getAllByRole("link").map((a) => a.textContent);
     expect(rows()).toEqual([
-      "KHKhalidBirthday, turns 30 · Fri, 6 Novin 2 days",
-      "MDMom & DadAnniversary, 32 years · Mon, 16 Novin 12 days",
-      "YAYasmineGraduation · Tue, 24 Novin 20 days",
-      "OMOmarBirthday · Wed, 2 Decin 28 days",
+      "KHKhalid🎂Birthday, turns 30 · Fri, 6 Novin 2 days",
+      "MDMom & Dad💍Anniversary, 32 years · Mon, 16 Novin 12 days",
+      "YAYasmine🎓Graduation · Tue, 24 Novin 20 days",
+      "OMOmar🎂Birthday · Wed, 2 Decin 28 days",
     ]);
     expect(screen.getByRole("link", { name: /^Khalid/ })).toHaveAttribute(
       "href",
@@ -94,9 +94,9 @@ describe("Coming up", () => {
       "aria-pressed",
       "true",
     );
-    expect(rows()).toEqual(["MDMom & DadAnniversary, 32 years · Mon, 16 Novin 12 days"]);
+    expect(rows()).toEqual(["MDMom & Dad💍Anniversary, 32 years · Mon, 16 Novin 12 days"]);
     await userEvent.click(screen.getByRole("button", { name: "Birthdays" }));
-    expect(rows().map((r) => r!.split("Birthday")[0])).toEqual(["KHKhalid", "OMOmar"]);
+    expect(rows().map((r) => r!.split("Birthday")[0])).toEqual(["KHKhalid🎂", "OMOmar🎂"]);
   });
 
   it("says when a filter has nothing", async () => {

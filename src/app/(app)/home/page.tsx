@@ -1,4 +1,3 @@
-import { CakeIcon, CalendarDaysIcon, GiftIcon, StarIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Form from "next/form";
 import { Suspense } from "react";
@@ -21,7 +20,6 @@ import { loadDays } from "@/features/days/load";
 import { ComingUp } from "@/features/home/coming-up";
 import { MiniMonth } from "@/features/home/mini-month";
 import { NoorNudge, type NudgeOffer } from "@/features/home/noor-nudge";
-import { OccasionIcon } from "@/features/occasions/occasion-icon";
 import { AddPersonButton } from "@/features/people/components/add-person-button";
 import { HomePlanCard } from "@/features/plans/components/home-plan-card";
 import { PlansProvider } from "@/features/plans/components/plan-state";
@@ -47,14 +45,14 @@ export const metadata: Metadata = { title: "Home · Remember Me" };
 
 function StatCard({
   label,
-  icon,
+  emoji,
   value,
   line,
   pastel,
 }: {
   label: string;
-  /** A decorative Lucide icon (no emoji in tiles). */
-  icon: React.ReactNode;
+  /** Decorative: the label says what the tile is. */
+  emoji: string;
   value: React.ReactNode;
   line: string;
   pastel: Pastel;
@@ -68,7 +66,9 @@ function StatCard({
     >
       <span className="flex items-center justify-between gap-2 text-12 font-bold tracking-[.05em]">
         <span>{label}</span>
-        {icon}
+        <span aria-hidden="true" className="text-[18px] leading-none">
+          {emoji}
+        </span>
       </span>
       <span className="truncate text-[28px] leading-[1.1] font-extrabold tracking-[-0.03em] sm:text-[30px]">
         {value}
@@ -191,13 +191,7 @@ async function Dashboard() {
         <ul aria-label="At a glance" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           <StatCard
             label="NEXT UP"
-            icon={
-              next ? (
-                <OccasionIcon kind={next.source.kind} className="size-5" />
-              ) : (
-                <CakeIcon aria-hidden className="size-5" />
-              )
-            }
+            emoji={next?.emoji ?? "🎂"}
             value={next ? next.source.name : peopleCount ? "All quiet" : "No one yet"}
             line={
               next ? nextUpLine(next) : peopleCount ? "nothing coming up" : "add your first person"
@@ -206,7 +200,7 @@ async function Dashboard() {
           />
           <StatCard
             label="THIS MONTH"
-            icon={<CalendarDaysIcon aria-hidden className="size-5" />}
+            emoji="🗓️"
             value={more ? String(more) : "None"}
             line={
               more
@@ -217,7 +211,7 @@ async function Dashboard() {
           />
           <StatCard
             label="YOUR DAY"
-            icon={<StarIcon aria-hidden className="size-5" />}
+            emoji="🕯️"
             value={
               !yourDay
                 ? "Not set"
@@ -232,7 +226,7 @@ async function Dashboard() {
           />
           <StatCard
             label="GIFTS SORTED"
-            icon={<GiftIcon aria-hidden className="size-5" />}
+            emoji="🎁"
             value={gifts.value}
             line={gifts.line}
             pastel="mint"

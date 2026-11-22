@@ -8,6 +8,7 @@ import { FilterChip, pastelClasses } from "@/components/ui/chip";
 import { cn } from "@/lib/utils";
 
 import type { DayEvent } from "../days/days";
+import { OccasionEmoji } from "../occasions/occasion-emoji";
 import { occasionType } from "../occasions/types";
 import { PlanDots } from "../plans/components/plan-dots";
 import { usePlans } from "../plans/components/plan-state";
@@ -77,6 +78,12 @@ export function ComingUp({ events }: { events: DayEvent[] }) {
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="truncate text-16 font-bold">{e.source.name}</span>
                   <span className="truncate text-14 text-sub">
+                    <OccasionEmoji
+                      kind={e.source.kind}
+                      isYou={e.source.isYou}
+                      gentle={e.gentle}
+                      className="mr-1.5"
+                    />
                     {what(e)} · {e.shortDate}
                   </span>
                 </span>

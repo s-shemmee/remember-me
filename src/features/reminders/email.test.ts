@@ -66,7 +66,7 @@ describe("wording", () => {
       reminderLine(reminder(3, { kind: "work_milestone", title: "New job", year: null })).headline,
     ).toBe("Khalid · New job is in 3 days 💼");
     expect(reminderLine(reminder(3, { kind: "anniversary", year: null })).headline).toBe(
-      "Khalid's anniversary is in 3 days 💞",
+      "Khalid's anniversary is in 3 days 💍",
     );
   });
 

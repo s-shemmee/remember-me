@@ -19,7 +19,7 @@ Hard rules (never break):
 - `seed:demo` is local only.
 - No new dependency outside the stack without saying why in the PR.
 - No AI-tool names or co-author trailers in code, comments, docs or commits.
-- UI: follow `docs/design/DESIGN.md`. WCAG 2.2 AA (4.5:1 text, visible focus, 44px targets, labels on every field, real buttons and links). No emoji in app UI (only in Noor's messages and user content). Lucide icons. Dark mode, reduced motion, axe clean. Copy: short, warm, plain English, no em dashes; Noor speaks in first person, one emoji max.
+- UI: follow `docs/design/DESIGN.md`. WCAG 2.2 AA (4.5:1 text, visible focus, 44px targets, labels on every field, real buttons and links). Lucide icons for controls (nav, buttons, menus, Settings, form controls, toasts); emoji for content and feeling (stat tiles, plan steps, occasion types, Noor, user content), `aria-hidden` next to text. The rule: DESIGN.md "Icons and emoji". Dark mode, reduced motion, axe clean. Copy: short, warm, plain English, no em dashes; Noor speaks in first person, one emoji max.
 - Keep CI green: lint, typecheck, format:check, unit, pgTAP, Playwright + axe, Lighthouse CI, gitleaks. Before calling a task done: lint, typecheck, tests, and for UI a look in light and dark at 390px and 1440px.
 
 <!-- BEGIN:nextjs-agent-rules -->

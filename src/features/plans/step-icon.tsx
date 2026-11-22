@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 import type { StepKind } from "./steps";
 
-/** Each plan step's icon in the app UI (no emoji in buttons or tiles). */
+/** Each plan step's icon on buttons ("Add Gift"); the steps themselves show STEP_EMOJI. */
 export const STEP_ICONS: Record<StepKind, LucideIcon> = {
   gift: GiftIcon,
   message: MailIcon,

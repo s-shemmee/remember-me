@@ -7,8 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { StepIcon } from "../step-icon";
-import { type PlanTarget, previewSteps, progress } from "../steps";
+import { type PlanTarget, previewSteps, progress, STEP_EMOJI } from "../steps";
 import { PlanSheet } from "./plan-sheet";
 import { usePlanActions } from "./plan-state";
 
@@ -56,13 +55,13 @@ export function HomePlanCard({ target }: { target: PlanTarget }) {
               aria-pressed={step.done}
               onClick={() => void actions.toggle(step)}
               className={cn(
-                "relative flex size-[54px] items-center justify-center rounded-full hover-tint transition-[background-color,box-shadow,transform] duration-200 ease-soft hover:-translate-y-px active:scale-[.97] motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+                "relative flex size-[54px] items-center justify-center rounded-full hover-tint text-[23px] transition-[background-color,box-shadow,transform] duration-200 ease-soft hover:-translate-y-px active:scale-[.97] motion-reduce:transition-none motion-reduce:hover:translate-y-0",
                 step.done
                   ? "bg-card shadow-[0_8px_18px_rgba(91,63,181,.22)]"
                   : "bg-card/40 shadow-[inset_0_0_0_2px_var(--lilac-ink)]",
               )}
             >
-              <StepIcon kind={step.kind} className="size-6 text-lilac-ink" />
+              <span aria-hidden="true">{STEP_EMOJI[step.kind]}</span>
               {step.done && (
                 <span
                   aria-hidden

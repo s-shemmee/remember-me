@@ -26,10 +26,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export const metadata: Metadata = { title: "My profile · Remember Me" };
 
 /**
- * My profile (AppProfile), top to bottom: the header card (avatar + edit,
- * name, "@handle · City", your birthday and its countdown, your little
- * line), three stat tiles, "Invite your people", About you, Who can see what
- * (a summary; the switch is in Settings → Privacy) and Connected with you.
+ * My profile (docs/design/DESIGN.md). From 1024px, two columns: left (1/3)
+ * your card (avatar + edit, name, "@handle · City", birthday pill, little
+ * line, three numbers) and "Invite your people"; right (2/3) About you, Who
+ * can see what (a summary; the switch is in Settings → Privacy) and
+ * Connected with you. Narrower: one column, same order.
  * RLS: your own rows; your photo is signed for an hour.
  */
 async function Profile() {
@@ -71,64 +72,69 @@ async function Profile() {
     : null;
 
   return (
-    <>
-      <section
-        aria-label="Your profile"
-        className="flex flex-wrap items-center gap-5 rounded-card-lg bg-card p-6 shadow-card sm:p-8"
-      >
-        <AvatarEditor
-          userId={p.id}
-          name={p.first_name ?? "You"}
-          initialPhotoUrl={photoUrl}
-          initial={{
-            kind: p.avatar_kind,
-            color: asPastel(p.avatar_color),
-            character: p.avatar_character,
-            photoPath: p.avatar_path,
-          }}
-        />
-        <div className="flex min-w-0 flex-1 basis-[220px] flex-col gap-1">
-          <h2 className="text-22 font-extrabold tracking-[-0.02em] [overflow-wrap:anywhere]">
-            {fullName}
-          </h2>
-          {handleLine && <p className="text-15 text-sub">{handleLine}</p>}
-          {birthdayLine && <p className="text-15 font-semibold">{birthdayLine}</p>}
-          {p.bio && (
-            <p className="mt-1 font-hand text-[19px] [overflow-wrap:anywhere]">
-              &ldquo;{p.bio}&rdquo;
-            </p>
-          )}
-        </div>
-      </section>
-
-      <ProfileStats
-        people={people.count ?? 0}
-        wishlists={wishlists.count ?? 0}
-        days={days.count ?? 0}
-      />
-
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <div className="flex min-w-0 flex-col gap-6">
-          <InviteCard invites={connections.invites} />
-          <AboutYouForm
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      {/* Left: your card and Invite your people. */}
+      <div className="flex min-w-0 flex-col gap-6">
+        <section
+          aria-label="Your profile"
+          className="flex flex-col items-center gap-3 rounded-card-lg bg-[linear-gradient(160deg,var(--rose),var(--rose2))] p-6 text-center text-text shadow-card sm:p-8"
+        >
+          <AvatarEditor
+            userId={p.id}
+            name={p.first_name ?? "You"}
+            initialPhotoUrl={photoUrl}
             initial={{
-              firstName: p.first_name ?? "",
-              lastName: p.last_name ?? "",
-              birthday: { day: p.birthday_day, month: p.birthday_month, year: p.birth_year },
-              city: p.city ?? "",
-              bio: p.bio ?? "",
-              timezone,
+              kind: p.avatar_kind,
+              color: asPastel(p.avatar_color),
+              character: p.avatar_character,
+              photoPath: p.avatar_path,
             }}
           />
-        </div>
-        <div className="flex min-w-0 flex-col gap-6">
-          <WhoSeesWhat shareBirthday={p.share_birthday} />
-          <ConnectedCard connections={connections.connections} people={connections.people} />
-        </div>
+          <div className="flex min-w-0 flex-col items-center gap-1">
+            <h2 className="text-22 font-extrabold tracking-[-0.02em] [overflow-wrap:anywhere]">
+              {fullName}
+            </h2>
+            {handleLine && (
+              <p className="text-15 font-medium [overflow-wrap:anywhere] text-rose-ink">
+                {handleLine}
+              </p>
+            )}
+          </div>
+          {birthdayLine && (
+            <p className="rounded-pill bg-card px-3.5 py-1.5 text-14 font-bold">
+              <span aria-hidden="true">🎂 </span>
+              {birthdayLine}
+            </p>
+          )}
+          {p.bio && (
+            <p className="font-hand text-[19px] [overflow-wrap:anywhere]">&ldquo;{p.bio}&rdquo;</p>
+          )}
+          <ProfileStats
+            people={people.count ?? 0}
+            wishlists={wishlists.count ?? 0}
+            days={days.count ?? 0}
+          />
+        </section>
+        <InviteCard invites={connections.invites} />
       </div>
 
-      <MeLinks />
-    </>
+      {/* Right: About you, Who can see what, Connected with you. */}
+      <div className="flex min-w-0 flex-col gap-6">
+        <AboutYouForm
+          initial={{
+            firstName: p.first_name ?? "",
+            lastName: p.last_name ?? "",
+            birthday: { day: p.birthday_day, month: p.birthday_month, year: p.birth_year },
+            city: p.city ?? "",
+            bio: p.bio ?? "",
+            timezone,
+          }}
+        />
+        <WhoSeesWhat shareBirthday={p.share_birthday} />
+        <ConnectedCard connections={connections.connections} people={connections.people} />
+        <MeLinks />
+      </div>
+    </div>
   );
 }
 

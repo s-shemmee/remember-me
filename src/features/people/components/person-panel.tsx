@@ -9,7 +9,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { pastelClasses } from "@/components/ui/chip";
 import { Switch } from "@/components/ui/switch";
-import { OccasionIcon } from "@/features/occasions/occasion-icon";
+import { OccasionEmoji } from "@/features/occasions/occasion-emoji";
 import { cn } from "@/lib/utils";
 
 import { occasionTitle, typeFor } from "@/features/occasions/types";
@@ -124,7 +124,7 @@ export function PersonPanel({
               key={d.id}
               className="flex min-w-0 items-center gap-2.5 rounded-[16px] bg-card2 px-3.5 py-3"
             >
-              <OccasionIcon kind={d.kind} gentle={d.gentle} className="size-5 text-accent-text" />
+              <OccasionEmoji kind={d.kind} gentle={d.gentle} className="text-[20px]" />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="text-15 font-bold [overflow-wrap:anywhere]">{d.title}</span>
                 <span className="text-13 text-sub">{d.date}</span>

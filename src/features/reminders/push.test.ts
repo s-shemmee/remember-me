@@ -39,7 +39,7 @@ describe("push wording", () => {
       "Khalid · New job is in 3 days 💼",
     );
     expect(pushTitle(reminder(3, { kind: "anniversary" }))).toBe(
-      "Khalid's anniversary is in 3 days 💞",
+      "Khalid's anniversary is in 3 days 💍",
     );
   });
 

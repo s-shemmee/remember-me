@@ -6,7 +6,7 @@ describe("occasion types", () => {
   it("has the six types with their emojis (🕯️ is Noor's, so never a type)", () => {
     expect(Object.values(OCCASION_TYPES).map((t) => `${t.label} ${t.emoji}`)).toEqual([
       "Birthday 🎂",
-      "Anniversary 💞",
+      "Anniversary 💍",
       "Graduation 🎓",
       "Work milestone 💼",
       "Remembrance 🕊️",

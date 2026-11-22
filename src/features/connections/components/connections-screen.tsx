@@ -42,7 +42,7 @@ export type Connection = {
 export type LinkablePerson = { id: string; name: string; linkedProfileId: string | null };
 
 /**
- * Profile → "Invite your people": Copy invite link makes a new link (7
+ * Profile → "Invite your people": Copy makes a new link (7
  * days, once) and copies it ("Copied" for 2 seconds, announced). Your open
  * invites are listed with Cancel.
  */
@@ -51,16 +51,18 @@ export function InviteCard({ invites }: { invites: PendingInvite[] }) {
   const [pending, startTransition] = React.useTransition();
   const [status, setStatus] = React.useState("");
   const [copied, setCopied] = React.useState(false);
-  const [fallback, setFallback] = React.useState<string | null>(null);
+  /** The last link made here (links are stored hashed, so an older one can't be shown again). */
+  const [link, setLink] = React.useState("");
+  const field = React.useRef<HTMLInputElement>(null);
   const copyButton = React.useRef<HTMLButtonElement>(null);
   const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   React.useEffect(() => () => clearTimeout(timer.current), []);
 
   const copy = () =>
     startTransition(async () => {
-      setFallback(null);
       const result = await createInvite();
       if (!result.ok) return void setStatus(result.message);
+      setLink(result.url);
       try {
         await navigator.clipboard.writeText(result.url);
         setCopied(true);
@@ -71,9 +73,9 @@ export function InviteCard({ invites }: { invites: PendingInvite[] }) {
           setStatus("");
         }, 2000);
       } catch {
-        // No clipboard (an old browser, or permission refused): show it to copy by hand.
-        setFallback(result.url);
+        // No clipboard (an old browser, or permission refused): copy it from the field.
         setStatus("Here's your link. Copy it from the box.");
+        requestAnimationFrame(() => field.current?.select());
       }
       router.refresh();
     });
@@ -96,28 +98,31 @@ export function InviteCard({ invites }: { invites: PendingInvite[] }) {
         <h2 id="invite-heading" className="text-22 font-extrabold tracking-[-0.02em]">
           Invite your people
         </h2>
-        <p className="text-15 text-sub">
-          Send a link so they can add their own birthday and wishlist, and connect with you.
-        </p>
+        <p className="text-15 text-sub">A link to add their birthday and wishlist, and connect.</p>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <Button ref={copyButton} onClick={copy} disabled={pending} className="w-fit">
-          {copied ? <CheckIcon aria-hidden /> : <LinkIcon aria-hidden />}
-          {copied ? "Copied" : "Copy invite link"}
-        </Button>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="invite-link" className="text-14 font-semibold">
+          Your invite link
+        </label>
+        <div className="flex min-w-0 items-center gap-2">
+          <input
+            ref={field}
+            id="invite-link"
+            readOnly
+            value={link}
+            placeholder="Copy to make a link"
+            onFocus={(e) => e.currentTarget.select()}
+            className="min-h-11 w-full min-w-0 flex-1 truncate rounded-input border-[1.5px] border-line bg-card2 px-4 text-15 placeholder:text-sub"
+          />
+          <Button ref={copyButton} onClick={copy} disabled={pending} className="shrink-0">
+            {copied ? <CheckIcon aria-hidden /> : <LinkIcon aria-hidden />}
+            {copied ? "Copied" : "Copy"}
+          </Button>
+        </div>
         <p role="status" aria-live="polite" className="text-14 text-sub empty:hidden">
           {status}
         </p>
       </div>
-      {fallback && (
-        <input
-          readOnly
-          aria-label="Your invite link"
-          value={fallback}
-          onFocus={(e) => e.currentTarget.select()}
-          className="min-h-11 w-full rounded-input border-[1.5px] border-line bg-card2 px-4 text-15"
-        />
-      )}
       {invites.length > 0 && (
         <div className="flex flex-col gap-2">
           <h3 className="text-12 font-bold tracking-[.05em] text-sub uppercase">Open invites</h3>
@@ -196,7 +201,7 @@ export function ConnectedCard({
     <>
       <section
         aria-labelledby="connections-heading"
-        className="flex min-w-0 flex-col gap-4 rounded-card-lg bg-card p-6 shadow-card"
+        className="flex min-w-0 flex-col gap-4 rounded-card-lg bg-card p-6 shadow-card sm:p-8"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2
@@ -216,13 +221,20 @@ export function ConnectedCard({
         </div>
         {connections.length ? (
           <>
-            <ul aria-label="Your connections" className="flex flex-wrap gap-4">
+            <ul aria-label="Your connections" className="flex flex-wrap gap-2">
               {connections.map((c) => (
-                <li key={c.id} className="flex w-16 flex-col items-center gap-1.5">
-                  <Avatar name={c.name} pastel={c.color} character={c.character} decorative />
-                  <span className="w-full truncate text-center text-13 font-semibold">
-                    {c.name}
-                  </span>
+                <li
+                  key={c.id}
+                  className="flex max-w-full min-w-0 items-center gap-2 rounded-pill bg-card2 py-1 pr-4 pl-1"
+                >
+                  <Avatar
+                    name={c.name}
+                    pastel={c.color}
+                    character={c.character}
+                    size="sm"
+                    decorative
+                  />
+                  <span className="truncate text-14 font-semibold">{c.name}</span>
                 </li>
               ))}
             </ul>

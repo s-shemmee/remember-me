@@ -21,7 +21,7 @@ import {
   toIsoDate,
   weekdayIndex,
 } from "@/lib/dates";
-import { OccasionIcon } from "@/features/occasions/occasion-icon";
+import { OccasionEmoji } from "@/features/occasions/occasion-emoji";
 import { cn } from "@/lib/utils";
 
 import { inkBg } from "../days/colors";
@@ -61,11 +61,11 @@ function EventCard({ e }: { e: DayEvent }) {
         <span
           aria-hidden
           className={cn(
-            "grid size-10 shrink-0 place-items-center rounded-full",
+            "grid size-10 shrink-0 place-items-center rounded-full text-[18px]",
             pastelClasses[s.color],
           )}
         >
-          <OccasionIcon kind={s.kind} isYou={s.isYou} gentle={e.gentle} className="size-5" />
+          {e.emoji}
         </span>
         <span className="flex min-w-0 flex-col">
           <span className="text-16 font-bold [overflow-wrap:anywhere]">{e.title}</span>
@@ -298,11 +298,10 @@ export function CalendarScreen({
                               pastelClasses[e.source.color],
                             )}
                           >
-                            <OccasionIcon
+                            <OccasionEmoji
                               kind={e.source.kind}
                               isYou={e.source.isYou}
                               gentle={e.gentle}
-                              className="size-3"
                             />
                             <span className="truncate">{e.short}</span>
                           </span>
@@ -369,7 +368,7 @@ export function CalendarScreen({
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col">
                       <span className="flex items-center gap-1.5 text-15 font-bold [overflow-wrap:anywhere]">
-                        <OccasionIcon
+                        <OccasionEmoji
                           kind={e.source.kind}
                           isYou={e.source.isYou}
                           gentle={e.gentle}

@@ -148,10 +148,9 @@ export function AvatarEditor({
 
   return (
     <div className="relative shrink-0">
-      {avatar(saved.look, saved.photoUrl, "size-24")}
+      {avatar(saved.look, saved.photoUrl, "size-28")}
       <Button
         ref={editButton}
-        variant="card2"
         size="icon"
         onClick={start}
         className="absolute -right-1 -bottom-1 border-2 border-card"

@@ -103,7 +103,7 @@ test("profile photo without location data, and birthday sharing on and off", asy
   );
 
   // ...until A hides it (Settings → Privacy; the profile links there).
-  await pageA.getByRole("link", { name: /privacy settings/ }).click();
+  await pageA.getByRole("link", { name: "Privacy settings" }).click();
   await expect(pageA).toHaveURL(/\/settings\/privacy$/);
   await pageA.getByRole("switch", { name: /Show my birthday to my connections/ }).click();
   await expect(pageA.getByText(/Hidden\. Your connections won't see your birthday/)).toBeVisible();

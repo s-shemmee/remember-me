@@ -257,9 +257,9 @@ describe("Home copy", () => {
     });
 
     it("covers anniversaries, graduations and other days", () => {
-      expect(nudge([moms]).text).toBe("Mom & Dad celebrate 32 years in 12 days 💞");
+      expect(nudge([moms]).text).toBe("Mom & Dad celebrate 32 years in 12 days 💍");
       expect(nudge([src({ kind: "anniversary", year: null })]).text).toBe(
-        "Khalid's anniversary is in 2 days 💞",
+        "Khalid's anniversary is in 2 days 💍",
       );
       expect(nudge([yasmine]).text).toBe("Yasmine's graduation is in 20 days 🎓");
       expect(nudge([src({ kind: "other", title: "Name day" })]).text).toBe(
@@ -395,7 +395,7 @@ describe("occasion types on Home and Calendar", () => {
     );
     expect(nudge([newJob])).toBe("Khalid · New job is in 16 days 💼");
     expect(nudge([src({ kind: "anniversary", title: "Wedding", year: null })])).toBe(
-      "Khalid · Wedding is in 2 days 💞",
+      "Khalid · Wedding is in 2 days 💍",
     );
     expect(nextUpLine(upcoming([newJob], today)[0]!)).toBe("new job in 16 days");
   });

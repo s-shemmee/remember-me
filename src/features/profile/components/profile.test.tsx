@@ -40,9 +40,9 @@ describe("Profile → About you", () => {
     actions.saveAbout.mockResolvedValue({ ok: true });
     render(<AboutYouForm initial={initial} />);
     await userEvent.type(screen.getByLabelText("Last name"), "Alaoui");
-    await userEvent.type(screen.getByLabelText("Your little line"), "Tea first.");
+    await userEvent.type(screen.getByLabelText("A little line about you"), "Tea first.");
     await userEvent.selectOptions(screen.getByLabelText("Time zone"), "Europe/London");
-    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
     expect(actions.saveAbout).toHaveBeenCalledWith({
       firstName: "Maya",
       lastName: "Alaoui",
@@ -55,7 +55,7 @@ describe("Profile → About you", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Saved");
     // A new change makes it "Save" again.
     await userEvent.type(screen.getByLabelText("City"), "!");
-    expect(screen.getByRole("button", { name: "Save" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeVisible();
   });
 
   it("the year is private, said in the spec's words", () => {
@@ -70,7 +70,7 @@ describe("Profile → About you", () => {
       fieldErrors: { birthday: "That date doesn't exist." },
     });
     render(<AboutYouForm initial={initial} />);
-    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
     expect((await screen.findAllByText("That date doesn't exist.")).length).toBeGreaterThan(0);
   });
 });
@@ -113,7 +113,7 @@ describe("Profile → numbers and who can see what", () => {
   it("the summary links to Settings → Privacy", () => {
     render(<WhoSeesWhat shareBirthday={false} />);
     expect(screen.getByText("Your birthday").closest("div")).toHaveTextContent("Only you");
-    expect(screen.getByRole("link", { name: /privacy settings/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Privacy settings" })).toHaveAttribute(
       "href",
       "/settings/privacy",
     );

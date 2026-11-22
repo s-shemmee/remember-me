@@ -54,7 +54,7 @@ export const OCCASION_TYPES: Record<OccasionKind, OccasionType> = {
     kind: "anniversary",
     label: "Anniversary",
     noun: "anniversary",
-    emoji: "💞",
+    emoji: "💍",
     defaultRecurring: true,
     titleRequired: false,
     placeholder: "e.g. Wedding",
