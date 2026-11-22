@@ -26,6 +26,7 @@ import { emptyPersonForm, PersonDialog, type PersonDialogResult } from "./person
 import { PersonPanel, type PersonWishlist } from "./person-panel";
 import { PlansProvider } from "@/features/plans/components/plan-state";
 import type { PlanView } from "@/features/plans/steps";
+import { type Account, LinkPrompt } from "./link-account";
 
 /** Below this width the profile replaces the grid instead of sitting next to it. */
 const WIDE = "(min-width: 1280px)";
@@ -46,7 +47,10 @@ export function PeopleScreen({
   bell = false,
   wishlists = {},
   messages = false,
+  accounts = [],
 }: {
+  /** Your connections' accounts (my_friends()): the link prompt and Edit → Their account. */
+  accounts?: Account[];
   /** Noor drafts messages (AI_MESSAGES_ENABLED and AI_ENABLED). */
   messages?: boolean;
   people: PersonView[];
@@ -197,6 +201,19 @@ export function PeopleScreen({
         bell={bell}
       />
 
+      <LinkPrompt
+        joiners={accounts.filter((a) => !a.linkedPersonId)}
+        candidates={people
+          .filter((p) => !p.connected && !p.inMemory)
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            color: p.color,
+            birthday: p.form.day && p.form.month ? { day: p.form.day, month: p.form.month } : null,
+          }))}
+        openFor={params.get("link")}
+      />
+
       {people.length === 0 ? (
         <div className="flex max-w-xl flex-col gap-5 rounded-card-lg bg-card p-6 shadow-card sm:p-8">
           <NoorBubble className="[&_p]:bg-card2 [&_p]:shadow-none">
@@ -295,6 +312,16 @@ export function PeopleScreen({
           onOpenChange={(isOpen) => !isOpen && closeDialog(() => opener.current)}
           initial={dialog.initial}
           onDone={onDone}
+          account={
+            dialog.initial.id
+              ? {
+                  linkedProfileId:
+                    people.find((p) => p.id === dialog.initial.id)?.linkedProfileId ?? null,
+                  accounts,
+                  peopleNames: Object.fromEntries(people.map((p) => [p.id, p.name])),
+                }
+              : undefined
+          }
           onCloseAutoFocus={(event) => {
             event.preventDefault();
             requestAnimationFrame(() => (returnFocus.current() ?? titleRef.current)?.focus());

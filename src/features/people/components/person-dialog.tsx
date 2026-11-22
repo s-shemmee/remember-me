@@ -1,6 +1,7 @@
 "use client";
 
 import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ import {
 
 import { ColorSwatches } from "./color-swatches";
 import { RelationChips } from "./relation-chips";
+import { type Account, AccountSection } from "./link-account";
 
 type Errors = Record<string, string>;
 
@@ -98,7 +100,14 @@ export function PersonDialog({
   initial,
   onDone,
   onCloseAutoFocus,
+  account,
 }: {
+  /** Editing: their account (linked, or link to one of your connections). */
+  account?: {
+    linkedProfileId: string | null;
+    accounts: Account[];
+    peopleNames: Record<string, string>;
+  };
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** The person to edit, or an empty form to add someone. */
@@ -107,6 +116,7 @@ export function PersonDialog({
   /** Where focus goes after closing (there's no Radix trigger to return to). */
   onCloseAutoFocus?: (event: Event) => void;
 }) {
+  const router = useRouter();
   const editing = Boolean(initial.id);
   const [values, setValues] = React.useState(initial);
   const [colorPicked, setColorPicked] = React.useState(
@@ -487,6 +497,20 @@ export function PersonDialog({
                   </ul>
                 )}
               </div>
+
+              {editing && account && initial.id && (
+                <AccountSection
+                  personId={initial.id}
+                  personName={initial.name.trim()}
+                  linkedProfileId={account.linkedProfileId}
+                  accounts={account.accounts}
+                  peopleNames={account.peopleNames}
+                  onChanged={() => {
+                    onOpenChange(false);
+                    router.refresh();
+                  }}
+                />
+              )}
 
               {/* Stays in view while the body scrolls inside the dialog. */}
               <div className="sticky -bottom-6 -mx-6 mt-auto -mb-6 flex flex-wrap items-center gap-2.5 border-t border-line bg-card px-6 py-4 sm:-bottom-8 sm:-mx-8 sm:-mb-8 sm:px-8">

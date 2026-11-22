@@ -123,3 +123,137 @@ export async function linkConnection(input: unknown): Promise<ActionResult> {
       : { error: null };
   return error ? { ok: false, message: "That didn't work. Please try again." } : { ok: true };
 }
+
+// Linking your people to accounts (no duplicates) ---------------------------------------------
+
+export type DayMonthValue = { day: number; month: number };
+
+export type LinkAccountResult =
+  | {
+      ok: true;
+      /** The duplicate merged into this person, if there was one. */
+      merged: string | null;
+      /** Their profile's birthday when it differs from yours (asked, never changed silently). */
+      theirBirthday: DayMonthValue | null;
+    }
+  | { ok: false; message: string };
+
+const linkAccountSchema = z.object({ personId: z.uuid(), profileId: z.uuid() });
+
+/** Their shared birthday (null when they don't share it), from my_friends(). */
+async function sharedBirthday(
+  supabase: Awaited<ReturnType<typeof signedIn>>,
+  profileId: string,
+): Promise<DayMonthValue | null> {
+  const { data } = await supabase.rpc("my_friends");
+  const f = (data ?? []).find((x) => x.profile_id === profileId);
+  return f?.birthday_day && f.birthday_month
+    ? { day: f.birthday_day, month: f.birthday_month }
+    : null;
+}
+
+/**
+ * "Link to account" / "Link" in the prompt: links one of your people to a
+ * connection. Another of your people already linked to them is merged into
+ * this one (your fields win) and removed. Says when their birthday differs.
+ */
+export async function linkPersonToAccount(input: unknown): Promise<LinkAccountResult> {
+  const supabase = await signedIn("/people");
+  const parsed = linkAccountSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, message: "That didn't work. Please try again." };
+  const { personId, profileId } = parsed.data;
+  const { data: merged, error } = await supabase.rpc("link_person_to_account", {
+    p_person_id: personId,
+    p_profile_id: profileId,
+  });
+  if (error) {
+    return {
+      ok: false,
+      message:
+        error.message === "not_connected"
+          ? "You're not connected with them any more."
+          : "That didn't work. Please try again.",
+    };
+  }
+  const [theirs, { data: mine }] = await Promise.all([
+    sharedBirthday(supabase, profileId),
+    supabase
+      .from("occasions")
+      .select("day, month")
+      .eq("person_id", personId)
+      .eq("kind", "birthday")
+      .maybeSingle(),
+  ]);
+  const differs = theirs && mine && (theirs.day !== mine.day || theirs.month !== mine.month);
+  return { ok: true, merged: merged ?? null, theirBirthday: differs ? theirs : null };
+}
+
+const addFromSchema = z.object({
+  profileId: z.uuid(),
+  day: z.number().int().min(1).max(31).nullable(),
+  month: z.number().int().min(1).max(12).nullable(),
+});
+
+/** "No, add as new": a new person for someone who joined, linked to them. */
+export async function addPersonFromConnection(
+  input: unknown,
+): Promise<{ ok: true; personId: string } | { ok: false; message: string }> {
+  const supabase = await signedIn("/people");
+  const parsed = addFromSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, message: "Pick their birthday first." };
+  const { profileId, day, month } = parsed.data;
+  const { data, error } = await supabase.rpc("add_person_from_connection", {
+    p_profile_id: profileId,
+    p_birthday_day: day ?? undefined,
+    p_birthday_month: month ?? undefined,
+  });
+  if (error || !data) {
+    const message =
+      error?.message === "birthday_needed" || error?.message === "invalid_birthday"
+        ? "Pick their birthday first."
+        : error?.message === "already_linked"
+          ? "They're already in your people."
+          : "That didn't work. Please try again.";
+    return { ok: false, message };
+  }
+  return { ok: true, personId: data };
+}
+
+/** Unlink: keeps your person, removes the link to their account. */
+export async function unlinkPersonFromAccount(personId: unknown): Promise<ActionResult> {
+  const supabase = await signedIn("/people");
+  const parsed = idSchema.safeParse(personId);
+  if (!parsed.success) return { ok: false, message: "I couldn't find them." };
+  const { error } = await supabase.rpc("unlink_person", { p_person_id: parsed.data });
+  return error ? { ok: false, message: "That didn't work. Please try again." } : { ok: true };
+}
+
+/**
+ * "Use theirs": your person's birthday takes the day and month their profile
+ * shares (your year stays, unless it can't hold that date).
+ */
+export async function applyAccountBirthday(personId: unknown): Promise<ActionResult> {
+  const supabase = await signedIn("/people");
+  const parsed = idSchema.safeParse(personId);
+  if (!parsed.success) return { ok: false, message: "I couldn't find them." };
+  const { data: person } = await supabase
+    .from("people")
+    .select("linked_profile_id, occasions(id, kind, year)")
+    .eq("id", parsed.data)
+    .maybeSingle();
+  const birthday = person?.occasions.find((o) => o.kind === "birthday");
+  if (!person?.linked_profile_id || !birthday)
+    return { ok: false, message: "I couldn't find them." };
+  const theirs = await sharedBirthday(supabase, person.linked_profile_id);
+  if (!theirs) return { ok: false, message: "Their birthday isn't shared any more." };
+  const leap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+  const year =
+    birthday.year && theirs.day === 29 && theirs.month === 2 && !leap(birthday.year)
+      ? null
+      : birthday.year;
+  const { error } = await supabase
+    .from("occasions")
+    .update({ day: theirs.day, month: theirs.month, year })
+    .eq("id", birthday.id);
+  return error ? { ok: false, message: "That didn't save. Please try again." } : { ok: true };
+}

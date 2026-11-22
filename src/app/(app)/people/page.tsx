@@ -55,6 +55,15 @@ async function People() {
       giftIdeas={giftIdeasEnabled()}
       bell={notificationsInboxEnabled()}
       wishlists={wishlists}
+      accounts={friends.map((f) => ({
+        profileId: f.profileId,
+        firstName: f.firstName ?? f.name,
+        linkedPersonId: f.linkedPersonId,
+        birthday: f.birthday,
+        pastel: f.pastel,
+        photoUrl: f.photoUrl ?? null,
+        character: f.character,
+      }))}
       messages={messagesEnabled()}
     />
   );

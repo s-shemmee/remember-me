@@ -58,8 +58,9 @@ test("invites accepted and wishlist updates reach the bell; reservations never d
   await bell(maya).click();
   const inbox = maya.getByRole("dialog").or(maya.locator("[data-slot=popover-content]"));
   await expect(inbox.getByText("Yasmine added 2 wishes to their birthday list.")).toBeVisible();
+  // She joined through Maya's personal link and isn't one of her people yet.
   await expect(
-    inbox.getByText("Yasmine accepted your invite. You can now see each other's wishlists."),
+    inbox.getByText("Yasmine joined through your link. Is this someone you already added?"),
   ).toBeVisible();
   await expectAccessible(maya, "inbox with items");
 

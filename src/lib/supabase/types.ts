@@ -1008,6 +1008,10 @@ export type Database = {
     };
     Functions: {
       accept_invite: { Args: { p_token: string }; Returns: string };
+      add_person_from_connection: {
+        Args: { p_birthday_day?: number; p_birthday_month?: number; p_profile_id: string };
+        Returns: string;
+      };
       allow_test: { Args: { p_channel: string; p_profile_id: string }; Returns: boolean };
       are_connected: { Args: { p_a: string; p_b: string }; Returns: boolean };
       call_edge_function: { Args: { p_name: string }; Returns: number };
@@ -1092,6 +1096,10 @@ export type Database = {
       is_little_emoji: { Args: { p_emoji: string }; Returns: boolean };
       is_push_endpoint: { Args: { p_endpoint: string }; Returns: boolean };
       link_person: { Args: { p_person_id: string; p_profile_id: string }; Returns: undefined };
+      link_person_to_account: {
+        Args: { p_person_id: string; p_profile_id: string };
+        Returns: string;
+      };
       little_emojis_valid: { Args: { p_emojis: string[] }; Returns: boolean };
       match_help_chunks: {
         Args: { p_count: number; p_embedding: string; p_threshold: number };

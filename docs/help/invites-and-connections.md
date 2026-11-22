@@ -16,6 +16,14 @@ You can invite someone from:
 
 Send links however you like: a message, an email, WhatsApp.
 
+## When someone joins through your link
+
+If they joined through your personal link, People asks: **"[Name] joined through your link. Is this someone you already added?"** (the bell says it too). Pick them from your people and **Link**, or **No, add as new**. Nothing is matched for you.
+
+Linking keeps what you wrote: the name you gave them, notes, little things and dates stay yours. You see their photo and their birthday wishlist. If their profile shows a different birthday, you're asked whether to use theirs.
+
+You can also link someone later: **Edit → Their account → Link to account**. If that account was already linked to another of your people, the two are merged: days, plans and little things move to the one you're editing. **Unlink** keeps your person and removes the link.
+
 ## Accept an invite
 
 Open the link and accept. If you don't have an account yet, sign up first: the invite waits for you.

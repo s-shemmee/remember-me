@@ -80,6 +80,8 @@ export type PersonView = {
   relationLabel: string;
   /** Linked to one of your connections. */
   connected: boolean;
+  /** Their account, when linked. */
+  linkedProfileId?: string | null;
   /** Has passed: every day is shown gently (people.in_memory). */
   inMemory: boolean;
   color: Pastel;
@@ -144,6 +146,7 @@ export function personView(row: PersonRow, today: CalendarDate): PersonView {
     group: row.group,
     littleThings: littleThingsOf(row.little_things, row.little_thing_emojis),
     connected: Boolean(row.linked_profile_id),
+    linkedProfileId: row.linked_profile_id ?? null,
     inMemory: Boolean(row.in_memory),
     days,
     next: days.find((d) => Number.isFinite(d.daysUntil)) ?? null,

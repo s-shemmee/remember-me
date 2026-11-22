@@ -53,8 +53,17 @@ function reminderText(r: InboxRow, today: CalendarDate): string | null {
   return line;
 }
 
-/** One row's text and link, or null when there's nothing to show (e.g. a removed person). */
-export function inboxItem(r: InboxRow, today: CalendarDate): InboxItem | null {
+/**
+ * One row's text and link, or null when there's nothing to show (e.g. a
+ * removed person). `linked`: the accounts already linked to one of your
+ * people; someone who joined and isn't one of them yet gets the question
+ * that leads to People's "Is this someone you already added?".
+ */
+export function inboxItem(
+  r: InboxRow,
+  today: CalendarDate,
+  linked?: ReadonlySet<string>,
+): InboxItem | null {
   const who = r.actor_name ?? "Someone";
   const friendList = r.actor_id ? `/wishlists?tab=friends&friend=${r.actor_id}` : "/wishlists";
   let text: string | null;
@@ -63,8 +72,13 @@ export function inboxItem(r: InboxRow, today: CalendarDate): InboxItem | null {
     text = reminderText(r, today);
     href = r.person_id ? `/people?person=${r.person_id}` : "/people";
   } else if (r.kind === "invite_accepted") {
-    text = `${who} accepted your invite. You can now see each other's wishlists.`;
-    href = friendList;
+    if (linked && r.actor_id && !linked.has(r.actor_id)) {
+      text = `${who} joined through your link. Is this someone you already added?`;
+      href = `/people?link=${r.actor_id}`;
+    } else {
+      text = `${who} accepted your invite. You can now see each other's wishlists.`;
+      href = friendList;
+    }
   } else {
     const n = r.wish_count ?? 1;
     text = `${who} added ${n} ${n === 1 ? "wish" : "wishes"} to their birthday list.`;

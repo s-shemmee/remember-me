@@ -29,15 +29,22 @@ export type InboxView = { items: (InboxItem & { when: string })[]; unread: numbe
 export async function loadInbox(): Promise<InboxView | null> {
   const { supabase, userId } = await signedIn();
   if (!notificationsInboxEnabled()) return null;
-  const [{ data: rows, error }, { data: profile }] = await Promise.all([
+  const [{ data: rows, error }, { data: profile }, { data: people }] = await Promise.all([
     supabase.rpc("my_inbox", { p_limit: 50 }),
     supabase.from("profiles").select("timezone").eq("id", userId).maybeSingle(),
+    // Which accounts are already one of your people (RLS: your own rows).
+    supabase
+      .from("people")
+      .select("linked_profile_id")
+      .is("archived_at", null)
+      .not("linked_profile_id", "is", null),
   ]);
+  const linked = new Set((people ?? []).map((p) => p.linked_profile_id as string));
   if (error) return { items: [], unread: 0 };
   const zone = profile?.timezone ?? undefined;
   const today = todayIn(zone);
   const items = ((rows ?? []) as InboxRow[])
-    .map((r) => inboxItem(r, today))
+    .map((r) => inboxItem(r, today, linked))
     .filter((i): i is InboxItem => i !== null)
     .map((i) => ({ ...i, when: whenLabel(i.at, today, zone) }));
   return { items, unread: items.filter((i) => !i.read).length };

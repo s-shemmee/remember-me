@@ -22,6 +22,8 @@ export type Friend = {
   profileId: string;
   /** Your name for them (from People when linked), else their first name. */
   name: string;
+  /** Their own first name, from their account. */
+  firstName?: string;
   pastel: Pastel;
   character: string | null;
   birthday: DayMonth | null;

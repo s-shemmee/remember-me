@@ -100,6 +100,7 @@ export async function loadFriends(
         return {
           profileId: f.profile_id,
           name: f.name ?? f.first_name ?? "Someone",
+          firstName: f.first_name ?? f.name ?? "Someone",
           pastel: asPastel(f.avatar_color),
           character:
             f.avatar_kind === "character" ? (characterEmoji(f.avatar_character) ?? null) : null,

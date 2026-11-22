@@ -40,6 +40,16 @@ describe("inbox wording", () => {
     );
   });
 
+  it("someone who joined and isn't one of your people yet: the question, to People", () => {
+    const joined = row({ kind: "invite_accepted", actor_name: "Chama", actor_id: "c1" });
+    expect(inboxItem(joined, today, new Set(["b1"]))).toMatchObject({
+      text: "Chama joined through your link. Is this someone you already added?",
+      href: "/people?link=c1",
+    });
+    // Once linked, the usual line.
+    expect(inboxItem(joined, today, new Set(["c1"]))!.text).toMatch(/accepted your invite/);
+  });
+
   it("reminders: turning N with a known year, the plan, a link to the person", () => {
     const r = row({
       kind: "reminder",
