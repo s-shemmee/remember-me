@@ -18,7 +18,15 @@ Remember Me is a gentle web app for keeping track of the birthdays and special d
 
 ## Technology
 
-Next.js App Router, React, TypeScript, Tailwind CSS, Radix UI, Supabase (Postgres, Auth, Storage, Edge Functions), Vitest, Playwright, pgTAP, and GitHub Actions.
+
+| Category | Technologies |
+|---|---|
+| Framework | Next.js (App Router) |
+| UI | React, Tailwind CSS, Radix UI |
+| Language | TypeScript |
+| Backend & Database | Supabase (Postgres, Auth, Storage, Edge Functions) |
+| Testing | Vitest, Playwright, pgTAP |
+| CI/CD | GitHub Actions |
 
 The web app uses server components by default. Supabase Row Level Security protects user data. Edge Functions handle tasks that need server-side secrets, such as reminders and optional AI requests. The PWA caches static app resources, not private account data.
 
