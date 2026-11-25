@@ -1,5 +1,5 @@
 /**
- * Reminder wording, the same as in the app (docs/decisions.md): names, never
+ * Reminder wording, the same as in the app: names, never
  * pronouns; one emoji; Remembrance days are gentle (no "celebrate", no
  * countdown excitement, no gift prompts, no little thing, no wishlist).
  * Pure and shared with the Edge Function, so imports end in `.ts`.

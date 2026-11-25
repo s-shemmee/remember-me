@@ -206,7 +206,6 @@ function HeroCollage() {
         </span>
         <Noor size={52} />
       </div>
-
     </figure>
   );
 }

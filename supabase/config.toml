@@ -477,11 +477,5 @@ verify_jwt = false
 [functions.index-help]
 verify_jwt = false
 
-[functions.gift-ideas]
-verify_jwt = false
-
 [functions.send-feedback]
-verify_jwt = false
-
-[functions.noor-messages]
 verify_jwt = false

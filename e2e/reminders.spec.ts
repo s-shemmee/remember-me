@@ -16,7 +16,7 @@ const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
 const FUNCTIONS =
   process.env.E2E_FUNCTIONS_URL ??
   `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321"}/functions/v1`;
-// The placeholder from supabase/functions/local-dev.env (refused off a local Supabase).
+// The local-only placeholder from src/test/fake-values.ts.
 const CRON_SECRET = FAKE_CRON_SECRET;
 
 type MailSummary = { ID: string; Subject: string };
@@ -96,7 +96,7 @@ test("the 7-day reminder arrives once, the test email works, unsubscribe turns e
   };
   expect(message.From).toMatchObject({
     Name: "Noor · Remember Me",
-    Address: "noor@mail.shemme.codes",
+    Address: "noor@example.com",
   });
   expect(message.Subject).toBe("Khalid turns 34 in 7 days 🎂");
   for (const part of [

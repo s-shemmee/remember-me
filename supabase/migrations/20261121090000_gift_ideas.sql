@@ -10,8 +10,9 @@
 -- gift_idea_wishes(): the free, shared wish titles for one of your people.
 --
 -- Rollback: drop function public.gift_idea_wishes(uuid, uuid);
---   drop table public.gift_idea_results; and re-create claim_ai_use()
---   from 20261120190000_ask_noor.sql (per-feature global count).
+--   re-create claim_ai_use() from 20261120190000_ask_noor.sql (per-feature
+--   global count). Keep gift_idea_results to preserve saved user data; any
+--   future cleanup must be a separate opt-in migration with a backup warning.
 
 create table public.gift_idea_results (
   person_id uuid primary key references public.people (id) on delete cascade,

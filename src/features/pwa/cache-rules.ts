@@ -1,5 +1,5 @@
 /**
- * What the service worker may keep (docs/decisions.md, "Installable app").
+ * What the service worker may keep.
  *
  * Only the app shell and static files: build assets, icons, the manifest
  * and the offline page. Never page HTML or RSC payloads (they carry people,

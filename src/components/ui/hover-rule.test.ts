@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 /**
  * Hover tints a control's own colour (`hover-tint`, globals.css), never
  * swaps in a surface colour: a surface-coloured hover vanishes on that
- * surface (the "Plan their day" bug). See docs/decisions.md, UI polish.
+ * surface (the "Plan their day" bug).
  */
 const SRC = path.resolve(__dirname, "../..");
 const SURFACE_HOVER = /hover:bg-(bg|card2?|line)(\/\d+)?\b/g;

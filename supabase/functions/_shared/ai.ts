@@ -1,10 +1,10 @@
 /**
- * The AI groundwork for Edge Functions (docs/ai.md, "Providers"):
+ * Shared RAG provider calls for Noor (docs/ai.md):
  * - embed(): Supabase's built-in gte-small (384 dims, runs inside the Edge
  *   runtime, free). English-first: other languages match less well.
  * - generate(): Groq first, Cloudflare Workers AI as fallback. Both speak the
  *   OpenAI chat format, so plain fetch, no SDK. Models come from env. JSON mode.
- * Keys are function secrets only (never in the Next app or Vercel).
+ * Provider keys are server-side secrets and never browser-visible.
  */
 import { secret } from "./env.ts";
 

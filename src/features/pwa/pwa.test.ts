@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { isCacheable, precacheable } from "./cache-rules";
 import { notificationFor, parsePush, safePath } from "./push-message";
 
-const ORIGIN = "https://rememberme.shemme.codes";
+const ORIGIN = "https://app.example.com";
 const check = (path: string, init: { method?: string; headers?: Record<string, string> } = {}) =>
   isCacheable({
     url: new URL(path, ORIGIN),

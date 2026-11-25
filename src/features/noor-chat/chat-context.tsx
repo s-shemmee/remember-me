@@ -4,34 +4,13 @@ import * as React from "react";
 
 import { NoorChatPanel } from "./chat-panel";
 
-/** Who the chat is about, on a person's page (their next day that isn't gentle). */
-export type ChatPerson = {
-  personId: string;
-  name: string;
-  occasionId: string;
-  occursOn: string;
-};
-
-export type ChatFlags = {
-  /** NOOR_CHAT_ENABLED and AI_ENABLED: the panel, with help answers. */
-  enabled: boolean;
-  /** AI_GIFT_IDEAS_ENABLED: gift ideas inside the chat. */
-  gifts: boolean;
-  /** AI_MESSAGES_ENABLED: message drafts inside the chat. */
-  messages: boolean;
-};
-
-/** What a launcher asks for: a person's context, a first question, or a flow to start. */
-export type OpenChat = {
-  person?: ChatPerson | null;
-  question?: string;
-  start?: "gifts" | "message";
-};
+export type ChatFlags = { enabled: boolean };
+export type OpenChat = { question?: string };
 
 type ChatContextValue = { flags: ChatFlags; openChat: (opts?: OpenChat) => void };
 
 const OFF: ChatContextValue = {
-  flags: { enabled: false, gifts: false, messages: false },
+  flags: { enabled: false },
   openChat: () => {},
 };
 const ChatContext = React.createContext<ChatContextValue>(OFF);
@@ -72,10 +51,7 @@ export function NoorChatProvider({
       {flags.enabled && session && (
         <NoorChatPanel
           key={session.key}
-          flags={flags}
-          person={session.person ?? null}
           firstQuestion={session.question}
-          start={session.start}
           onClose={() => setSession(null)}
           returnFocus={() => opener.current}
         />

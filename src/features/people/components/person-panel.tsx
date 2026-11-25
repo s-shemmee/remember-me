@@ -8,16 +8,11 @@ import * as React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { pastelClasses } from "@/components/ui/chip";
-import { Noor } from "@/components/ui/noor";
 import { Switch } from "@/components/ui/switch";
 import { OccasionEmoji } from "@/features/occasions/occasion-emoji";
 import { cn } from "@/lib/utils";
 
 import { occasionTitle, typeFor } from "@/features/occasions/types";
-import { GiftIdeasButton } from "@/features/gift-ideas/components/gift-ideas";
-import { WriteMessageButton } from "@/features/messages/components/message-sheet";
-import { useNoorChat } from "@/features/noor-chat/chat-context";
-import { PersonChatButtons } from "@/features/noor-chat/launchers";
 import { PlanDots } from "@/features/plans/components/plan-dots";
 import { PlanSheet } from "@/features/plans/components/plan-sheet";
 import { usePlans } from "@/features/plans/components/plan-state";
@@ -42,8 +37,7 @@ function SectionLabel({ id, children }: { id: string; children: React.ReactNode 
 /**
  * A person's profile (AppPeople.dc.html, right panel), top to bottom:
  * avatar, name and "relation · Connected/Not connected"; their days with
- * countdowns; little things (emoji + text); "Noor can help" (gift ideas,
- * a message); their wishlist (first items with status and "See all", or
+ * countdowns; little things (emoji + text); their wishlist (first items with status and "See all", or
  * "Invite them"); then "Plan their day". Edit is the pencil at the top
  * right. From 1280px it sits next to the grid; below, it replaces the grid
  * and "All people" goes back.
@@ -55,15 +49,12 @@ export function PersonPanel({
   onInvite,
   headingRef,
   today,
-  giftIdeas = false,
   wishlist = null,
   className,
 }: {
   person: PersonView;
   /** Their shared "My birthday" list, when you're connected (as you see it). */
   wishlist?: PersonWishlist | null;
-  /** Noor's gift ideas are switched on (AI_GIFT_IDEAS_ENABLED). */
-  giftIdeas?: boolean;
   /** Today in the user's timezone, "2026-11-17" (past plans are before it). */
   today: string;
   onBack: () => void;
@@ -73,12 +64,6 @@ export function PersonPanel({
   className?: string;
 }) {
   const headingId = `person-${person.id}-name`;
-  const { messages } = usePlans();
-  const { flags: chat } = useNoorChat();
-  // Gift ideas are for their next day that isn't gentle; never "In memory".
-  const giftDay = person.inMemory
-    ? undefined
-    : person.days.find((d) => !d.gentle && Number.isFinite(d.daysUntil));
 
   return (
     <section
@@ -184,59 +169,10 @@ export function PersonPanel({
           <p className="text-14 text-sub">
             {person.inMemory
               ? "Nothing yet."
-              : "Nothing yet. Add what they love, so gift ideas come easy."}
+              : "Nothing yet. Add a little note about what they love."}
           </p>
         )}
       </div>
-
-      {giftDay && (chat.enabled ? chat.gifts || chat.messages : messages || giftIdeas) && (
-        <section
-          aria-labelledby={`${headingId}-noor`}
-          className="flex flex-col gap-3 rounded-[20px] bg-[linear-gradient(160deg,var(--peach),var(--peach2))] p-4"
-        >
-          <div className="flex items-center gap-2.5">
-            <Noor size={32} />
-            <h3 id={`${headingId}-noor`} className="text-15 font-bold">
-              Noor can help
-            </h3>
-          </div>
-          {chat.enabled ? (
-            <PersonChatButtons
-              person={{
-                personId: person.id,
-                name: person.name,
-                occasionId: giftDay.id,
-                occursOn: giftDay.occursOn,
-              }}
-            />
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {giftIdeas && (
-                <GiftIdeasButton
-                  label="Gift ideas"
-                  variant="card"
-                  target={{
-                    personId: person.id,
-                    name: person.name,
-                    occasionId: giftDay.id,
-                    occursOn: giftDay.occursOn,
-                  }}
-                />
-              )}
-              {messages && (
-                <WriteMessageButton
-                  variant="card"
-                  target={{
-                    name: person.name,
-                    occasionId: giftDay.id,
-                    occursOn: giftDay.occursOn,
-                  }}
-                />
-              )}
-            </div>
-          )}
-        </section>
-      )}
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
@@ -251,7 +187,7 @@ export function PersonPanel({
           )}
         </div>
         {person.inMemory ? (
-          <p className="text-14 text-sub">In memory. No gift ideas here.</p>
+          <p className="text-14 text-sub">In memory.</p>
         ) : person.connected ? (
           <TheirWishlist wishlist={wishlist} name={person.name} />
         ) : (
@@ -277,7 +213,7 @@ export function PersonPanel({
 
 /**
  * "In memory": a quiet switch. On, every day of theirs is gentle: no
- * "turns N", no 🎂, no celebrating, no gift actions, in the app, emails and push.
+ * "turns N", no 🎂, no celebrating, in the app, emails and push.
  */
 function InMemorySwitch({ person }: { person: PersonView }) {
   const router = useRouter();
@@ -309,8 +245,8 @@ function InMemorySwitch({ person }: { person: PersonView }) {
         />
       </div>
       <p id={`${id}-hint`} className="text-13 text-sub">
-        For someone who has passed. Their days are remembered gently, with no countdowns to
-        celebrate and no gift ideas.
+        For someone who has passed. Their days are remembered gently, without celebratory
+        countdowns.
       </p>
       <p role="status" aria-live="polite" className="text-13 text-sub empty:hidden">
         {message}

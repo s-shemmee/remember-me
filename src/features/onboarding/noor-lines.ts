@@ -19,7 +19,7 @@ export function noorLine(
         : "Let's make you look like you 🎨";
     case 2:
       return person
-        ? `Ooh, ${person}! Tell me a little thing they love, and I'll use it for gift ideas 💡`
+        ? `Ooh, ${person}! Tell me a little thing they love, so their special days feel personal 💛`
         : "Now the fun part. Who should never be forgotten? 💌";
     case 3:
       return "Last thing. When should I nudge you? I picked my favourites 🔔";

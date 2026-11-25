@@ -346,7 +346,7 @@
 }
 
 /*
- * Auth panel motion (docs/decisions.md: exception for the auth panels only).
+ * Auth panel motion (exception for the auth panels only).
  * Items fade up once with a stagger (set --in-delay per item); two cards then
  * float gently 3 times (about 15s) and rest. Keyframes animate `translate`,
  * not `transform`, so Tailwind's rotate-* tilt is kept. All of it stops under
@@ -384,7 +384,7 @@
 }
 
 /*
- * Landing motion (docs/decisions.md, "Landing page"). The hero words move
+ * Landing motion. The hero words move
  * once through four phrases in under 5 seconds and rest on the last ("own"),
  * so no pause control is needed (WCAG 2.2.2). The pen line draws once. Noor's
  * typing dots pulse 3 times. Under reduced motion, the base layer above makes

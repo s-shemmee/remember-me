@@ -1,8 +1,7 @@
 /**
- * Every message the auth flows show (docs/decisions.md, "Auth flows: every
- * case"). None of them says whether an email has an account: the same words
- * for a new address and a registered one, a wrong password and an unknown
- * email.
+ * Every message the auth flows show. Responses never reveal whether an
+ * address has an account: the same wording is used for new and registered
+ * addresses, and for incorrect passwords and unknown email addresses.
  */
 export const AUTH_MESSAGES = {
   // Everywhere

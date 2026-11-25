@@ -1,6 +1,6 @@
 "use client";
 
-import { LightbulbIcon, MessageCircleIcon, PenLineIcon } from "lucide-react";
+import { MessageCircleIcon } from "lucide-react";
 import * as React from "react";
 
 import { QUESTION_MAX } from "@/ai/ask-noor/answer";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Noor } from "@/components/ui/noor";
 import { cn } from "@/lib/utils";
 
-import { type ChatPerson, useNoorChat } from "./chat-context";
+import { useNoorChat } from "./chat-context";
 import { HELP_CHIPS } from "./thread";
 
 /** Home's nudge card: "Ask Noor" opens the chat (help questions). */
@@ -19,29 +19,6 @@ export function AskNoorButton({ className }: { className?: string }) {
     <Button variant="card2" className={cn("bg-card", className)} onClick={() => openChat()}>
       <MessageCircleIcon aria-hidden /> Ask Noor
     </Button>
-  );
-}
-
-/**
- * A person's page: "Gift ideas" and "Write a message" open the chat with
- * that person's context. Null when the chat is off (the old dialogs stay).
- */
-export function PersonChatButtons({ person }: { person: ChatPerson }) {
-  const { flags, openChat } = useNoorChat();
-  if (!flags.enabled || (!flags.gifts && !flags.messages)) return null;
-  return (
-    <div className="flex flex-wrap gap-2">
-      {flags.gifts && (
-        <Button variant="card" onClick={() => openChat({ person, start: "gifts" })}>
-          <LightbulbIcon aria-hidden /> Gift ideas
-        </Button>
-      )}
-      {flags.messages && (
-        <Button variant="card" onClick={() => openChat({ person, start: "message" })}>
-          <PenLineIcon aria-hidden /> Write a message
-        </Button>
-      )}
-    </div>
   );
 }
 

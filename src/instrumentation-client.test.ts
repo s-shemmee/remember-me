@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 /**
- * No Session Replay (docs/decisions.md): Sentry in the browser is configured
+ * No Session Replay: Sentry in the browser is configured
  * without any Replay integration, eager or lazy-loaded from Sentry's CDN,
  * and without replay sample rates.
  */
@@ -19,15 +19,19 @@ vi.mock("@sentry/nextjs", () => sentry);
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllEnvs();
 });
 
 describe("Sentry in the browser", () => {
   it("has no Replay integration and no replay sample rates", async () => {
     vi.useFakeTimers();
+    vi.stubEnv("NEXT_PUBLIC_SENTRY_DSN", "");
     await import("./instrumentation-client");
 
     expect(sentry.init).toHaveBeenCalledOnce();
     const options = sentry.init.mock.calls[0]![0] as Record<string, unknown>;
+    expect(options.dsn).toBeUndefined();
+    expect(options.enabled).toBe(false);
     const names = ((options.integrations as { name?: string }[] | undefined) ?? []).map(
       (i) => i.name,
     );
@@ -53,13 +57,17 @@ describe("Sentry in the browser", () => {
 
   it("every Sentry config sends no personal data", () => {
     const root = path.resolve(__dirname, "..");
-    for (const file of [
-      "src/instrumentation-client.ts",
-      "sentry.server.config.ts",
-      "sentry.edge.config.ts",
-    ]) {
+    const configs = [
+      ["src/instrumentation-client.ts", "NEXT_PUBLIC_SENTRY_DSN"],
+      ["sentry.server.config.ts", "SENTRY_DSN"],
+      ["sentry.edge.config.ts", "SENTRY_DSN"],
+    ] as const;
+    for (const [file, variable] of configs) {
       expect(readFileSync(path.join(root, file), "utf8"), file).toMatch(
         /dataCollection: SENTRY_DATA_COLLECTION/,
+      );
+      expect(readFileSync(path.join(root, file), "utf8"), file).toContain(
+        `process.env.${variable}`,
       );
     }
   });

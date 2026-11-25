@@ -1,6 +1,6 @@
 /**
  * Web push (RFC 8030/8291/8292) with jsr:@negrel/webpush (pinned in
- * deno.json / deno.lock; why: docs/decisions.md). On top of the library:
+ * deno.json / deno.lock). On top of the library:
  * - a NEW application server (ECDH key pair) per message, as RFC 8291 expects;
  * - known push services only (never an arbitrary URL from the database);
  * - a 10-second timeout; 404 and 410 both mean "this device is gone".
@@ -74,7 +74,7 @@ function vapidKeys() {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY");
   const priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv) throw new Error("VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY are not set");
-  // The fake pair from local-dev.env (0x01 bytes) only works on a local Supabase.
+  // The fixed all-0x01 test key only works on a local Supabase.
   if (priv.startsWith("AQEBAQEBAQEB") && !isLocal()) {
     throw new Error("VAPID_PRIVATE_KEY is the local placeholder; set a real key for this project");
   }
@@ -98,7 +98,7 @@ export async function pushToDevices(
 ): Promise<DeviceResult[]> {
   if (pushMockOn()) installMock();
   const keys = await vapidKeys();
-  const subject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:noor@mail.shemme.codes";
+  const subject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:noor@example.com";
   const body = JSON.stringify(payload);
   const results: DeviceResult[] = [];
   for (const device of devices) {

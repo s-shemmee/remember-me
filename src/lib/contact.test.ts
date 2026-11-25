@@ -7,12 +7,12 @@ import { CONTACT_EMAIL, CONTACT_MAILTO } from "./contact";
 
 /**
  * One contact address everywhere: the app, landing, emails, auth templates,
- * Edge Functions, docs, README and .env.example. Only CONTACT_EMAIL (and the
- * sending address noor@mail.shemme.codes) may appear; hello@ never does.
+ * Edge Functions, docs, README and .env.example. Only CONTACT_EMAIL may
+ * appear; hello@ never does.
  * Failures name the file and the address only, nothing else from the file.
  */
 const ROOT = path.resolve(__dirname, "../..");
-const ALLOWED = new Set([CONTACT_EMAIL, "noor@mail.shemme.codes"]);
+const ALLOWED = new Set([CONTACT_EMAIL]);
 const PLACES = [
   "src",
   "supabase/templates",

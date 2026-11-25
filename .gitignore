@@ -1,5 +1,6 @@
 node_modules/
 .next/
+/AGENTS.md
 .env*
 !.env.example
 .vercel/
@@ -7,6 +8,7 @@ coverage/
 playwright-report/
 test-results/
 supabase/.temp/
+supabase/functions/local-dev.env
 .DS_Store
 /out/
 /build
@@ -22,6 +24,6 @@ yarn-error.log*
 .env.sentry-build-plugin
 .lighthouseci/
 
-# Database backups (pnpm db:backup writes them outside the repo; never commit one)
+# Local database dumps should never be committed.
 remember-me-[0-9]*/
 *.dump.sql

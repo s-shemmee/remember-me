@@ -7,7 +7,8 @@ import * as Sentry from "@sentry/nextjs";
 import { SENTRY_DATA_COLLECTION, scrubAuthEvent } from "@/lib/sentry-filters";
 
 Sentry.init({
-  dsn: "https://30c8ce5e6c1ca778145af4673c48275a@o4512376138891264.ingest.de.sentry.io/4512376148262992",
+  dsn: process.env.SENTRY_DSN || undefined,
+  enabled: Boolean(process.env.SENTRY_DSN),
 
   // Auth reports carry the Supabase code and status only: no request data.
   beforeSend: (event) => scrubAuthEvent(event),

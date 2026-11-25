@@ -25,10 +25,9 @@ import {
   progress,
   SUGGESTIONS,
 } from "../steps";
-import { WriteMessageButton } from "@/features/messages/components/message-sheet";
 
 import { PlanChecklist } from "./plan-checklist";
-import { usePlanActions, usePlans } from "./plan-state";
+import { usePlanActions } from "./plan-state";
 
 /**
  * "Plan their day": the whole plan in a dialog. Tick, rename, remove and
@@ -69,7 +68,6 @@ export function PlanSheet({
 
 function PlanSheetBody({ target, onDone }: { target: PlanTarget; onDone: () => void }) {
   const actions = usePlanActions(target);
-  const { messages } = usePlans();
   const { plan, busy, message } = actions;
   const steps = plan?.steps ?? previewSteps(target.style);
   const { done, total } = progress({ steps });
@@ -117,25 +115,6 @@ function PlanSheetBody({ target, onDone }: { target: PlanTarget; onDone: () => v
             toggle={(step) => actions.toggle(step)}
             rename={(step, value) => actions.rename(step, value)}
             remove={(step) => actions.remove(step)}
-            extra={
-              messages && target.occasionId && target.style === "celebrate"
-                ? (step) =>
-                    step.kind === "message" ? (
-                      <WriteMessageButton
-                        variant="transparent"
-                        label={step.message ? "Write another with Noor" : "Write with Noor"}
-                        className="-ml-3 min-h-11 px-3 py-0 text-14 text-accent-text"
-                        target={{
-                          name: target.name,
-                          occasionId: target.occasionId!,
-                          occursOn: target.occursOn,
-                          // A suggested step isn't saved yet: the plan's Message step is used.
-                          stepId: step.id.startsWith("suggested-") ? null : step.id,
-                        }}
-                      />
-                    ) : null
-                : undefined
-            }
           />
         ) : (
           <p className="text-14 text-sub">No steps yet. Add one below.</p>

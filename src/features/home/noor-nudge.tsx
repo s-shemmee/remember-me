@@ -5,9 +5,7 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Noor } from "@/components/ui/noor";
-import { useNoorChat } from "@/features/noor-chat/chat-context";
 import { AskNoorButton } from "@/features/noor-chat/launchers";
-import { GiftIdeasButton, type GiftIdeasTarget } from "@/features/gift-ideas/components/gift-ideas";
 import { useReserve } from "@/features/reservations/components/use-reserve";
 
 /** "Later" hides the offer until tomorrow, in this browser only. */
@@ -46,7 +44,6 @@ export function NoorNudge({
   isYou,
   offer,
   today,
-  giftIdeas = null,
 }: {
   text: string;
   personId: string | null;
@@ -55,11 +52,8 @@ export function NoorNudge({
   offer: NudgeOffer | null;
   /** Today in the user's timezone, "2026-11-11". */
   today: string;
-  /** "Ask Noor for gift ideas 💡" for the next birthday (never a gentle day). */
-  giftIdeas?: GiftIdeasTarget | null;
 }) {
   const { reserve, busy } = useReserve();
-  const { flags: chat } = useNoorChat();
   const later = React.useSyncExternalStore(subscribe, readLater, () => null);
   const [state, setState] = React.useState<"offer" | "reserved" | "taken" | "later">("offer");
   const [reservedFor, setReservedFor] = React.useState<NudgeOffer | null>(null);
@@ -125,7 +119,6 @@ export function NoorNudge({
         </p>
       </div>
       <AskNoorButton />
-      {!chat.enabled && giftIdeas && <GiftIdeasButton target={giftIdeas} className="bg-card" />}
       {offering ? (
         <div className="flex flex-wrap gap-2">
           <Button disabled={busy === offer.wishId} onClick={() => void onReserve()}>

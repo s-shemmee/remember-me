@@ -1,5 +1,5 @@
 /**
- * Birthday plans (docs/decisions.md, "Celebrate Me and birthday plans").
+ * Birthday plans.
  * Pure: shared by Home, People and Celebrate Me, and unit-tested.
  *
  * A plan belongs to one year's occurrence of a day (`occasionId` +
@@ -69,8 +69,6 @@ export type PlanStep = {
   done: boolean;
   /** Ticked by reserving a gift (cancelling the reservation unticks it). */
   byReservation: boolean;
-  /** The message chosen for this step ("Use in plan" from Noor's drafts). */
-  message?: string | null;
 };
 
 export type PlanView = {
@@ -117,18 +115,6 @@ export function planDots(
 ): { dots: boolean[]; more: number } {
   const steps = sortedSteps(plan.steps);
   return { dots: steps.slice(0, max).map((s) => s.done), more: Math.max(0, steps.length - max) };
-}
-
-/**
- * The step "Use in plan" writes a message to: the one asked for, else the
- * plan's Message step (an unticked one first, else the first one, ticked or
- * not). Undefined only when the plan has no Message step: then add one.
- * Never a second Message step next to a ticked one.
- */
-export function messageStepFor(steps: PlanStep[], stepId: string | null): PlanStep | undefined {
-  if (stepId) return steps.find((s) => s.id === stepId);
-  const messages = sortedSteps(steps).filter((s) => s.kind === "message");
-  return messages.find((s) => !s.done) ?? messages[0];
 }
 
 /** Steps in order. */
@@ -205,16 +191,4 @@ export function targetFor(e: DayEvent): PlanTarget {
     look: e.source.look ?? null,
     style: styleFor({ isYou: e.source.isYou, gentle: e.gentle }),
   };
-}
-
-/**
- * "Add to their plan" from a gift idea: rename the first unticked Gift step
- * to the idea (so the plan never holds two gifts to pick), or add a new,
- * unticked Gift step when there's none or the gift is already ticked.
- */
-export function giftIdeaStep(
-  steps: PlanStep[],
-): { action: "rename"; stepId: string } | { action: "add" } {
-  const open = sortedSteps(steps).find((s) => s.kind === "gift" && !s.done);
-  return open ? { action: "rename", stepId: open.id } : { action: "add" };
 }

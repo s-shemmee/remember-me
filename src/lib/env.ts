@@ -5,7 +5,7 @@ import { z } from "zod";
  *
  * Only browser-safe values live here. The Supabase secret key is for Edge
  * Functions and CI only and must never be read by the Next app
- * (docs/decisions.md). SENTRY_AUTH_TOKEN is read by next.config.ts at build.
+ * Sentry build settings are read by next.config.ts.
  *
  * Validated at server start in src/instrumentation.ts; errors name the
  * variable and the problem, never the value.
@@ -15,7 +15,7 @@ export const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z
     .string()
     .startsWith("sb_publishable_", { error: 'must be a publishable key ("sb_publishable_…")' }),
-  /** The public site, e.g. https://rememberme.shemme.codes (manifest id). Optional locally. */
+  /** The public site URL (manifest id). Optional locally. */
   NEXT_PUBLIC_SITE_URL: z
     .url({ protocol: /^https?$/, error: "must be an http(s) URL" })
     .transform((url) => url.replace(/\/+$/, ""))
@@ -33,7 +33,7 @@ export class EnvError extends Error {
   constructor(problems: string[]) {
     super(
       `Invalid environment variables:\n${problems.map((p) => `  - ${p}`).join("\n")}\n` +
-        "Check .env.local (see .env.example) or the Vercel project settings.",
+        "Check .env.local (see .env.example) or your hosting environment settings.",
     );
     this.name = "EnvError";
   }

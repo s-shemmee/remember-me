@@ -49,8 +49,8 @@ describe("siteUrl", () => {
     const { siteUrl } = await import("./env");
     const before = process.env.NEXT_PUBLIC_SITE_URL;
     try {
-      process.env.NEXT_PUBLIC_SITE_URL = "https://rememberme.shemme.codes/";
-      expect(siteUrl()).toBe("https://rememberme.shemme.codes");
+      process.env.NEXT_PUBLIC_SITE_URL = "https://app.example.com/";
+      expect(siteUrl()).toBe("https://app.example.com");
       process.env.NEXT_PUBLIC_SITE_URL = "not a url";
       expect(siteUrl()).toBe("http://localhost:3000");
       delete process.env.NEXT_PUBLIC_SITE_URL;

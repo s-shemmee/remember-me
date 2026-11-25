@@ -1,38 +1,11 @@
 /**
- * pnpm ai:eval: runs the AI evals against the real Edge Functions and
- * providers, and prints a pass rate per suite. Never in CI (it calls real AI
- * providers). Every suite by default, or one: `pnpm ai:eval gift-ideas` (ask-noor,
- * gift-ideas, messages).
- *
- * Like `supabase db push`, local Supabase unless you name the cloud project
- * (src/lib/script-target.ts):
- *
- *   pnpm ai:eval                                             # local Supabase
- *   read -rs AI_ADMIN_SECRET
- *   AI_ADMIN_SECRET="$AI_ADMIN_SECRET" pnpm ai:eval gift-ideas --remote="${SUPABASE_PROJECT_REF:?}"
- *
- * Ask Noor (docs/ai/evals/ask-noor.json): a case passes when Noor answers and
- * cites a source starting with expectedSource, or, for expectedSource null,
- * when she refuses.
- * Gift ideas (docs/ai/evals/gift-ideas.json, fictional people): 3 to 5 ideas,
- * within the length limits, no prices or links, and at least one idea
- * mentions one of their little things.
- * Messages (docs/ai/evals/messages.json, fictional people): 3 drafts within
- * the length, no contact details, their first name, the right language and
- * script; the off-topic case must be refused.
+ * Runs the Ask Noor evals against a local Supabase Edge Function. Never run in
+ * CI: the function uses a configured provider.
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-import {
-  hasPriceOrLink,
-  mentionsALittleThing,
-  TITLE_MAX,
-  WHY_MAX,
-} from "../src/ai/gift-ideas/ideas.ts";
-import { hasArabicScript, hasContactDetails } from "../src/ai/messages/drafts.ts";
-import { MESSAGE_MAX } from "../src/ai/messages/prompt.ts";
-import { adminSecretFor, positionalArgs, scriptTarget } from "../src/lib/script-target.ts";
+import { adminSecretFor, scriptTarget } from "../src/lib/script-target.ts";
 
 type Case = { question: string; expectedSource: string | null };
 type Result =
@@ -49,191 +22,54 @@ function fail(message: string): never {
 
 const target = scriptTarget(process.argv, { SUPABASE_URL: process.env.SUPABASE_URL });
 if (!target.ok) fail(target.error);
-const supabaseUrl = target.url;
 const secretFor = adminSecretFor(target, process.env.AI_ADMIN_SECRET);
 if (!secretFor.ok) fail(secretFor.error);
-const secret = secretFor.secret;
 console.log(`Target: ${target.label}.`);
 
-const only = positionalArgs(process.argv.slice(2))[0];
-const rates: boolean[] = [];
+const { cases } = JSON.parse(
+  readFileSync(path.join(root, "docs/ai/evals/ask-noor.json"), "utf8"),
+) as { cases: Case[] };
+let passed = 0;
+console.log(`Ask Noor evals: ${cases.length} cases against ${new URL(target.url).host}\n`);
 
-async function askNoorSuite() {
-  const { cases } = JSON.parse(
-    readFileSync(path.join(root, "docs/ai/evals/ask-noor.json"), "utf8"),
-  ) as {
-    cases: Case[];
-  };
-  let passed = 0;
-  console.log(`Ask Noor evals: ${cases.length} cases against ${new URL(supabaseUrl).host}\n`);
-  for (const c of cases) {
-    const started = performance.now();
-    const res = await fetch(`${supabaseUrl}/functions/v1/ask-noor`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ question: c.question }),
-      signal: AbortSignal.timeout(60_000),
-    });
-    const r = (await res.json().catch(() => ({ error: `HTTP ${res.status}` }))) as Result;
-    const ms = Math.round(performance.now() - started);
-    let ok: boolean;
-    let got: string;
-    if ("error" in r) {
-      ok = false;
-      got = `error ${r.error}`;
-    } else if (r.kind === "answer") {
-      const urls = r.sources.map((s) => s.url);
-      ok = c.expectedSource !== null && urls.some((u) => u.startsWith(c.expectedSource!));
-      got = `answer (${urls.join(", ")})`;
-    } else {
-      ok = c.expectedSource === null;
-      got = r.kind;
-    }
-    if (ok) passed++;
-    console.log(
-      `${ok ? "PASS" : "FAIL"}  ${c.question}\n      want ${c.expectedSource ?? "a refusal"}, got ${got} · ${ms} ms`,
-    );
+for (const testCase of cases) {
+  const started = performance.now();
+  const response = await fetch(`${target.url}/functions/v1/ask-noor`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${secretFor.secret}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ question: testCase.question }),
+    signal: AbortSignal.timeout(60_000),
+  });
+  const result = (await response
+    .json()
+    .catch(() => ({ error: `HTTP ${response.status}` }))) as Result;
+  const ms = Math.round(performance.now() - started);
+  let ok: boolean;
+  let got: string;
+
+  if ("error" in result) {
+    ok = false;
+    got = `error ${result.error}`;
+  } else if (result.kind === "answer") {
+    const urls = result.sources.map((source) => source.url);
+    ok =
+      testCase.expectedSource !== null &&
+      urls.some((url) => url.startsWith(testCase.expectedSource!));
+    got = `answer (${urls.join(", ")})`;
+  } else {
+    ok = testCase.expectedSource === null;
+    got = result.kind;
   }
-  const rate = Math.round((passed / cases.length) * 100);
-  console.log(`\n${passed}/${cases.length} passed (${rate}%).\n`);
-  rates.push(rate >= 80);
+
+  if (ok) passed++;
+  console.log(
+    `${ok ? "PASS" : "FAIL"}  ${testCase.question}\n      want ${testCase.expectedSource ?? "a refusal"}, got ${got} · ${ms} ms`,
+  );
 }
 
-type GiftCase = {
-  name: string;
-  relationKind: string | null;
-  occasion: string;
-  budget: string | null;
-  littleThings: string[];
-  wishes: string[];
-};
-type GiftResult =
-  | { kind: "ideas"; ideas: { title: string; why: string }[] }
-  | { kind: "unavailable" }
-  | { error: string };
-
-async function giftIdeasSuite() {
-  const { cases } = JSON.parse(
-    readFileSync(path.join(root, "docs/ai/evals/gift-ideas.json"), "utf8"),
-  ) as { cases: GiftCase[] };
-  let passed = 0;
-  console.log(`Gift ideas evals: ${cases.length} fictional people\n`);
-  for (const c of cases) {
-    const started = performance.now();
-    const { budget, ...person } = c;
-    const res = await fetch(`${supabaseUrl}/functions/v1/gift-ideas`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ person, budget }),
-      signal: AbortSignal.timeout(90_000),
-    });
-    const r = (await res.json().catch(() => ({ error: `HTTP ${res.status}` }))) as GiftResult;
-    const ms = Math.round(performance.now() - started);
-    const problems: string[] = [];
-    if ("error" in r) problems.push(`error ${r.error}`);
-    else if (r.kind !== "ideas") problems.push(r.kind);
-    else {
-      const n = r.ideas.length;
-      if (n < 3 || n > 5) problems.push(`${n} ideas`);
-      if (r.ideas.some((i) => i.title.length > TITLE_MAX || i.why.length > WHY_MAX)) {
-        problems.push("too long");
-      }
-      if (r.ideas.some((i) => hasPriceOrLink(`${i.title} ${i.why}`))) {
-        problems.push("a price or link");
-      }
-      if (!mentionsALittleThing(r.ideas, c.littleThings)) problems.push("no little thing");
-    }
-    const ok = problems.length === 0;
-    if (ok) passed++;
-    console.log(
-      `${ok ? "PASS" : "FAIL"}  ${c.name} (${c.occasion}${budget ? `, ${budget}` : ""}) · ${ms} ms` +
-        (ok ? "" : `\n      ${problems.join(", ")}`),
-    );
-  }
-  const rate = Math.round((passed / cases.length) * 100);
-  console.log(`\n${passed}/${cases.length} passed (${rate}%).\n`);
-  rates.push(rate >= 80);
-}
-
-type MessageCase = {
-  id: string;
-  tone: string;
-  language: string;
-  length: string;
-  mention: string | null;
-  person: {
-    name: string;
-    relationKind: string | null;
-    occasion: string;
-    age: number | null;
-    littleThings: string[];
-  };
-  maxChars?: number;
-  expectAny?: string[];
-  mustNot?: string[];
-  arabicScript?: boolean;
-  expect?: "refused";
-};
-type MessageResult =
-  | { kind: "messages"; messages: string[] }
-  | { kind: "refused" }
-  | { kind: "unavailable" }
-  | { error: string };
-
-async function messagesSuite() {
-  const { cases } = JSON.parse(
-    readFileSync(path.join(root, "docs/ai/evals/messages.json"), "utf8"),
-  ) as { cases: MessageCase[] };
-  let passed = 0;
-  console.log(`Message evals: ${cases.length} fictional people\n`);
-  for (const c of cases) {
-    const started = performance.now();
-    const res = await fetch(`${supabaseUrl}/functions/v1/noor-messages`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        person: c.person,
-        tone: c.tone,
-        language: c.language,
-        length: c.length,
-        mention: c.mention,
-      }),
-      signal: AbortSignal.timeout(90_000),
-    });
-    const r = (await res.json().catch(() => ({ error: `HTTP ${res.status}` }))) as MessageResult;
-    const ms = Math.round(performance.now() - started);
-    const problems: string[] = [];
-    if ("error" in r) problems.push(`error ${r.error}`);
-    else if (c.expect === "refused") {
-      if (r.kind !== "refused") problems.push(`not refused (${r.kind})`);
-    } else if (r.kind !== "messages") problems.push(r.kind);
-    else {
-      const all = r.messages.join("\n");
-      if (r.messages.length !== 3) problems.push(`${r.messages.length} drafts`);
-      const max = c.maxChars ?? MESSAGE_MAX;
-      if (r.messages.some((m) => m.length > max)) problems.push(`longer than ${max}`);
-      if (r.messages.some(hasContactDetails)) problems.push("contact details or a link");
-      if (!r.messages.some((m) => m.includes(c.person.name))) problems.push("no first name");
-      if (c.arabicScript === true && !hasArabicScript(all)) problems.push("not in Arabic script");
-      if (c.arabicScript === false && hasArabicScript(all))
-        problems.push("Arabic script in Darija");
-      if (c.expectAny && !c.expectAny.some((w) => all.toLowerCase().includes(w.toLowerCase()))) {
-        problems.push(`none of: ${c.expectAny.join(", ")}`);
-      }
-      for (const w of c.mustNot ?? []) if (all.includes(w)) problems.push(`contains "${w}"`);
-    }
-    const ok = problems.length === 0;
-    if (ok) passed++;
-    console.log(
-      `${ok ? "PASS" : "FAIL"}  ${c.id} · ${ms} ms` + (ok ? "" : `\n      ${problems.join(", ")}`),
-    );
-  }
-  const rate = Math.round((passed / cases.length) * 100);
-  console.log(`\n${passed}/${cases.length} passed (${rate}%).\n`);
-  rates.push(rate >= 80);
-}
-
-if (!only || only === "ask-noor") await askNoorSuite();
-if (!only || only === "gift-ideas") await giftIdeasSuite();
-if (!only || only === "messages") await messagesSuite();
-process.exit(rates.length > 0 && rates.every(Boolean) ? 0 : 1);
+const rate = Math.round((passed / cases.length) * 100);
+console.log(`\n${passed}/${cases.length} passed (${rate}%).\n`);
+process.exit(rate >= 80 ? 0 : 1);

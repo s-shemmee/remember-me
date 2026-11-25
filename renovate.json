@@ -15,11 +15,10 @@
       "automerge": false
     },
     {
-      "description": "Patch updates: one weekly PR, merged by Renovate only after CI passes.",
+      "description": "Patch updates: one weekly PR for review after CI passes.",
       "matchUpdateTypes": ["patch"],
       "groupName": "patch updates",
-      "automerge": true,
-      "automergeType": "pr"
+      "automerge": false
     },
     {
       "description": "Major updates: their own PRs, never automerged.",

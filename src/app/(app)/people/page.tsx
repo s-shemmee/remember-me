@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { giftIdeasEnabled, messagesEnabled } from "@/ai/config";
 import { PeopleScreen } from "@/features/people/components/people-screen";
 import type { PersonWishlist } from "@/features/people/components/person-panel";
 import { loadFriends } from "@/features/reservations/load";
@@ -52,7 +51,6 @@ async function People() {
       people={people}
       plans={plans}
       today={toIsoDate(today)}
-      giftIdeas={giftIdeasEnabled()}
       bell={notificationsInboxEnabled()}
       wishlists={wishlists}
       accounts={friends.map((f) => ({
@@ -64,7 +62,6 @@ async function People() {
         photoUrl: f.photoUrl ?? null,
         character: f.character,
       }))}
-      messages={messagesEnabled()}
     />
   );
 }

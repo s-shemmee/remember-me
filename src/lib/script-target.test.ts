@@ -69,7 +69,7 @@ describe("ai:index / ai:eval target: local unless --remote=<ref>", () => {
   });
 
   it("flags aren't suite names", () => {
-    expect(positionalArgs(["gift-ideas", `--remote=${REF}`])).toEqual(["gift-ideas"]);
+    expect(positionalArgs(["ask-noor", `--remote=${REF}`])).toEqual(["ask-noor"]);
     expect(positionalArgs([`--remote=${REF}`])).toEqual([]);
   });
 });

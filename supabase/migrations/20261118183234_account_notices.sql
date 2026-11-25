@@ -1,4 +1,4 @@
--- "You already have an account" emails (fix/auth-flows).
+-- "You already have an account" emails.
 --
 -- Signing up (or changing your email) with an address that already has a
 -- confirmed account shows the usual "Check your email" screen, and the

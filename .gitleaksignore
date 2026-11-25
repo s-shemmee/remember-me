@@ -9,3 +9,7 @@ a6b58d947b783e9c05d9608e298f579b6e22aad1:src/lib/env.test.ts:generic-api-key:36
 # The same file as squash-merged to main in upstream change (f1a99e5).
 f1a99e596ef8cb3288bfa353c3b4532986d4347b:src/lib/env.test.ts:generic-api-key:7
 f1a99e596ef8cb3288bfa353c3b4532986d4347b:src/lib/env.test.ts:generic-api-key:36
+
+# History rewrites: same documented fake test key at its rewritten commits.
+98725ddb40a5b99ef059bbeee9d1e8f73d2d6992:src/lib/env.test.ts:generic-api-key:7
+2f5bb4e65a9cc1d8cbe0e87c374c26b6625925cf:src/lib/env.test.ts:generic-api-key:7

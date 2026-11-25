@@ -1,6 +1,6 @@
 /**
  * Occasion types: the one place that knows each kind's name, emoji, title
- * suggestions and repeat default (docs/decisions.md, "Occasion types").
+ * suggestions and repeat default.
  * People, Home and Calendar all read from here.
  *
  * There is deliberately no health type: health milestones go under

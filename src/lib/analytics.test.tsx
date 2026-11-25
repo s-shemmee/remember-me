@@ -16,7 +16,7 @@ vi.mock("@vercel/analytics/next", () => ({
   },
 }));
 
-const SITE = "https://rememberme.shemme.codes";
+const SITE = "https://app.example.com";
 const UUID = "1f0e0000-0000-4000-8000-000000000001";
 const INVITE = "q9X_kR2vLm8TzA1bYc3dEf4GhIj5KlMn"; // like create_invite()'s tokens
 const HASH = "pkce_c8fdc4306aaa2e989fbb7a96b5f5ed8508569de81788cf9d5aaaf24d";

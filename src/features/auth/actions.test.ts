@@ -459,7 +459,7 @@ describe("auth errors", () => {
 });
 
 // --- every case, never revealing whether an email has an account -----------------
-describe("every auth case (docs/decisions.md)", () => {
+describe("every auth case", () => {
   const signUpForm = (email = "sara@test.local") =>
     form({ firstName: "Sara", email, password: PASSWORD });
   const existingConfirmed = { data: { user: { identities: [] }, session: null }, error: null };

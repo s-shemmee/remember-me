@@ -2,7 +2,16 @@
 -- help_chunks is read-only for users, written only by the server; the AI
 -- usage counts and their claim function are server only; the caps hold.
 begin;
-select plan(17);
+select plan(20);
+
+select ok(to_regclass('public.gift_idea_results') is not null, 'legacy results table remains for data preservation');
+select ok(to_regprocedure('public.gift_idea_wishes(uuid,uuid)') is not null, 'legacy helper remains in the schema');
+select is(
+  (select count(*)::int from information_schema.columns
+   where table_schema = 'public' and table_name = 'plan_steps' and column_name = 'message'),
+  1,
+  'legacy plan-step message column remains for data preservation'
+);
 
 insert into auth.users (id, email, raw_user_meta_data, email_confirmed_at) values
   ('00000000-0000-0000-0000-00000000a501', 'ask.one@test.local', '{"first_name": "Amal"}', now()),

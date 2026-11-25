@@ -4,10 +4,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * The code must never name the Supabase project (there is one, and it is
- * production). The URL and keys come from env variables, and every CLI
- * command names the project from the shell (`--remote=<ref>`). This fails on a hard-coded project host, a project ref in a
- * pooler or dashboard URL, or a bare ref in backticks in the docs.
+ * The code and docs must not contain a hard-coded Supabase project URL or
+ * project reference. Connection details come from environment variables.
  * Test fakes (test.supabase.co, project.supabase.co) are fine.
  */
 const ROOT = path.resolve(__dirname, "../..");
@@ -25,7 +23,6 @@ const PLACES = [
   "AGENTS.md",
   "next.config.ts",
   "vercel.json",
-  ".mcp.json",
 ];
 const SKIP_DIRS = new Set(["node_modules", ".next", "design"]);
 

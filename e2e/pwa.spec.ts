@@ -7,7 +7,7 @@ import { expectAccessible, PASSWORD, signUpAndOnboard } from "./helpers";
 /**
  * M4 part 2: the installable app and push notifications. Needs a production
  * build (the service worker is off in `next dev`), local Supabase and the
- * Edge Functions with PUSH_MOCK=1 (supabase/functions/local-dev.env).
+ * locally served Edge Functions with PUSH_MOCK=1.
  */
 const FUNCTIONS =
   process.env.E2E_FUNCTIONS_URL ??

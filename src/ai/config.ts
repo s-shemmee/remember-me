@@ -1,21 +1,10 @@
 import "server-only";
 
 /**
- * AI switches (server env, read per request):
- * - AI_ENABLED=true turns AI features on. Off by default: the app works fully
- *   without them (docs/ai.md).
+ * Ask Noor is optional and off by default. AI_MOCK provides scripted responses
+ * for tests and is ignored on hosted deployments.
  * - AI_MOCK=1 answers from a fixed script instead of the real providers, for
  *   e2e tests. Ignored on Vercel, so it can never reach real users.
  */
 export const aiEnabled = () => process.env.AI_ENABLED === "true";
 export const aiMock = () => process.env.AI_MOCK === "1" && !process.env.VERCEL;
-/**
- * AI_GIFT_IDEAS_ENABLED=true turns on Noor's gift ideas, on its own switch
- * (so Ask Noor can stay on while gift ideas are off, and the other way round).
- */
-export const giftIdeasEnabled = () => process.env.AI_GIFT_IDEAS_ENABLED === "true";
-/**
- * Noor drafts a message (AI phase 2): AI_MESSAGES_ENABLED=true, and AI_ENABLED
- * too. Off by default.
- */
-export const messagesEnabled = () => aiEnabled() && process.env.AI_MESSAGES_ENABLED === "true";

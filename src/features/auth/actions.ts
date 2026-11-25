@@ -23,7 +23,7 @@ import { type AuthFormState, fieldErrorsFrom } from "./state";
  * redirects on success. Rate limits come from Supabase Auth for now.
  *
  * Privacy: messages never reveal whether an email has an account (every
- * case is listed in docs/decisions.md). Unexpected errors go to Sentry with
+ * case is handled consistently). Unexpected errors go to Sentry with
  * the Supabase code and status only (reportAuthError), never the email
  * address or password.
  */

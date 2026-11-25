@@ -22,7 +22,6 @@
     "lighthouse": "node scripts/lighthouse.ts",
     "icons": "node scripts/icons.ts",
     "seed:demo": "node --env-file-if-exists=.env.local scripts/seed-demo.ts",
-    "db:backup": "node --env-file-if-exists=.env.local scripts/db-backup.ts",
     "ai:index": "node --env-file-if-exists=.env.local scripts/ai-index.ts",
     "ai:eval": "node --env-file-if-exists=.env.local scripts/ai-eval.ts"
   },

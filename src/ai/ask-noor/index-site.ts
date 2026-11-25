@@ -1,14 +1,4 @@
-/**
- * Which site `pnpm ai:index` reads the FAQ, /privacy and /terms from. It must
- * match the Supabase project being indexed: the production site for the
- * cloud project, localhost only for local Supabase. Pure (no imports): used
- * by scripts/ai-index.ts and Vitest.
- *
- * Order: `--site=<url>` (or `--site <url>`), then SITE_URL, then the default
- * for the target. Never NEXT_PUBLIC_SITE_URL: in .env.local it is localhost,
- * which is how production got indexed from a local dev server.
- */
-export const PRODUCTION_SITE = "https://rememberme.shemme.codes";
+/** Selects the site used by the local help-content indexing utility. */
 export const LOCAL_SITE = "http://localhost:3000";
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]", "::1"]);
@@ -41,20 +31,27 @@ export function indexSite(args: {
   supabaseUrl?: string;
 }): IndexSite {
   const localTarget = Boolean(args.supabaseUrl) && isLocalUrl(args.supabaseUrl ?? "");
-  const raw = args.flag ?? (args.siteUrl || (localTarget ? LOCAL_SITE : PRODUCTION_SITE));
+  const raw =
+    args.flag ?? args.siteUrl ?? (localTarget || !args.supabaseUrl ? LOCAL_SITE : undefined);
+  if (!raw) {
+    return {
+      ok: false,
+      error: "Set SITE_URL or pass --site=<url> for the site being indexed.",
+    };
+  }
   if (!/^https?:\/\/[^/]/.test(raw)) {
     return {
       ok: false,
-      error: `the site must be a full URL, like ${PRODUCTION_SITE} (got "${raw}").`,
+      error: `the site must be a full URL, such as https://example.com (got "${raw}").`,
     };
   }
   const site = raw.replace(/\/+$/, "");
-  if (!localTarget && isLocalUrl(site)) {
+  if (args.supabaseUrl && !localTarget && isLocalUrl(site)) {
     return {
       ok: false,
       error:
         `${site} is a local site, but the target is not local Supabase. ` +
-        `Use --site=${PRODUCTION_SITE} for the cloud project.`,
+        "Set SITE_URL or pass --site=<public URL>.",
     };
   }
   return { ok: true, site };

@@ -1,7 +1,7 @@
 /*
- * Terms of use. Plain English, matched to what the app does (fix/launch-prep,
- * Nov 2026). Bump TERMS_UPDATED (src/features/legal/updated.ts) when the text
- * changes.
+ * Terms template. Customize applicable law and operator contact details for
+ * each deployment.
+ * Bump TERMS_UPDATED (src/features/legal/updated.ts) when the text changes.
  *
  * NOTE: this text has not been reviewed by a lawyer. Have a legal
  * professional review it before scaling beyond a small group of users.
@@ -152,7 +152,8 @@ const sections: LegalSection[] = [
     body: (
       <p>
         Remember Me is a small, independent project, made so the people you love are never
-        forgotten. These terms follow Moroccan law. Questions?{" "}
+        forgotten. The instance operator should adapt these terms to the laws that apply to the
+        deployment and its users. Questions?{" "}
         <LegalLink href={CONTACT_MAILTO}>{CONTACT_EMAIL}</LegalLink>.
       </p>
     ),

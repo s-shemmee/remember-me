@@ -1,7 +1,7 @@
 /**
  * pnpm seed:demo: demo accounts with realistic data, in local Supabase only.
- * The one cloud project is production and is never seeded: every cloud URL
- * is refused before anything is written (src/lib/seed-guard.ts).
+ * Every non-local Supabase URL is refused before anything is written
+ * (src/lib/seed-guard.ts).
  *
  *   pnpm db:start && pnpm seed:demo
  *

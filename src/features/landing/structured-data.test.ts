@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { FAQ } from "./content";
 import { faqPage, jsonLd, webApplication } from "./structured-data";
 
-const SITE = "https://rememberme.shemme.codes";
+const SITE = "https://app.example.com";
 
 describe("structured data", () => {
   it("describes the app as a free WebApplication", () => {

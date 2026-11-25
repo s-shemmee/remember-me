@@ -1,7 +1,6 @@
 /**
- * The landing page's words (docs/design/screens S1Hero, S2Features, S3Rest,
- * with the copy fixes in docs/decisions.md, "Landing page"). Real content
- * only: no reviews, counts or testimonials. Demo people (Sara, Khalid, Omar…)
+ * The landing page's words. Real content only: no reviews, counts or
+ * testimonials. Demo people (Sara, Khalid, Omar…)
  * are fictional and every panel that shows them says "Example".
  *
  * The FAQ here feeds both the visible section and the FAQPage JSON-LD, so

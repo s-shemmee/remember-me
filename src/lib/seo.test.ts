@@ -11,8 +11,8 @@ vi.mock("server-only", () => ({}));
 
 describe("robots.txt and sitemap.xml", () => {
   it("allows the landing page, disallows the private app, and points to the sitemap", () => {
-    const robots = robotsFor("https://rememberme.shemme.codes");
-    expect(robots.sitemap).toBe("https://rememberme.shemme.codes/sitemap.xml");
+    const robots = robotsFor("https://app.example.com");
+    expect(robots.sitemap).toBe("https://app.example.com/sitemap.xml");
     const [rule] = [robots.rules].flat();
     expect(rule).toMatchObject({ userAgent: "*", allow: "/" });
     for (const p of ["/home", "/people", "/settings", "/onboarding", "/invite/", "/api/"]) {
@@ -24,12 +24,12 @@ describe("robots.txt and sitemap.xml", () => {
   });
 
   it("lists only public pages, with absolute URLs: the landing page, the help center and the legal pages", () => {
-    expect(sitemapFor("https://rememberme.shemme.codes").map((e) => e.url)).toEqual([
-      "https://rememberme.shemme.codes/",
-      "https://rememberme.shemme.codes/help",
-      ...HELP_SLUGS.map((slug) => `https://rememberme.shemme.codes/help/${slug}`),
-      "https://rememberme.shemme.codes/privacy",
-      "https://rememberme.shemme.codes/terms",
+    expect(sitemapFor("https://app.example.com").map((e) => e.url)).toEqual([
+      "https://app.example.com/",
+      "https://app.example.com/help",
+      ...HELP_SLUGS.map((slug) => `https://app.example.com/help/${slug}`),
+      "https://app.example.com/privacy",
+      "https://app.example.com/terms",
     ]);
   });
 

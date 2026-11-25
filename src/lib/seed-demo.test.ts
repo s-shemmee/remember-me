@@ -47,7 +47,7 @@ describe("seed:demo guard: local Supabase only", () => {
 
   it("refuses any other host or scheme, including look-alikes", () => {
     for (const url of [
-      "https://rememberme.shemme.codes",
+      "https://app.example.com",
       "https://supabase.example.com",
       `http://${PROJECT}.supabase.co`,
       "http://127.0.0.1.evil.example",

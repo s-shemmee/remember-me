@@ -95,7 +95,7 @@ All live in `src/components/ui/`. Button, Switch, Dialog, Dropdown Menu, Tabs an
 ## Motion
 - Durations 200–600ms, ease `cubic-bezier(.2,.8,.2,1)`; springy pop `cubic-bezier(.2,.9,.3,1.3)`.
 - Allowed: rotating hero words, pen-draw underline, cards fading in once, the reminders card shuffle, wishlist cards tilting on hover, Noor's bob, numbers rolling up once.
-- Exception, auth panels only (sign-up, log-in and their sibling pages): items fade up once with a stagger (0.2s / 0.7s / 1.2s / 1.7s, 0.6s each), one card per panel floats 8px three times (about 15s) and rests, and Noor bobs. See docs/decisions.md.
+- Exception, auth panels only (sign-up, log-in and their sibling pages): items fade up once with a stagger (0.2s / 0.7s / 1.2s / 1.7s, 0.6s each), one card per panel floats 8px three times (about 15s) and rests, and Noor bobs.
 - One moving thing per section. Everything off under `prefers-reduced-motion` (and the in-app "Reduce motion" switch).
 
 ## Voice

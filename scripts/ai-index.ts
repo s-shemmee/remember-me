@@ -4,10 +4,8 @@
  *
  * Sources: docs/help/*.md, plus the landing FAQ (its FAQPage JSON-LD),
  * /privacy and /terms, read from the site that matches the target
- * (src/ai/ask-noor/index-site.ts): --site=<url>, else SITE_URL, else the
- * production site for the cloud project and localhost for local Supabase.
- * Localhost is refused for the cloud project, and so is a site that doesn't
- * answer.
+ * (src/ai/ask-noor/index-site.ts): --site=<url>, then SITE_URL, then
+ * localhost for local Supabase. A non-local target requires an explicit site.
  *
  * Like `supabase db push`, local Supabase unless you name the cloud project
  * (src/lib/script-target.ts):
@@ -43,8 +41,7 @@ const supabaseUrl = target.url;
 const secretFor = dryRun ? null : adminSecretFor(target, process.env.AI_ADMIN_SECRET);
 if (secretFor && !secretFor.ok) fail(secretFor.error);
 const secret = secretFor?.ok ? secretFor.secret : "";
-// For the cloud project, a localhost SITE_URL (from .env.local) is skipped:
-// the production site is the default there.
+// Ignore a local SITE_URL when the target is not local.
 const siteFromEnv = process.env.SITE_URL;
 const chosen = indexSite({
   flag: siteFlag(process.argv),

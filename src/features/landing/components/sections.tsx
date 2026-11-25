@@ -155,7 +155,7 @@ export function MeetNoor() {
           <ul className="mt-1.5 flex flex-wrap gap-2">
             {[
               ["🔔", "gentle reminders"],
-              ["🎁", "gift ideas"],
+              ["📚", "answers from help"],
               ["🎉", "a little cheer"],
             ].map(([emoji, t]) => (
               <li key={t} className="rounded-pill bg-card px-3.5 py-2 text-14 font-semibold">

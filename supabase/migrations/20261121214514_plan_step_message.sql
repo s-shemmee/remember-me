@@ -8,7 +8,8 @@
 --
 -- Rollback:
 --   revoke update (message) on public.plan_steps from authenticated;
---   alter table public.plan_steps drop column if exists message;
+--   Keep the column to preserve saved user data. Any future cleanup must be a
+--   separate opt-in migration with a backup warning.
 
 alter table public.plan_steps
   add column message text

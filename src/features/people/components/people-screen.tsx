@@ -43,23 +43,17 @@ export function PeopleScreen({
   people,
   plans = [],
   today = "",
-  giftIdeas = false,
   bell = false,
   wishlists = {},
-  messages = false,
   accounts = [],
 }: {
   /** Your connections' accounts (my_friends()): the link prompt and Edit → Their account. */
   accounts?: Account[];
-  /** Noor drafts messages (AI_MESSAGES_ENABLED and AI_ENABLED). */
-  messages?: boolean;
   people: PersonView[];
   /** Connected people's shared lists, by person id. */
   wishlists?: Record<string, PersonWishlist>;
   /** The notification bell in the header (NOTIFICATIONS_INBOX_ENABLED). */
   bell?: boolean;
-  /** Noor's gift ideas are switched on (AI_GIFT_IDEAS_ENABLED). */
-  giftIdeas?: boolean;
   /** Your plans, this year's and past ones (private: only ever yours). */
   plans?: PlanView[];
   /** Today in your timezone, "2026-11-17". */
@@ -167,7 +161,7 @@ export function PeopleScreen({
   };
 
   return (
-    <PlansProvider plans={plans} messages={messages}>
+    <PlansProvider plans={plans}>
       <PageHeader
         title="People"
         titleRef={titleRef}
@@ -277,7 +271,6 @@ export function PeopleScreen({
               person={panelPerson}
               headingRef={headingRef}
               today={today}
-              giftIdeas={giftIdeas}
               wishlist={wishlists[panelPerson.id] ?? null}
               onBack={backToList}
               onEdit={() => openEdit(panelPerson)}

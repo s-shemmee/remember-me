@@ -17,7 +17,7 @@ import {
 
 import { useIsDark } from "@/lib/use-theme";
 
-/** Toasts with an action (like Undo) stay at least this long (docs/decisions.md). */
+/** Toasts with an action (like Undo) stay visible long enough to use it. */
 export const ACTION_TOAST_MIN_MS = 6000;
 
 /**

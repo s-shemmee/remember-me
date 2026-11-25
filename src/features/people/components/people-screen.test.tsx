@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -11,10 +11,6 @@ vi.mock("@/features/inbox/actions", () => ({
   loadInbox: vi.fn(async () => null),
   markInboxRead: vi.fn(),
   setWishlistUpdates: vi.fn(),
-}));
-vi.mock("@/features/messages/actions", () => ({
-  draftNoorMessages: vi.fn(),
-  saveMessageInPlan: vi.fn(),
 }));
 vi.mock("next/navigation", async () => {
   const React = await import("react");
@@ -61,12 +57,6 @@ vi.mock("@/features/plans/actions", () => ({
 
 const toast = Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() });
 vi.mock("@/components/ui/sonner", () => ({ toast }));
-vi.mock("@/features/gift-ideas/actions", () => ({
-  addGiftIdeaToPlan: vi.fn(),
-  newGiftIdeas: vi.fn(),
-  savedGiftIdeas: vi.fn(async () => null),
-}));
-
 const { PeopleScreen } = await import("./people-screen");
 
 const today = { year: 2026, month: 11, day: 4 };
@@ -176,7 +166,7 @@ describe("People screen", () => {
     expect(within(panel).getByText("Mon, 16 November")).toBeInTheDocument();
     expect(within(panel).getByText("in 12 days")).toBeInTheDocument();
     expect(
-      within(panel).getByText("Nothing yet. Add what they love, so gift ideas come easy."),
+      within(panel).getByText("Nothing yet. Add a little note about what they love."),
     ).toBeInTheDocument();
     expect(
       within(panel).getByText("Not connected yet, so no shared wishlist."),
@@ -185,46 +175,6 @@ describe("People screen", () => {
       "aria-current",
       "true",
     );
-  });
-
-  it("gift ideas: only when switched on, and never for a Remembrance day or someone In memory", () => {
-    const ask = /^Gift ideas$/;
-    window.history.replaceState(null, "", `/people?person=${KH}`);
-    const { unmount } = render(<PeopleScreen people={people} />);
-    expect(screen.queryByRole("button", { name: ask })).not.toBeInTheDocument();
-    unmount();
-
-    render(<PeopleScreen people={people} giftIdeas />);
-    expect(screen.getByRole("button", { name: ask })).toBeInTheDocument();
-    cleanup();
-
-    const remembered = peopleView(
-      [
-        {
-          ...rows[0]!,
-          occasions: [
-            {
-              id: "r1",
-              kind: "remembrance",
-              title: null,
-              day: 8,
-              month: 11,
-              year: 2020,
-              recurring: true,
-            },
-          ],
-        },
-      ],
-      today,
-    );
-    const { unmount: u2 } = render(<PeopleScreen people={remembered} giftIdeas />);
-    expect(screen.queryByRole("button", { name: ask })).not.toBeInTheDocument();
-    u2();
-
-    const inMemory = peopleView([{ ...rows[0]!, in_memory: true }], today);
-    render(<PeopleScreen people={inMemory} giftIdeas />);
-    expect(screen.getByRole("region", { name: "Khalid" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: ask })).not.toBeInTheDocument();
   });
 
   it("choosing a card puts them in the URL and, on a phone, moves focus to their profile and back", async () => {

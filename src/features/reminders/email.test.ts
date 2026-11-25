@@ -287,11 +287,9 @@ describe("the logo", () => {
   });
 
   it("the URL is always absolute, from SITE_URL", () => {
-    expect(emailLogoUrl("https://rememberme.shemme.codes")).toBe(
-      "https://rememberme.shemme.codes/email/logo.png",
-    );
+    expect(emailLogoUrl("https://app.example.com")).toBe("https://app.example.com/email/logo.png");
     expect(emailLogoUrl("http://localhost:3000/")).toBe("http://localhost:3000/email/logo.png");
-    for (const bad of ["", "/", "rememberme.shemme.codes", "./public"]) {
+    for (const bad of ["", "/", "app.example.com", "./public"]) {
       expect(() => emailLogoUrl(bad), bad).toThrow(/absolute site URL/);
     }
   });

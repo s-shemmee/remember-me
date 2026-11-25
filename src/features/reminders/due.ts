@@ -1,5 +1,5 @@
 /**
- * Which reminders are due right now (docs/decisions.md, "Email reminders").
+ * Which reminders are due right now.
  *
  * Pure: no I/O, no clock of its own. Shared by the app (Vitest) and the
  * send-reminders Edge Function (Deno), so imports are relative with `.ts`.

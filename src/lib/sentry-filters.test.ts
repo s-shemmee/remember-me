@@ -7,7 +7,7 @@ describe("Sentry filters", () => {
     const event = scrubAuthEvent({
       tags: { auth_action: "sign_up", supabase_code: "unexpected_failure" },
       request: {
-        url: "https://rememberme.shemme.codes/sign-up",
+        url: "https://app.example.com/sign-up",
         data: "email=sara%40test.local&password=secret",
         cookies: { a: "b" },
         query_string: "x=1",
@@ -18,7 +18,7 @@ describe("Sentry filters", () => {
     });
     expect(event).toEqual({
       tags: { auth_action: "sign_up", supabase_code: "unexpected_failure" },
-      request: { url: "https://rememberme.shemme.codes/sign-up" },
+      request: { url: "https://app.example.com/sign-up" },
     });
   });
 
@@ -32,6 +32,6 @@ describe("Sentry filters", () => {
     expect(denied("chrome-extension://abc/content.js")).toBe(true);
     expect(denied("moz-extension://abc/content.js")).toBe(true);
     expect(denied("safari-web-extension://abc/script.js")).toBe(true);
-    expect(denied("https://rememberme.shemme.codes/_next/static/chunk.js")).toBe(false);
+    expect(denied("https://app.example.com/_next/static/chunk.js")).toBe(false);
   });
 });

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Form from "next/form";
 import { Suspense } from "react";
 
-import { giftIdeasEnabled, messagesEnabled } from "@/ai/config";
 import { Card } from "@/components/ui/card";
 import { pastelClasses } from "@/components/ui/chip";
 import { TruncatedName } from "@/components/ui/truncated-name";
@@ -124,22 +123,6 @@ async function Dashboard() {
     };
   }
   const month = monthName(today.month);
-  // Gift ideas in the nudge: the next birthday's, never a gentle day.
-  const birthday =
-    giftIdeasEnabled() && nudge.kind === "birthday" && !nudge.gentle && nudge.personId
-      ? events.find(
-          (e) => e.source.personId === nudge.personId && e.source.kind === "birthday" && !e.gentle,
-        )
-      : undefined;
-  const giftIdeas = birthday
-    ? {
-        personId: birthday.source.personId!,
-        name: birthday.source.name,
-        occasionId: birthday.source.id,
-        occursOn: toIsoDate(birthday.on),
-      }
-    : null;
-
   return (
     <>
       <PageHeader
@@ -182,7 +165,7 @@ async function Dashboard() {
         bell={notificationsInboxEnabled()}
       />
 
-      <PlansProvider plans={plans} messages={messagesEnabled()}>
+      <PlansProvider plans={plans}>
         <NoorNudge
           text={nudge.text}
           personId={nudge.personId}
@@ -190,7 +173,6 @@ async function Dashboard() {
           isYou={nudge.isYou}
           offer={offer}
           today={toIsoDate(today)}
-          giftIdeas={giftIdeas}
         />
         <Notices notices={notices} />
 

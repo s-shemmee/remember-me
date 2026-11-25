@@ -23,7 +23,7 @@ Each little thing has an emoji. I suggest one as you type (coffee gets ☕, foot
 
 ## In memory
 
-If someone has passed away, turn on **In memory** in their profile. Their days are then remembered gently: no countdowns, no "turns 70", and no gift ideas.
+If someone has passed away, turn on **In memory** in their profile. Their days are then remembered gently, without celebratory countdowns.
 
 ## Edit or remove someone
 

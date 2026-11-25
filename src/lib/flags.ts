@@ -7,9 +7,7 @@ import "server-only";
  */
 export const notificationsInboxEnabled = () => process.env.NOTIFICATIONS_INBOX_ENABLED === "true";
 /**
- * NOOR_CHAT_ENABLED: Noor's chat panel (docs/roadmap/02-noor-chat.md). It also
- * needs AI_ENABLED (help answers); gift ideas and message drafts inside it
- * follow their own switches. Off by default.
+ * NOOR_CHAT_ENABLED and AI_ENABLED enable Noor's help chat. Off by default.
  */
 export const noorChatEnabled = () =>
   process.env.NOOR_CHAT_ENABLED === "true" && process.env.AI_ENABLED === "true";

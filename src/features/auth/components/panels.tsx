@@ -7,7 +7,7 @@ import { LiveDate } from "./live-date";
 // Decorative example panels for the auth pages (aria-hidden in AuthShell).
 // Sample content only, never real data.
 //
-// Motion (docs/decisions.md, exception for these panels only): items fade up
+// Motion (exception for these panels only): items fade up
 // once at 0.2s / 0.7s / 1.2s / 1.7s, one card per panel floats 3 times (about
 // 15s) and rests, Noor bobs. All of it stops under reduced motion.
 

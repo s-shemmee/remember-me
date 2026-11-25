@@ -5,8 +5,8 @@ import { expect, type Page, test } from "@playwright/test";
  * /llms.txt, and fails on any link that answers 4xx or 5xx, any in-page
  * anchor without its target, and any internal page we can't reach.
  *
- * - Internal links are fetched from this build (links to the production site,
- *   like the canonical URL and llms.txt, are checked as paths here).
+ * - Internal links are fetched from this build (canonical and llms.txt links
+ *   are checked as paths here).
  * - App pages behind log-in only need to answer (a redirect to /log-in is fine).
  * - External links are fetched for real (3 tries). A 4xx/5xx answer fails;
  *   a site that never answers from the CI runner (cndp.ma times out from
@@ -24,7 +24,7 @@ const PUBLIC_PAGES = [
   "/check-email",
   "/offline",
 ];
-const SITE_HOSTS = new Set(["rememberme.shemme.codes", "localhost", "127.0.0.1"]);
+const SITE_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 const UA = "Mozilla/5.0 (compatible; RememberMeLinkCheck/1.0)";
 
 type Found = { href: string; from: string };

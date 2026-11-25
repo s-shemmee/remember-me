@@ -1,3 +1,3 @@
 /** "Last updated" for the legal pages (ISO dates). Bump when the text changes. */
-export const PRIVACY_UPDATED = "2026-11-23";
-export const TERMS_UPDATED = "2026-11-19";
+export const PRIVACY_UPDATED = "2026-11-25";
+export const TERMS_UPDATED = "2026-11-25";

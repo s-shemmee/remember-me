@@ -1,6 +1,6 @@
 /**
  * What Vercel Web Analytics may see: the page, never anything that
- * identifies a person, a link or a record (docs/decisions.md, "Analytics").
+ * identifies a person, a link or a record.
  *
  * Every page view goes through `scrubAnalyticsUrl` before it leaves the
  * browser (the `beforeSend` of <Analytics>):

@@ -12,7 +12,6 @@ import { ThemeSync } from "@/features/profile/components/theme-sync";
 import { AVATARS_BUCKET } from "@/features/profile/constants";
 import { NoorChatProvider } from "@/features/noor-chat/chat-context";
 import { AppShell } from "@/features/shell/app-shell";
-import { giftIdeasEnabled, messagesEnabled } from "@/ai/config";
 import { noorChatEnabled } from "@/lib/flags";
 import { parseThemeChoice } from "@/lib/theme";
 import { daysBetween, formatShortDate, nextOccurrence, todayIn, toIsoDate } from "@/lib/dates";
@@ -87,8 +86,6 @@ async function Shell({ children }: { children: React.ReactNode }) {
     <NoorChatProvider
       flags={{
         enabled: noorChatEnabled(),
-        gifts: giftIdeasEnabled(),
-        messages: messagesEnabled(),
       }}
     >
       <AppShell

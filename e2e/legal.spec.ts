@@ -59,10 +59,9 @@ for (const p of PAGES) {
         `#${await m.getByRole("heading", { level: 2, name: p.sections[1] }).getAttribute("id")}$`,
       ),
     );
-    await expect(m.getByRole("link", { name: "contact@shemme.codes" }).first()).toHaveAttribute(
-      "href",
-      "mailto:contact@shemme.codes",
-    );
+    const contactLink = m.locator('a[href^="mailto:"]').first();
+    await expect(contactLink).toHaveAttribute("href", /^mailto:/);
+    await expect(contactLink).toContainText("@");
     // Indexable (no noindex).
     const robots = await page.evaluate(
       () => document.querySelector('meta[name="robots"]')?.getAttribute("content") ?? "",
@@ -71,16 +70,19 @@ for (const p of PAGES) {
   });
 }
 
-test("the privacy policy names the real regions and promises no tracking", async ({ page }) => {
+test("the privacy policy explains deployment-dependent services and promises no tracking", async ({
+  page,
+}) => {
   await page.goto("/privacy");
   const m = await main(page);
   for (const text of [
-    "Ireland (eu-west-1)",
-    "Dublin, Ireland",
-    "Germany",
+    "operator of each instance is responsible",
+    "This source code does not define a universal hosting region or provider",
     "No tracking cookies, no ads.",
-    "Anonymous page counts.",
-    "Global Privacy Control or Do Not Track",
+    "Anonymous page counts (deployment-dependent).",
+    "Global Privacy Control and Do Not Track",
+    "Privacy laws may provide additional rights",
+    "data protection authority responsible for your location",
   ]) {
     await expect(m.getByText(text, { exact: false }).first()).toBeVisible();
   }

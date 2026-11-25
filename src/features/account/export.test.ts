@@ -63,28 +63,6 @@ describe("Download my data", () => {
     ]);
   });
 
-  it("includes Noor's last gift ideas for each person", () => {
-    const out = buildExport({
-      ...base,
-      giftIdeas: [
-        {
-          for: "Khalid",
-          budget: "small",
-          madeAt: "2026-11-20T10:00:00.000Z",
-          ideas: [{ title: "A mint tea set", why: "He loves mint tea." }],
-        },
-      ],
-    });
-    expect(out.gift_ideas).toEqual([
-      {
-        for: "Khalid",
-        budget: "small",
-        made_on: "2026-11-20T10:00:00.000Z",
-        ideas: [{ title: "A mint tea set", why: "He loves mint tea." }],
-      },
-    ]);
-  });
-
   it("has every section even when empty", () => {
     const out = buildExport(base);
     expect(out.plans).toEqual([]);
@@ -92,5 +70,41 @@ describe("Download my data", () => {
     expect(out.connections).toEqual([]);
     expect(out.notes_to_future_you).toEqual([]);
     expect(exportFileName(base.exportedAt)).toBe("remember-me-data-2026-11-19.json");
+  });
+
+  it("includes legacy saved messages and gift suggestions in the data export", () => {
+    const out = buildExport({
+      ...base,
+      plans: [
+        {
+          for: "Khalid",
+          occursOn: "2026-12-03",
+          note: null,
+          steps: [{ label: "Message", done: true, message: "Happy birthday!" }],
+        },
+      ],
+      giftIdeas: [
+        {
+          for: "Khalid",
+          occasionKind: "birthday",
+          budget: "small",
+          madeAt: "2026-11-20T10:00:00.000Z",
+          ideas: [{ title: "A mint tea set", why: "He loves mint tea." }],
+        },
+      ],
+    });
+
+    expect(out.plans[0]?.steps).toEqual([
+      { label: "Message", done: true, message: "Happy birthday!" },
+    ]);
+    expect(out.gift_ideas).toEqual([
+      {
+        for: "Khalid",
+        occasion_kind: "birthday",
+        budget: "small",
+        made_on: "2026-11-20T10:00:00.000Z",
+        ideas: [{ title: "A mint tea set", why: "He loves mint tea." }],
+      },
+    ]);
   });
 });

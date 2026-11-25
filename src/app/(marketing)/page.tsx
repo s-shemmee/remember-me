@@ -9,7 +9,7 @@ import { faqPage, jsonLd, webApplication } from "@/features/landing/structured-d
 import { siteUrl } from "@/lib/env";
 
 /**
- * The landing page (M6, docs/decisions.md "Landing page"): fully static,
+ * The landing page is fully static,
  * prerendered at build time. Signed-in visitors never see it: the proxy sends
  * them to /home. The Open Graph image is ./opengraph-image.tsx.
  */

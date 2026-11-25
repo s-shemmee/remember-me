@@ -15,7 +15,7 @@ import { FAKE_AI_ADMIN_SECRET } from "../test/fake-values.ts";
 
 export const LOCAL_SUPABASE_URL = "http://127.0.0.1:54321";
 
-/** The local placeholder (supabase/functions/local-dev.env); refused for the cloud. */
+/** The local placeholder; refused for the cloud. */
 export const LOCAL_AI_ADMIN_SECRET = FAKE_AI_ADMIN_SECRET;
 
 export type ScriptTarget =
@@ -103,5 +103,5 @@ export function adminSecretFor(
   return { ok: true, secret: s || LOCAL_AI_ADMIN_SECRET };
 }
 
-/** The command line without flags: `pnpm ai:eval gift-ideas --remote=…` → ["gift-ideas"]. */
+/** The command line without flags: `pnpm ai:eval ask-noor --remote=…` → ["ask-noor"]. */
 export const positionalArgs = (argv: readonly string[]) => argv.filter((a) => !a.startsWith("--"));

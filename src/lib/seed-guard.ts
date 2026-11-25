@@ -1,9 +1,8 @@
 /**
  * Where `pnpm seed:demo` may write: local Supabase only.
  *
- * There is one cloud project, and it is production (docs/decisions.md,
- * "One Supabase project"), so every cloud URL is refused, whatever it is,
- * before anything is written. Allowed: http(s)://127.0.0.1 or localhost.
+ * Every non-local URL is refused before anything is written. Allowed:
+ * http(s)://127.0.0.1 or localhost.
  *
  * Pure (no imports), so scripts run it with Node and Vitest tests it.
  */
@@ -28,7 +27,7 @@ export function checkSeedTarget(rawUrl: string | undefined): SeedTarget {
   if (!local || (url.protocol !== "http:" && url.protocol !== "https:")) {
     return {
       ok: false,
-      reason: `Refusing ${url.hostname}: seed:demo only runs against local Supabase. The cloud project is production and is never seeded.`,
+      reason: `Refusing ${url.hostname}: seed:demo only runs against local Supabase.`,
     };
   }
   return { ok: true, url: url.origin };

@@ -74,7 +74,7 @@ export async function GET() {
     supabase.rpc("my_connections"),
     supabase
       .from("gift_idea_results")
-      .select("budget, ideas, created_at, people(name)")
+      .select("occasion_kind, budget, ideas, created_at, people(name)")
       .order("created_at"),
   ]);
 
@@ -115,14 +115,15 @@ export async function GET() {
         .map((st) => ({
           label: st.label,
           done: st.done_at !== null,
-          ...(st.message ? { message: st.message } : {}),
+          ...(st.message !== null ? { message: st.message } : {}),
         })),
     })),
     giftIdeas: (giftIdeas.data ?? []).map((g) => ({
-      for: g.people?.name ?? "Someone",
+      for: g.people?.name ?? null,
+      occasionKind: g.occasion_kind,
       budget: g.budget,
       madeAt: g.created_at,
-      ideas: g.ideas as { title: string; why: string }[],
+      ideas: g.ideas,
     })),
     openedNotes: (notes.data ?? []).map((n) => ({
       opensOn: n.opens_on,

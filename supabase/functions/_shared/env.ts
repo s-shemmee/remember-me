@@ -1,12 +1,14 @@
+import { resolveAppUrl } from "./site-url.ts";
+
 /**
  * Edge Function settings. Secrets (RESEND_API_KEY, UNSUBSCRIBE_SECRET,
  * CRON_SECRET, EMAIL_HASH_SECRET, ACCOUNT_NOTICE_SECRET) live in Supabase
- * function secrets (ACCOUNT_NOTICE_SECRET also on the Vercel server); the Next app and
+ * function secrets (ACCOUNT_NOTICE_SECRET is also configured on the app server); the Next app and
  * Vercel never see them. The secret key comes from Supabase's own function
  * environment.
  *
- * `supabase/functions/local-dev.env` holds placeholder values for local and
- * CI runs; they're refused anywhere but a local Supabase.
+ * `supabase/functions/local-dev.env.example` documents local-only values;
+ * they're refused anywhere but a local Supabase.
  */
 
 export const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -55,25 +57,16 @@ export const accountNoticeSecret = () => secret("ACCOUNT_NOTICE_SECRET", 32);
 /** Keys the HMAC of addresses in account_notices (never stored in plain text). */
 export const emailHashSecret = () => secret("EMAIL_HASH_SECRET", 32);
 
-/**
- * The site (links in emails and notifications): SITE_URL, e.g.
- * https://rememberme.shemme.codes. APP_URL is the older name, still read.
- * Unset, it is localhost only on a local Supabase: emails from the cloud
- * project never point (or load their logo) at localhost.
- */
-export const appUrl = () =>
-  (
-    Deno.env.get("SITE_URL") ??
-    Deno.env.get("APP_URL") ??
-    (isLocal() ? "http://localhost:3000" : "https://rememberme.shemme.codes")
-  ).replace(/\/+$/, "");
+/** The site used in email and notification links. Hosted instances must configure it. */
+export function appUrl(): string {
+  return resolveAppUrl(Deno.env.get("SITE_URL") ?? Deno.env.get("APP_URL"), isLocal());
+}
 
 /** Public functions URL for List-Unsubscribe (not SUPABASE_URL, which is internal locally). */
 export const functionsUrl = () =>
   (Deno.env.get("PUBLIC_FUNCTIONS_URL") ?? `${SUPABASE_URL}/functions/v1`).replace(/\/+$/, "");
 
-export const EMAIL_FROM =
-  Deno.env.get("EMAIL_FROM") ?? "Noor · Remember Me <noor@mail.shemme.codes>";
+export const EMAIL_FROM = Deno.env.get("EMAIL_FROM") ?? "Noor · Remember Me <noor@example.com>";
 
 /**
  * The `now` override for tests: two locks, REMINDERS_ALLOW_NOW=1 AND a local

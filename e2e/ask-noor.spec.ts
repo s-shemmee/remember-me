@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { expectAccessible, signUpAndOnboard } from "./helpers";
 
 /**
- * Ask Noor (AI phase 1b), with AI_ENABLED=true and AI_MOCK=1 on the server
+ * Ask Noor uses retrieved help content and scripted answers in this test
  * (CI sets both; the mock never calls a real provider). Ask through a
  * suggested question, see the answer and its source link to the help center;
  * an off-topic question gets Noor's fixed reply; axe at 390px.

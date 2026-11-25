@@ -40,7 +40,7 @@ jobs:
   database:
     # Local Postgres (Docker on the runner) with every migration applied,
     # then the pgTAP tests in supabase/tests. This is the only place they run:
-    # development uses the cloud project and has no Docker (docs/decisions.md).
+    # Local development can run the same database checks with `pnpm db:test`.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -80,25 +80,33 @@ jobs:
             echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
             echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY"
             echo "MAILPIT_URL=$MAILPIT_URL"
-            # The fake VAPID public key (src/test/fake-values.ts), matching
-            # supabase/functions/local-dev.env: push in e2e, never real.
-            echo "NEXT_PUBLIC_VAPID_PUBLIC_KEY=BG_wO5SSQc4drdQ1GeaWDgqFtBppoFwygQOqK84VlMoWPE91OlW_AdxT9sCwx-7ni0DG_30lqW4igrmJzvccFEo"
-            # The account-notice caller secret: the placeholder from
-            # supabase/functions/local-dev.env (refused off a local Supabase).
+            # The account-notice caller secret is a local-only placeholder.
             echo "ACCOUNT_NOTICE_SECRET=local-only-account-notice-secret-0000000000"
-            # Ask Noor, gift ideas and message drafts in e2e: on, with scripted answers (never real providers).
+            # Ask Noor in e2e: on, with scripted answers (never real providers).
             echo "AI_ENABLED=true"
-            echo "AI_GIFT_IDEAS_ENABLED=true"
-            echo "AI_MESSAGES_ENABLED=true"
             echo "AI_MOCK=1"
             echo "NOOR_CHAT_ENABLED=true"
             # The notification inbox behind the bell (e2e/notifications-inbox.spec.ts).
             echo "NOTIFICATIONS_INBOX_ENABLED=true"
           } >> "$GITHUB_ENV"
+          cp supabase/functions/local-dev.env.example supabase/functions/local-dev.env
+          node <<'NODE'
+          const { createECDH } = require("node:crypto");
+          const fs = require("node:fs");
+          const ecdh = createECDH("prime256v1");
+          ecdh.generateKeys();
+          const publicKey = ecdh.getPublicKey("base64url", "uncompressed");
+          const privateKey = ecdh.getPrivateKey("base64url");
+          fs.appendFileSync(process.env.GITHUB_ENV, `NEXT_PUBLIC_VAPID_PUBLIC_KEY=${publicKey}\n`);
+          fs.appendFileSync(
+            "supabase/functions/local-dev.env",
+            `VAPID_PUBLIC_KEY=${publicKey}\nVAPID_PRIVATE_KEY=${privateKey}\n`,
+          );
+          NODE
           rm /tmp/supabase.env
       - name: Serve the Edge Functions
-        # local-dev.env holds placeholders the functions refuse off a local
-        # Supabase. The first request compiles the functions, so warm them up.
+        # A local env file with ephemeral test keys; the first request compiles
+        # the functions, so warm them up.
         run: |
           nohup supabase functions serve --env-file supabase/functions/local-dev.env > functions.log 2>&1 &
           for i in $(seq 1 60); do
@@ -127,8 +135,7 @@ jobs:
             -e CI=true \
             -e NEXT_PUBLIC_SUPABASE_URL -e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY -e MAILPIT_URL \
             -e NEXT_PUBLIC_VAPID_PUBLIC_KEY -e ACCOUNT_NOTICE_SECRET -e AI_ENABLED -e AI_MOCK \
-            -e NOOR_CHAT_ENABLED \
-            -e AI_GIFT_IDEAS_ENABLED -e AI_MESSAGES_ENABLED -e NOTIFICATIONS_INBOX_ENABLED \
+            -e NOOR_CHAT_ENABLED -e NOTIFICATIONS_INBOX_ENABLED \
             "mcr.microsoft.com/playwright:v$PLAYWRIGHT_VERSION-noble" \
             node_modules/.bin/playwright test
       # The HTML report, plus test-results/ with the raw traces and screenshots
@@ -176,9 +183,8 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
 
-  # No AI evals job: `pnpm ai:eval` calls real providers, so the owner runs it
-  # with --remote=<ref> after deploying a function (docs/launch.md). In CI,
-  # src/ai/** is covered by unit tests and the AI_MOCK=1 e2e specs.
+  # AI evals are opt-in and are not run in CI. Unit tests and AI_MOCK=1
+  # end-to-end specs cover the AI code paths here.
 
   secrets-scan:
     runs-on: ubuntu-latest

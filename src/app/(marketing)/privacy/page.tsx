@@ -1,12 +1,10 @@
 /*
- * Privacy Policy. Written to match what the app actually does (checked
- * against the code, migrations and clean-up jobs in fix/launch-prep, Nov 2026).
- * Change it whenever a feature that touches personal data changes, and bump
- * PRIVACY_UPDATED (src/features/legal/updated.ts).
+ * Privacy Policy template for this self-hostable application.
+ * Customize it for each deployment and update PRIVACY_UPDATED
+ * (src/features/legal/updated.ts) when the policy changes.
  *
  * NOTE: this text has not been reviewed by a lawyer. Have a legal
- * professional review it (Morocco's law 09-08 / CNDP, and GDPR for EU users)
- * before scaling beyond a small group of users.
+ * professional review it for the jurisdictions relevant to each deployment.
  */
 import type { Metadata } from "next";
 
@@ -31,7 +29,7 @@ const sections: LegalSection[] = [
         <LegalList>
           <li>
             <strong>Your account:</strong> your email, your password (stored only as a secure hash,
-            so we never see it) or your Google sign-in, your first name, your birthday (day and
+            so we never see it) or your third-party sign-in, your first name, your birthday (day and
             month, and the year if you add it), your look (initials and colour, a character, or a
             photo), your time zone, your theme, and whether your connections can see your birthday.
           </li>
@@ -58,6 +56,15 @@ const sections: LegalSection[] = [
             future you.
           </li>
           <li>
+            <strong>Older saved data:</strong> an installation upgraded from an earlier version may
+            retain gift-suggestion results and message text saved on plan steps. The current app no
+            longer creates or displays these, but includes any remaining values (including the
+            occasion, ideas, and saved message text) in your data export while their associated
+            records exist. Deleting a person or account may also delete associated legacy data
+            through database cascade rules. Any separate cleanup of retained legacy schema or data
+            is operator-managed, opt-in, and should be preceded by an appropriate backup.
+          </li>
+          <li>
             <strong>Reminders and notifications:</strong> your reminder settings; for push, the
             subscription your browser gives us and a device name like &ldquo;Chrome on
             Android&rdquo;; and a log of the reminders we sent (which day, when, by email or push),
@@ -73,21 +80,9 @@ const sections: LegalSection[] = [
             scrambled fingerprint of the address (not the address) for 30 days.
           </li>
           <li>
-            <strong>Ask Noor:</strong> when you ask Noor a question in Settings, we keep only how
-            many questions you asked today (for the daily limit), never the question or the answer.
-            Those counts go after 30 days.
-          </li>
-          <li>
-            <strong>Gift ideas:</strong> when you ask Noor for gift ideas, we keep the last ideas
-            for that person, so you can open them again, until you ask for new ones or delete the
-            person. We also count how many times you asked today (for the daily limit). We never
-            keep what was sent to make them.
-          </li>
-          <li>
-            <strong>Messages Noor drafts:</strong> we don&apos;t keep the drafts. If you choose
-            &ldquo;Use in plan&rdquo;, the message you picked (after any edits) is saved on that
-            step of your plan, which only you can see, until you change it or delete the plan or the
-            person. We count how many times you asked today (for the daily limit).
+            <strong>Ask Noor:</strong> when you ask Noor a question, we keep only how many questions
+            you asked today (for the daily limit), never the question or the answer. Those counts go
+            after 30 days.
           </li>
           <li>
             <strong>Notifications in the app:</strong> the bell keeps your last 30 days of
@@ -167,56 +162,50 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          A few trusted services process data for us, only to run Remember Me. Your data is stored
-          in the European Union:
+          Remember Me is self-hostable, so its infrastructure and data processors vary by
+          installation. The operator of each instance is responsible for identifying and documenting
+          its hosting, database, authentication, storage, email, monitoring, analytics, AI and push
+          services; what each processes; where processing takes place; and the applicable retention
+          and privacy terms. Contact the operator for details about this instance.
         </p>
         <LegalList>
           <li>
-            <strong>Supabase</strong>: our database, sign-in, photo storage and scheduled jobs.
-            Ireland (eu-west-1).
+            <strong>Database and application hosting:</strong> the operator selects and configures
+            the services used for the website, database, sign-in, photo storage and scheduled jobs.
+            Their locations and logging practices depend on that deployment.
           </li>
           <li>
-            <strong>Vercel</strong>: hosts the website. Our server code runs in Dublin, Ireland
-            (dub1); pages may be delivered from Vercel&apos;s servers nearest to you. Vercel Web
-            Analytics also counts page views for us, anonymously (see{" "}
-            <LegalLink href="#cookies">Cookies and storage</LegalLink>).
+            <strong>Email delivery:</strong> local development captures email without delivering it.
+            A hosted instance may use an email provider selected by its operator.
           </li>
           <li>
-            <strong>Resend</strong>: sends our emails (confirmations, reminders, and your feedback
-            to us). Ireland (eu-west-1).
+            <strong>Optional monitoring and analytics:</strong> integrations may process technical
+            error details or anonymous page views, depending on the deployment and its
+            configuration. The operator should document which services are enabled for this
+            instance.
           </li>
           <li>
-            <strong>Sentry</strong>: tells us when something breaks, with technical details like the
-            page, browser and error. No session recordings, and no name or email. Germany (EU).
+            <strong>Third-party sign-in:</strong> if enabled, the selected identity provider returns
+            your name and email.
           </li>
           <li>
-            <strong>Google</strong>: only if you choose &ldquo;Continue with Google&rdquo;. Google
-            tells us your name and email.
+            <strong>Optional Noor assistance:</strong> when enabled, your question and matching help
+            passages are sent to the configured AI provider to write an answer. The provider does
+            not receive your name, email or people, and the question and answer are not stored by
+            the application. If no help passage matches, nothing is sent. The operator should
+            document the selected provider and its data practices.
           </li>
           <li>
-            <strong>Groq</strong>, and <strong>Cloudflare</strong> as a backup: when you ask Noor a
-            question, your question and the help text that matches it are sent to them to write
-            Noor&apos;s answer. They don&apos;t get your name, email or any of your people, and we
-            don&apos;t store the question or the answer. If nothing in our help matches, nothing is
-            sent at all. When you ask for gift ideas, they get only that person&apos;s first name,
-            the relation you picked (like Friend or Family), the kind of day, the budget you chose,
-            their little things, and the titles of wishes on their shared list that nobody has
-            reserved. Never emails, birth dates or years, notes, prices, links, or who reserved
-            what. When you ask Noor to draft a message, they get only that person&apos;s first name,
-            the relation you picked, the kind of day, their age if it&apos;s their birthday and you
-            saved the year, their little things, what you asked to mention, and the tone, language
-            and length you chose. Nothing else, and we don&apos;t store what was sent or the drafts.
-          </li>
-          <li>
-            <strong>Your browser&apos;s push service</strong> (Google, Mozilla, Apple or Microsoft):
-            delivers push notifications if you turn them on. Each message is encrypted so only your
-            device can read it.
+            <strong>Push delivery:</strong> if enabled, the push service selected by your browser or
+            device vendor delivers notifications. Each message is encrypted so only your device can
+            read it.
           </li>
         </LegalList>
         <p>
-          Some of these companies are based in the United States; each protects data under its own
-          data protection terms. Our hosting and database providers also keep short-lived technical
-          logs (which can include your IP address) to keep the service running and secure.
+          This source code does not define a universal hosting region or provider. Before operating
+          a hosted instance, customize this notice with the actual services, processing locations,
+          retention practices, applicable terms and operator contact details. Hosting providers may
+          keep technical logs, including IP addresses, according to their own settings.
         </p>
       </>
     ),
@@ -248,7 +237,7 @@ const sections: LegalSection[] = [
             <strong>
               <code>rm-resend-at</code>
             </strong>{" "}
-            show which address to check after signing up, and pace the Resend button (30 minutes and
+            show which address to check after signing up, and pace the resend button (30 minutes and
             1 minute).
           </li>
           <li>
@@ -259,16 +248,15 @@ const sections: LegalSection[] = [
           </li>
         </LegalList>
         <p>
-          <strong>Anonymous page counts.</strong> To see which pages are used, Vercel Web Analytics
-          counts page views: which page (with every link code and ID removed first, so never an
-          invite, a reset link or a person), the site you came from, and your country, browser and
-          device type. It uses no cookies and stores nothing on your device. Visitors are counted
-          with an anonymous code that changes every day, never your IP address, and we only ever see
-          totals. If your browser sends Global Privacy Control or Do Not Track, your visits
-          aren&apos;t counted at all.
+          <strong>Anonymous page counts (deployment-dependent).</strong> If the configured hosting
+          setup enables analytics, the integration sends a sanitized page path, referrer, and
+          country, browser and device categories to the analytics service. It uses no cookies and
+          respects Global Privacy Control and Do Not Track signals. The operator should document
+          whether analytics is enabled and identify the provider and its data practices.
         </p>
         <p>
-          Because all of this is strictly necessary or anonymous, there&apos;s no cookie banner.
+          Whether a consent notice is required depends on the deployment and applicable law. Each
+          operator should assess this before launch.
         </p>
       </>
     ),
@@ -306,8 +294,10 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          Under Morocco&apos;s law 09-08 on personal data, and in the spirit of the EU&apos;s GDPR,
-          you can:
+          These controls are available in the app. Privacy laws may provide additional rights or
+          require different response times. Each instance operator should adapt this section to the
+          laws applicable to the deployment and its users, including the relevant supervisory
+          authority.
         </p>
         <LegalList>
           <li>
@@ -326,10 +316,9 @@ const sections: LegalSection[] = [
           </li>
           <li>
             <strong>Ask us anything or complain:</strong> write to{" "}
-            <LegalLink href={CONTACT_MAILTO}>{CONTACT_EMAIL}</LegalLink>. We reply within 30 days.
-            You can also contact Morocco&apos;s data protection authority, the CNDP (
-            <LegalLink href="https://www.cndp.ma">cndp.ma</LegalLink>), or the authority where you
-            live.
+            <LegalLink href={CONTACT_MAILTO}>{CONTACT_EMAIL}</LegalLink>. Each instance operator
+            should customize the contact and response time for this deployment. You can also contact
+            the data protection authority responsible for your location.
           </li>
         </LegalList>
       </>
