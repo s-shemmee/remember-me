@@ -4,8 +4,8 @@ Remember Me is a gentle web app for keeping track of the birthdays and special d
 
 **Live demo:** [rememberme.shemme.codes](https://rememberme.shemme.codes)
 
-![Remember Me on a phone](docs/images/screenshot-mobile.png)
 ![Remember Me on desktop](docs/images/screenshot-desktop.png)
+![Remember Me on a phone](docs/images/screenshot-dashboard.png)
 
 ## What it does
 
@@ -70,12 +70,12 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000). Demo accounts are created only in the local Supabase instance:
 
-| Account | Email |
-|---|---|
-| Maya | `demo.maya@remember-me.test` |
-| Khalid | `demo.khalid@remember-me.test` |
-| Sara | `demo.sara@remember-me.test` |
-| Amine | `demo.amine@remember-me.test` |
+| Account | Email                            |
+| ------- | -------------------------------- |
+| Maya    | `demo.maya@remember-me.test`   |
+| Khalid  | `demo.khalid@remember-me.test` |
+| Sara    | `demo.sara@remember-me.test`   |
+| Amine   | `demo.amine@remember-me.test`  |
 
 The local demo password is `local-only-demo-password-0000`. Do not reuse it outside the local demo. The seed command refuses non-local Supabase URLs.
 
